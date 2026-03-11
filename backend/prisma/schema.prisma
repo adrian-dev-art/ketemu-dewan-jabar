@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  role      String     // 'admin', 'dewan', 'masyarakat'
+  bio       String?
+  schedulesAsDewan      Schedule[] @relation("DewanSchedules")
+  schedulesAsMasyarakat Schedule[] @relation("MasyarakatSchedules")
+  ratingsAsDewan        Rating[]   @relation("DewanRatings")
+}
+
+model Schedule {
+  id           Int      @id @default(autoincrement())
+  startTime    DateTime
+  status       String   @default("pending") // 'pending', 'confirmed', 'rejected'
+  
+  dewanId      Int
+  dewan        User     @relation("DewanSchedules", fields: [dewanId], references: [id])
+  
+  masyarakatId Int
+  masyarakat   User     @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
+  
+  rating       Rating?
+}
+
+model Rating {
+  id         Int      @id @default(autoincrement())
+  rating     Int
+  comment    String?
+  
+  scheduleId Int      @unique
+  schedule   Schedule @relation(fields: [scheduleId], references: [id])
+  
+  dewanId    Int
+  dewan      User     @relation("DewanRatings", fields: [dewanId], references: [id])
+}
