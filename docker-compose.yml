@@ -4,13 +4,58 @@ services:
     container_name: meetdewan_db
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: meetdewan
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER:-meetdewan_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-meetdewan_pass}
+      POSTGRES_DB: ${DB_NAME:-meetdewan_db}
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - meetdewan_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-meetdewan_user} -d ${DB_NAME:-meetdewan_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meetdewan_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-meetdewan_user}:${DB_PASSWORD:-meetdewan_pass}@db:5432/${DB_NAME:-meetdewan_db}?schema=public
+      FRONTEND_URL: https://ketemudewan.perdinkeuangan.online
+      PORT: 5000
+    ports:
+      - "5001:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - meetdewan_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL: https://ketemudewan.perdinkeuangan.online
+    container_name: meetdewan_frontend
+    restart: always
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: https://ketemudewan.perdinkeuangan.online
+      PORT: 3000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+    networks:
+      - meetdewan_net
+
+networks:
+  meetdewan_net:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -20,7 +20,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [meetingDetails, setMeetingDetails] = useState<any>(null);
-  
+
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -34,25 +34,24 @@ export default function RoomPage({ params }: { params: { id: string } }) {
 
     const initMedia = async () => {
       try {
-        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/schedules`);
-        const allSchedules = await detailsRes.json();
-        const current = allSchedules.find((s: any) => s.id === Number(roomId));
-        setMeetingDetails(current);
-
+        console.log("Memulai inisialisasi media...");
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         setLocalStream(stream);
-        
+
+        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/schedules`);
+        const allSchedules = await detailsRes.json();
+
         peerConnectionRef.current = new RTCPeerConnection(ICE_SERVERS);
         const pc = peerConnectionRef.current;
 
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-        pc.ontrack = (event) => {
+        pc.ontrack = (event: RTCTrackEvent) => {
           setRemoteStream(event.streams[0]);
           setAnnouncement("Video pengguna lain telah terhubung.");
         };
 
-        pc.onicecandidate = (event) => {
+        pc.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
           if (event.candidate) {
             socket.emit("ice-candidate", { target: roomId, candidate: event.candidate });
           }
@@ -80,7 +79,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         });
 
         socket.on("ice-candidate", async (payload: any) => {
-          try { await pc.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) {}
+          try { await pc.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch (e) { }
         });
 
         socket.on("user-disconnected", () => {
@@ -88,24 +87,25 @@ export default function RoomPage({ params }: { params: { id: string } }) {
           setRemoteStream(null);
         });
 
-      } catch (err) {
-        setAnnouncement("Gagal mengakses kamera atau mikrofon. Mohon periksa izin perangkat Anda.");
+      } catch (err: any) {
+        console.error("Error in initMedia:", err);
+        setAnnouncement(`Error: ${err.message || "Gagal mengakses kamera atau mikrofon"}. Mohon periksa izin perangkat Anda.`);
       }
     };
 
     initMedia();
 
     return () => {
-      localStream?.getTracks().forEach(track => track.stop());
+      localStream?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
       socket.disconnect();
       peerConnectionRef.current?.close();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
   const toggleMute = () => {
     if (localStream) {
-      localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
+      localStream.getAudioTracks().forEach((t: MediaStreamTrack) => t.enabled = !t.enabled);
       setIsMuted(!isMuted);
       setAnnouncement(isMuted ? "Mikrofon diaktifkan." : "Mikrofon dimatikan.");
     }
@@ -113,14 +113,14 @@ export default function RoomPage({ params }: { params: { id: string } }) {
 
   const toggleVideo = () => {
     if (localStream) {
-      localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
+      localStream.getVideoTracks().forEach((t: MediaStreamTrack) => t.enabled = !t.enabled);
       setIsVideoOff(!isVideoOff);
       setAnnouncement(isVideoOff ? "Kamera diaktifkan." : "Kamera dimatikan.");
     }
   };
 
   const leaveRoom = () => {
-    localStream?.getTracks().forEach(track => track.stop());
+    localStream?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
     socketRef.current?.disconnect();
     if (meetingDetails) {
       router.push(`/masyarakat?ratedMeetingId=${roomId}&dewanId=${meetingDetails.dewan_id}`);

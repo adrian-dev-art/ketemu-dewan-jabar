@@ -4,11 +4,25 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { rateLimit } from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 
 const app = express();
+
+// Trust proxy for accurate rate limiting (Nginx)
+app.set('trust proxy', 1);
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    standardHeaders: 'draft-7', // set `RateLimit` and `RateLimit-Policy` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+});
+
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
 const server = http.createServer(app);
 const prisma = new PrismaClient();
 
@@ -19,40 +33,19 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Inisialisasi Database dengan penanganan error yang lebih baik
-const seedDB = async () => {
+// Database connection
+const connectDB = async () => {
     console.log("Mencoba menghubungkan ke database...");
     try {
         await prisma.$connect();
-        
-        // Buat data Dewan
-        await prisma.user.upsert({
-            where: { email: 'ahmad@dewan.id' },
-            update: {},
-            create: { name: 'Ahmad Kurniawan', role: 'dewan', email: 'ahmad@dewan.id', bio: 'Wakil Rakyat Dapil A - Fokus pada infrastruktur.' }
-        });
-        await prisma.user.upsert({
-            where: { email: 'siti@dewan.id' },
-            update: {},
-            create: { name: 'Siti Aminah', role: 'dewan', email: 'siti@dewan.id', bio: 'Wakil Rakyat Dapil B - Fokus pada pendidikan dan kesehatan.' }
-        });
-
-        // Buat data Masyarakat untuk keperluan demo (ID 101)
-        await prisma.user.upsert({
-            where: { email: 'masyarakat@demo.id' },
-            update: {},
-            create: { id: 101, name: 'User Demo Masyarakat', role: 'masyarakat', email: 'masyarakat@demo.id' }
-        });
-
-        console.log("Database berhasil terhubung dan diinisialisasi.");
+        console.log("Database berhasil terhubung.");
     } catch (err) {
-        console.error("Gagal melakukan inisialisasi database:");
+        console.error("Gagal menghubungkan ke database:");
         console.error(err);
     }
 };
 
-// Berikan jeda 2 detik agar kontainer DB punya waktu untuk siap sepenuhnya
-setTimeout(seedDB, 2000);
+connectDB();
 
 // --- API ROUTES ---
 
@@ -67,9 +60,9 @@ app.get('/api/dewan', async (req, res) => {
                 }
             }
         });
-        
-        const dewanWithAvg = result.map(d => {
-            const sum = d.ratingsAsDewan.reduce((acc, r) => acc + r.rating, 0);
+
+        const dewanWithAvg = result.map((d: any) => {
+            const sum = d.ratingsAsDewan.reduce((acc: number, r: any) => acc + r.rating, 0);
             const avg = d.ratingsAsDewan.length > 0 ? sum / d.ratingsAsDewan.length : 4.5;
             return {
                 id: d.id,
@@ -78,7 +71,7 @@ app.get('/api/dewan', async (req, res) => {
                 rating: avg
             };
         });
-        
+
         res.json(dewanWithAvg);
     } catch (err) {
         console.error("Error fetching dewan:", err);
@@ -109,7 +102,7 @@ app.get('/api/schedules', async (req, res) => {
     const { role, userId } = req.query;
     try {
         const where: any = {};
-        
+
         // Validasi ID jika ada
         if (userId) {
             const parsedId = Number(userId);
@@ -124,15 +117,15 @@ app.get('/api/schedules', async (req, res) => {
             where,
             orderBy: { startTime: 'desc' }
         });
-        
-        const mapped = result.map(s => ({
+
+        const mapped = result.map((s: any) => ({
             id: s.id,
             dewan_id: s.dewanId,
             masyarakat_id: s.masyarakatId,
             start_time: s.startTime,
             status: s.status
         }));
-        
+
         res.json(mapped);
     } catch (err) {
         console.error("Error fetching schedules:", err);
