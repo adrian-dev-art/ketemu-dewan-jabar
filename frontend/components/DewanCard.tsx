@@ -1,40 +1,63 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Star, Calendar } from "lucide-react";
+
+interface Availability {
+  id: number;
+  startTime: string;
+  endTime: string;
+}
 
 interface Dewan {
   id: number;
   name: string;
   bio: string;
   rating: number;
+  availabilities?: Availability[];
 }
 
 interface DewanCardProps {
   dewan: Dewan;
-  onSelect: (id: number) => void;
+  onSelect: (dewan: Dewan) => void;
 }
 
 export default function DewanCard({ dewan, onSelect }: DewanCardProps) {
+  const hasAvailability = dewan.availabilities && dewan.availabilities.length > 0;
+
   return (
-    <article className="bg-white dark:bg-zinc-800 rounded-xl shadow-md border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="p-6">
+    <article className="premium-card overflow-hidden group">
+      <div className="h-2 bg-primary"></div>
+      <div className="p-8">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{dewan.name}</h3>
-          <div className="flex items-center bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded text-blue-600 dark:text-blue-400">
-            <Star size={16} className="fill-current mr-1" />
-            <span className="text-sm font-semibold">{dewan.rating.toFixed(1)}</span>
+          <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">{dewan.name}</h3>
+          <div className="flex items-center bg-accent/10 px-3 py-1.5 rounded-xl text-accent border border-accent/20">
+            <Star size={16} className="fill-current mr-1.5" />
+            <span className="text-sm font-bold">{dewan.rating.toFixed(1)}</span>
           </div>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-6 line-clamp-2">
-          {dewan.bio}
+        
+        <p className="text-gray-500 mb-8 text-sm leading-relaxed line-clamp-3 min-h-[4.5rem]">
+          {dewan.bio || "Tidak ada biodata tersedia."}
         </p>
+
+        <div className="flex items-center gap-2 mb-6 text-sm">
+          <div className={`w-2 h-2 rounded-full ${hasAvailability ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+          <span className={hasAvailability ? 'text-green-600 font-medium' : 'text-gray-400'}>
+            {hasAvailability ? `${dewan.availabilities?.length} Slot Tersedia` : 'Belum Ada Jadwal'}
+          </span>
+        </div>
         
         <button
-          onClick={() => onSelect(dewan.id)}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-colors focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 focus:outline-none"
-          aria-label={`Buat jadwal pertemuan dengan ${dewan.name}`}
+          onClick={() => onSelect(dewan)}
+          className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-95 ${
+            hasAvailability 
+              ? 'btn-primary shadow-primary/20' 
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+          disabled={!hasAvailability}
         >
-          Buat Jadwal
+          <Calendar size={18} />
+          {hasAvailability ? 'Lihat Jadwal' : 'Tidak Tersedia'}
         </button>
       </div>
     </article>

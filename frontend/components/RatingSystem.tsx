@@ -4,72 +4,82 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 
 interface RatingSystemProps {
-  onRatingSubmit: (rating: number, comment: string) => void;
+  onRatingSubmit: (scores: { speaking_score: number, context_score: number, time_score: number }, comment: string) => void;
 }
 
 export default function RatingSystem({ onRatingSubmit }: RatingSystemProps) {
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
+  const [scores, setScores] = useState({ speaking_score: 0, context_score: 0, time_score: 0 });
   const [comment, setComment] = useState("");
 
-  return (
-    <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-zinc-700">
-      <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Beri penilaian pengalaman Anda</h3>
-      
-      <fieldset className="mb-6">
-        <legend className="sr-only">Pilih rating dari 1 sampai 5 bintang</legend>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <label key={star} className="cursor-pointer">
-              <input
-                type="radio"
-                name="rating"
-                value={star}
-                className="sr-only"
-                onClick={() => setRating(star)}
-                required
-              />
-              <Star
-                size={32}
-                onMouseEnter={() => setHover(star)}
-                onMouseLeave={() => setHover(0)}
-                className={`transition-colors ${
-                  (hover || rating) >= star 
-                    ? 'text-yellow-400 fill-current' 
-                    : 'text-gray-300 dark:text-zinc-600'
-                }`}
-                aria-hidden="true"
-              />
-              <span className="sr-only">{star} Bintang</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+  const aspects = [
+    { key: 'speaking_score', label: 'Artikulasi & Penyampaian' },
+    { key: 'context_score', label: 'Kesesuaian Konteks' },
+    { key: 'time_score', label: 'Ketepatan Waktu' }
+  ];
 
-      <div className="mb-4">
-        <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Bagikan masukan Anda (Opsional)
+  const handleRating = (key: string, value: number) => {
+    setScores(prev => ({ ...prev, [key]: value }));
+  };
+
+  const isFormValid = scores.speaking_score > 0 && scores.context_score > 0 && scores.time_score > 0;
+
+  return (
+    <div className="premium-card p-8 w-full max-w-lg">
+      <h3 className="text-2xl font-bold mb-2 text-primary">Penilaian Pertemuan</h3>
+      <p className="text-gray-500 mb-8 text-sm">Berikan apresiasi atau masukan Anda terhadap kinerja Anggota Dewan.</p>
+      
+      <div className="space-y-8">
+        {aspects.map((aspect) => (
+          <div key={aspect.key}>
+            <p className="text-sm font-semibold text-gray-700 mb-3">{aspect.label}</p>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => handleRating(aspect.key, star)}
+                  className="focus:outline-none transition-transform hover:scale-110"
+                >
+                  <Star
+                    size={28}
+                    className={`transition-colors ${
+                      (scores as any)[aspect.key] >= star 
+                        ? 'text-secondary fill-current' 
+                        : 'text-gray-200'
+                    }`}
+                  />
+                  <span className="sr-only">{star} Bintang</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 mb-6">
+        <label htmlFor="comment" className="block text-sm font-semibold text-gray-700 mb-3">
+          Catatan Tambahan (Opsional)
         </label>
         <textarea
           id="comment"
           rows={3}
-          className="w-full px-4 py-2 bg-gray-50 dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+          className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-gray-900 transition-shadow"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Bagaimana diskusi tadi berjalan?"
+          placeholder="Tuliskan kesan atau pesan Anda..."
         />
       </div>
 
       <button
-        onClick={() => onRatingSubmit(rating, comment)}
-        disabled={rating === 0}
-        className={`w-full font-bold py-2 rounded-lg transition-colors focus:ring-4 focus:outline-none ${
-          rating === 0 
-            ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
-            : 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-300 dark:focus:ring-green-900'
+        onClick={() => onRatingSubmit(scores, comment)}
+        disabled={!isFormValid}
+        className={`w-full font-bold py-4 rounded-xl transition-all shadow-md active:scale-95 ${
+          !isFormValid 
+            ? 'bg-gray-200 cursor-not-allowed text-gray-400' 
+            : 'btn-primary shadow-primary/20'
         }`}
       >
-        Kirim Penilaian
+        Kirim Penilaian Lengkap
       </button>
     </div>
   );

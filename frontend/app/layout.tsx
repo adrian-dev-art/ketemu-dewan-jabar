@@ -22,9 +22,15 @@ export default function RootLayout({
           Langsung ke konten utama
         </a>
         
-        <header className="bg-slate-900 text-white p-4 shadow-md">
-          <div className="container mx-auto">
-            <h1 className="text-xl font-bold tracking-wider">MEETDEWAN</h1>
+        <header className="bg-primary text-white p-6 shadow-lg relative border-b-4 border-secondary">
+          <div className="container mx-auto flex items-center justify-between">
+            <h1 className="text-2xl font-black tracking-tighter uppercase flex items-center gap-2">
+              <div className="w-2 h-8 bg-secondary rounded-full"></div>
+              MEETDEWAN
+            </h1>
+            <div className="px-4 py-1.5 bg-white/10 rounded-full border border-white/20 text-xs font-bold tracking-widest uppercase">
+              DPRD JABAR
+            </div>
           </div>
         </header>
 

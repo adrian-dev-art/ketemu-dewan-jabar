@@ -6,9 +6,10 @@ interface VideoPlayerProps {
   stream: MediaStream | null;
   muted?: boolean;
   label: string;
+  mirrored?: boolean;
 }
 
-export default function VideoPlayer({ stream, muted = false, label }: VideoPlayerProps) {
+export default function VideoPlayer({ stream, muted = false, label, mirrored = false }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function VideoPlayer({ stream, muted = false, label }: VideoPlaye
         autoPlay
         playsInline
         muted={muted}
-        className="w-full h-full object-cover"
+        className={`w-full h-full object-cover ${mirrored ? 'scale-x-[-1]' : ''}`}
         aria-label={`Video stream for ${label}`}
       />
       <div className="absolute bottom-2 left-2 bg-black/60 text-white px-2 py-1 rounded text-sm font-medium">

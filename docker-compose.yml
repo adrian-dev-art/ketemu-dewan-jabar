@@ -41,6 +41,10 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_BACKEND_URL: https://ketemudewan.perdinkeuangan.online
+        NEXT_PUBLIC_STUN_SERVERS: stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302
+        NEXT_PUBLIC_TURN_SERVERS: turn:31.97.71.134:3478
+        NEXT_PUBLIC_TURN_USERNAME: meetdewan
+        NEXT_PUBLIC_TURN_PASSWORD: meetdewan_secret
     container_name: meetdewan_frontend
     restart: always
     environment:
@@ -52,6 +56,14 @@ services:
       - backend
     networks:
       - meetdewan_net
+
+  coturn:
+    image: coturn/coturn:latest
+    container_name: meetdewan_turn
+    restart: always
+    network_mode: host
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
 
 networks:
   meetdewan_net:

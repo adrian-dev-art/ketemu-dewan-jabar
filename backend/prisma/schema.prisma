@@ -13,9 +13,18 @@ model User {
   email     String     @unique
   role      String     // 'admin', 'dewan', 'masyarakat'
   bio       String?
-  schedulesAsDewan      Schedule[] @relation("DewanSchedules")
-  schedulesAsMasyarakat Schedule[] @relation("MasyarakatSchedules")
-  ratingsAsDewan        Rating[]   @relation("DewanRatings")
+  schedulesAsDewan      Schedule[]     @relation("DewanSchedules")
+  schedulesAsMasyarakat Schedule[]     @relation("MasyarakatSchedules")
+  ratingsAsDewan        Rating[]       @relation("DewanRatings")
+  availabilities        Availability[] @relation("DewanAvailability")
+}
+
+model Availability {
+  id        Int      @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime
+  dewanId   Int
+  dewan     User     @relation("DewanAvailability", fields: [dewanId], references: [id])
 }
 
 model Schedule {
@@ -33,9 +42,11 @@ model Schedule {
 }
 
 model Rating {
-  id         Int      @id @default(autoincrement())
-  rating     Int
-  comment    String?
+  id            Int      @id @default(autoincrement())
+  speakingScore Int
+  contextScore  Int
+  timeScore     Int
+  comment       String?
   
   scheduleId Int      @unique
   schedule   Schedule @relation(fields: [scheduleId], references: [id])
