@@ -1,6 +1,20 @@
-# Changelog - Ketemu Dewan
+## [2026-03-15] - Revamp UI Premium & Fitur Konferensi Lanjutan
 
-Semua perubahan penting pada proyek ini akan dicatat dalam berkas ini.
+### Ditambahkan
+- Implementasi sistem **Multi-Theme (Light & Dark)** dengan dukungan otomatis `prefers-color-scheme`.
+- Komponen `ThemeToggle` untuk perpindahan mode tema yang halus dan persisten.
+- Fitur **Pre-join Screen** pada ruang pertemuan untuk pengecekan kamera/mikrofon sebelum bergabung.
+- **Sidebar Kustom** pada video call untuk Chat real-time dan daftar Peserta yang terintegrasi.
+- Animasi premium (entrance animations) dan efek **Glassmorphism** di seluruh platform.
+
+### Diubah
+- Refaktor total desain Dashboard (Masyarakat, Dewan, Admin) dengan estetika premium yang konsisten.
+- Peningkatan layout ruang pertemuan menjadi lebih fleksibel dan profesional.
+- Pembaruan formulir pemesanan dengan dukungan input judul pertemuan (Meeting Title).
+
+### Diperbaiki
+- Perbaikan berbagai bug sintaksis pada dashboard dan komponen UI.
+- Optimalisasi transisi tema pada elemen glassmorphic untuk menghindari glitch visual.
 
 ## [2026-03-15] - Migrasi ke LiveKit SFU
 
