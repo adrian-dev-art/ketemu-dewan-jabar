@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MEETDEWAN - Konferensi Video",
+  title: "Ketemu Dewan - Konferensi Video",
   description: "Aplikasi konferensi video yang aman dan efektif untuk aspirasi masyarakat.",
 };
 
@@ -22,19 +22,29 @@ export default function RootLayout({
           Langsung ke konten utama
         </a>
         
-        <header className="bg-primary text-white p-6 shadow-lg relative border-b-4 border-secondary">
-          <div className="container mx-auto flex items-center justify-between">
-            <h1 className="text-2xl font-black tracking-tighter uppercase flex items-center gap-2">
-              <div className="w-2 h-8 bg-secondary rounded-full"></div>
-              MEETDEWAN
-            </h1>
-            <div className="px-4 py-1.5 bg-white/10 rounded-full border border-white/20 text-xs font-bold tracking-widest uppercase">
-              DPRD JABAR
+        <header className="sticky top-0 z-40 w-full glass border-b border-border">
+          <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                <span className="text-white font-black text-xl">K</span>
+              </div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                KETEMU<span className="text-primary italic">DEWAN</span>
+              </h1>
             </div>
+            
+            <nav className="hidden md:flex items-center gap-8">
+              <div className="flex items-center gap-2 px-4 py-1.5 glass rounded-full border border-primary/10">
+                <div className="w-2 h-2 bg-secondary animate-pulse rounded-full"></div>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-slate-400">
+                  DPRD JABAR • LIVE
+                </span>
+              </div>
+            </nav>
           </div>
         </header>
 
-        <main id="main-content" className="flex-grow flex flex-col">
+        <main id="main-content" className="flex-grow flex flex-col relative overflow-hidden">
           {children}
         </main>
       </body>

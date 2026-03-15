@@ -1,27 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #065f46;
-  --primary-hover: #047857;
-  --secondary: #d97706;
-  --secondary-hover: #b45309;
-  --accent: #b48c36;
-  --background: #f8fafc;
-  --foreground: #1e293b;
+  --background: #fcfcfd;
+  --foreground: #0f172a;
+  
+  --primary: #4f46e5; /* Indigo 600 */
+  --primary-hover: #4338ca;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #0d9488; /* Teal 600 */
+  --secondary-hover: #0f766e;
+  --secondary-foreground: #ffffff;
+  
+  --accent: #f59e0b; /* Amber 500 */
+  --accent-foreground: #ffffff;
+  
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  
   --card-bg: #ffffff;
-  --border: #e2e8f0;
+  --border: #f1f5f9;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  
+  --secondary: #14b8a6;
+  --secondary-hover: #2dd4bf;
+  
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  
+  --card-bg: #0f172a;
+  --border: #1e293b;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/20 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-800/30 shadow-2xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-indigo-600 to-teal-500 dark:from-indigo-400 dark:to-teal-400;
+  }
 }
 
 /* Premium Card Style */

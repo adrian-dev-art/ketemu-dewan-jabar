@@ -40,8 +40,74 @@ async function main() {
         },
     });
 
+    // 3. Seed Availability
+    const now = new Date();
+    await prisma.availability.createMany({
+        data: [
+            { dewanId: dewan1.id, startTime: new Date(now.getTime() + 60 * 60 * 1000), endTime: new Date(now.getTime() + 120 * 60 * 1000) },
+            { dewanId: dewan1.id, startTime: new Date(now.getTime() + 24 * 60 * 60 * 1000), endTime: new Date(now.getTime() + 25 * 60 * 60 * 1000) },
+            { dewanId: dewan2.id, startTime: new Date(now.getTime() + 2 * 60 * 60 * 1000), endTime: new Date(now.getTime() + 3 * 60 * 60 * 1000) },
+        ]
+    });
+
+    // 4. Seed Schedules (Meetings) for Dashboard Verification
+    
+    // ACTIVE: Confirmed, starting now (with a bit of buffer into the past to be "ongoing")
+    await prisma.schedule.create({
+        data: {
+            title: 'Diskusi Jalan Rusak di Cibiru',
+            masyarakatId: masyarakat.id,
+            dewanId: dewan1.id,
+            startTime: new Date(now.getTime() - 5 * 60 * 1000), // Started 5 mins ago
+            status: 'confirmed'
+        }
+    });
+
+    // INCOMING: Confirmed, starting in 2 hours
+    await prisma.schedule.create({
+        data: {
+            title: 'Pemerataan Fasilitas Sekolah Dasar',
+            masyarakatId: masyarakat.id,
+            dewanId: dewan2.id,
+            startTime: new Date(now.getTime() + 120 * 60 * 1000),
+            status: 'confirmed'
+        }
+    });
+
+    // PENDING: Waiting for approval, in 1 day
+    await prisma.schedule.create({
+        data: {
+            title: 'Rekomendasi Penyaluran Pupuk Subsidi',
+            masyarakatId: masyarakat.id,
+            dewanId: dewan1.id,
+            startTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+            status: 'pending'
+        }
+    });
+
+    // REJECTED: Past or future
+    await prisma.schedule.create({
+        data: {
+            title: 'Izin Pembangunan Lapangan Basket',
+            masyarakatId: masyarakat.id,
+            dewanId: dewan2.id,
+            startTime: new Date(now.getTime() - 48 * 60 * 60 * 1000),
+            status: 'rejected'
+        }
+    });
+
+    // DONE: Past confirmed session
+    await prisma.schedule.create({
+        data: {
+            title: 'Evaluasi Penanganan Banjir Musiman',
+            masyarakatId: masyarakat.id,
+            dewanId: dewan1.id,
+            startTime: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+            status: 'confirmed'
+        }
+    });
+
     console.log('Seeding selesai!');
-    console.log({ dewan1, dewan2, masyarakat });
 }
 
 main()

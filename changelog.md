@@ -1,4 +1,4 @@
-# Changelog - MEETDEWAN
+# Changelog - Ketemu Dewan
 
 Semua perubahan penting pada proyek ini akan dicatat dalam berkas ini.
 

@@ -29,6 +29,7 @@ model Availability {
 
 model Schedule {
   id           Int      @id @default(autoincrement())
+  title        String   @default("Diskusi Aspirasi")
   startTime    DateTime
   status       String   @default("pending") // 'pending', 'confirmed', 'rejected'
   

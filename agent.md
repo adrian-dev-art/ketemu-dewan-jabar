@@ -1,4 +1,4 @@
-# MEETDEWAN - Aplikasi Konferensi Video & Penjadwalan
+# Ketemu Dewan - Aplikasi Konferensi Video & Penjadwalan
 
 ## Arsitektur
 - **Frontend**: Next.js (React, TypeScript, Tailwind CSS). Terletak di folder `/frontend`.

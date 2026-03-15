@@ -108,7 +108,7 @@ app.post('/api/availability', async (req, res) => {
 
 // 3. Schedule a meeting (Masyarakat books a slot)
 app.post('/api/schedules', async (req, res) => {
-    const { dewan_id, masyarakat_id, start_time } = req.body;
+    const { dewan_id, masyarakat_id, start_time, title } = req.body;
     const requestedTime = new Date(start_time);
     
     try {
@@ -140,6 +140,7 @@ app.post('/api/schedules', async (req, res) => {
 
         const result = await prisma.schedule.create({
             data: {
+                title: title || "Diskusi Aspirasi",
                 dewanId: Number(dewan_id),
                 masyarakatId: Number(masyarakat_id),
                 startTime: requestedTime,
