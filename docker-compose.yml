@@ -27,6 +27,8 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-meetdewan_user}:${DB_PASSWORD:-meetdewan_pass}@db:5432/${DB_NAME:-meetdewan_db}?schema=public
       FRONTEND_URL: https://ketemudewan.perdinkeuangan.online
       PORT: 5000
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
     ports:
       - "5001:5000"
     depends_on:
@@ -41,29 +43,55 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_BACKEND_URL: https://ketemudewan.perdinkeuangan.online
-        NEXT_PUBLIC_STUN_SERVERS: stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302
-        NEXT_PUBLIC_TURN_SERVERS: turn:31.97.71.134:3478
-        NEXT_PUBLIC_TURN_USERNAME: meetdewan
-        NEXT_PUBLIC_TURN_PASSWORD: meetdewan_secret
+        NEXT_PUBLIC_LIVEKIT_URL: wss://meetdewan-v0apc9cj.livekit.cloud
     container_name: meetdewan_frontend
     restart: always
     environment:
       NEXT_PUBLIC_BACKEND_URL: https://ketemudewan.perdinkeuangan.online
+      NEXT_PUBLIC_LIVEKIT_URL: wss://meetdewan-v0apc9cj.livekit.cloud
       PORT: 3000
     ports:
       - "3001:3000"
     depends_on:
       - backend
+      - livekit
     networks:
       - meetdewan_net
 
-  coturn:
-    image: coturn/coturn:latest
-    container_name: meetdewan_turn
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: meetdewan_livekit
     restart: always
-    network_mode: host
+    command: --config /etc/livekit.yaml
     volumes:
-      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+      - ./livekit/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880" # HTTP/WS signaling
+      - "7881:7881" # WebRTC over TCP
+      - "7882:7882/udp" # WebRTC over UDP (optional custom)
+      - "50000-60000:50000-60000/udp" # UDP media range
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    depends_on:
+      - redis
+    networks:
+      - meetdewan_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: meetdewan_redis
+    restart: always
+    networks:
+      - meetdewan_net
+
+# Coturn is no longer needed as LiveKit handles TURN natively
+#  coturn:
+#    image: coturn/coturn:latest
+#    container_name: meetdewan_turn
+#    restart: always
+#    network_mode: host
+#    volumes:
+#      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
 
 networks:
   meetdewan_net:

@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
+import { AccessToken } from 'livekit-server-sdk';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -56,9 +57,7 @@ app.get('/api/dewan', async (req, res) => {
             where: { role: 'dewan' },
             include: {
                 availabilities: true,
-                ratingsAsDewan: {
-                    select: { speakingScore: true, contextScore: true, timeScore: true }
-                }
+                ratingsAsDewan: true
             }
         });
 
@@ -205,8 +204,8 @@ app.post('/api/ratings', async (req, res) => {
     try {
         const result = await prisma.rating.create({
             data: {
-                scheduleId: Number(schedule_id),
-                dewanId: Number(dewan_id),
+                schedule: { connect: { id: Number(schedule_id) } },
+                dewan: { connect: { id: Number(dewan_id) } },
                 speakingScore: Number(speaking_score),
                 contextScore: Number(context_score),
                 timeScore: Number(time_score),
@@ -217,6 +216,34 @@ app.post('/api/ratings', async (req, res) => {
     } catch (err) {
         console.error("Error submitting rating:", err);
         res.status(500).json({ error: "Gagal mengirim penilaian" });
+    }
+});
+
+// --- LIVEKIT REST ENDPOINTS ---
+app.post('/api/livekit/token', async (req, res) => {
+    const { roomName, participantName } = req.body;
+
+    if (!roomName || !participantName) {
+        return res.status(400).json({ error: "roomName and participantName are required" });
+    }
+
+    try {
+        const at = new AccessToken(
+            process.env.LIVEKIT_API_KEY,
+            process.env.LIVEKIT_API_SECRET,
+            {
+                identity: participantName,
+                name: participantName,
+            }
+        );
+
+        at.addGrant({ roomJoin: true, room: roomName });
+
+        const token = await at.toJwt();
+        res.json({ token });
+    } catch (error) {
+        console.error("Error generating LiveKit token:", error);
+        res.status(500).json({ error: "Failed to generate token" });
     }
 });
 
