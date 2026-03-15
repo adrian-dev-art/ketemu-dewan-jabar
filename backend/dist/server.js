@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
+const livekit_server_sdk_1 = require("livekit-server-sdk");
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -22,6 +23,8 @@ const express_rate_limit_1 = require("express-rate-limit");
 const client_1 = require("@prisma/client");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+// Trust proxy for accurate rate limiting (Nginx)
+app.set('trust proxy', 1);
 const limiter = (0, express_rate_limit_1.rateLimit)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -38,75 +41,106 @@ app.use((0, cors_1.default)({
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
 app.use(express_1.default.json());
-// Inisialisasi Database dengan penanganan error yang lebih baik
-const seedDB = () => __awaiter(void 0, void 0, void 0, function* () {
+// Database connection
+const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Mencoba menghubungkan ke database...");
     try {
         yield prisma.$connect();
-        // Buat data Dewan
-        yield prisma.user.upsert({
-            where: { email: 'ahmad@dewan.id' },
-            update: {},
-            create: { name: 'Ahmad Kurniawan', role: 'dewan', email: 'ahmad@dewan.id', bio: 'Wakil Rakyat Dapil A - Fokus pada infrastruktur.' }
-        });
-        yield prisma.user.upsert({
-            where: { email: 'siti@dewan.id' },
-            update: {},
-            create: { name: 'Siti Aminah', role: 'dewan', email: 'siti@dewan.id', bio: 'Wakil Rakyat Dapil B - Fokus pada pendidikan dan kesehatan.' }
-        });
-        // Buat data Masyarakat untuk keperluan demo (ID 101)
-        yield prisma.user.upsert({
-            where: { email: 'masyarakat@demo.id' },
-            update: {},
-            create: { id: 101, name: 'User Demo Masyarakat', role: 'masyarakat', email: 'masyarakat@demo.id' }
-        });
-        console.log("Database berhasil terhubung dan diinisialisasi.");
+        console.log("Database berhasil terhubung.");
     }
     catch (err) {
-        console.error("Gagal melakukan inisialisasi database:");
+        console.error("Gagal menghubungkan ke database:");
         console.error(err);
     }
 });
-// Berikan jeda 2 detik agar kontainer DB punya waktu untuk siap sepenuhnya
-setTimeout(seedDB, 2000);
+connectDB();
 // --- API ROUTES ---
-// 1. List all Dewan
+// 1. List all Dewan with Availability
 app.get('/api/dewan', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield prisma.user.findMany({
             where: { role: 'dewan' },
             include: {
+                availabilities: true,
                 ratingsAsDewan: {
-                    select: { rating: true }
+                    select: { speakingScore: true, contextScore: true, timeScore: true }
                 }
             }
         });
-        const dewanWithAvg = result.map((d) => {
-            const sum = d.ratingsAsDewan.reduce((acc, r) => acc + r.rating, 0);
-            const avg = d.ratingsAsDewan.length > 0 ? sum / d.ratingsAsDewan.length : 4.5;
+        const dewanWithDetails = result.map((d) => {
+            let avg = 0;
+            if (d.ratingsAsDewan.length > 0) {
+                const totalScores = d.ratingsAsDewan.reduce((acc, r) => acc + (r.speakingScore + r.contextScore + r.timeScore) / 3, 0);
+                avg = totalScores / d.ratingsAsDewan.length;
+            }
+            else {
+                avg = 4.5; // Default rating
+            }
             return {
                 id: d.id,
                 name: d.name,
                 bio: d.bio || "Tidak ada biodata.",
-                rating: avg
+                rating: avg,
+                availabilities: d.availabilities
             };
         });
-        res.json(dewanWithAvg);
+        res.json(dewanWithDetails);
     }
     catch (err) {
         console.error("Error fetching dewan:", err);
         res.status(500).json({ error: "Gagal mengambil daftar dewan" });
     }
 }));
-// 2. Schedule a meeting
+// 2. Set Availability (Dewan only)
+app.post('/api/availability', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { dewan_id, start_time, end_time } = req.body;
+    try {
+        const result = yield prisma.availability.create({
+            data: {
+                dewanId: Number(dewan_id),
+                startTime: new Date(start_time),
+                endTime: new Date(end_time),
+            }
+        });
+        res.status(201).json(result);
+    }
+    catch (err) {
+        console.error("Error creating availability:", err);
+        res.status(500).json({ error: "Gagal membuat ketersediaan waktu" });
+    }
+}));
+// 3. Schedule a meeting (Masyarakat books a slot)
 app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { dewan_id, masyarakat_id, start_time } = req.body;
+    const requestedTime = new Date(start_time);
     try {
+        // Validation 1: Must be within Dewan's availability
+        const availability = yield prisma.availability.findFirst({
+            where: {
+                dewanId: Number(dewan_id),
+                startTime: { lte: requestedTime },
+                endTime: { gte: requestedTime }
+            }
+        });
+        if (!availability) {
+            return res.status(400).json({ error: "Waktu ini tidak tersedia untuk Dewan tersebut" });
+        }
+        // Validation 2: Must not overlap with existing confirmed booking
+        const conflict = yield prisma.schedule.findFirst({
+            where: {
+                dewanId: Number(dewan_id),
+                startTime: requestedTime,
+                status: { in: ['pending', 'confirmed'] }
+            }
+        });
+        if (conflict) {
+            return res.status(400).json({ error: "Waktu ini sudah dipesan oleh orang lain" });
+        }
         const result = yield prisma.schedule.create({
             data: {
                 dewanId: Number(dewan_id),
                 masyarakatId: Number(masyarakat_id),
-                startTime: new Date(start_time),
+                startTime: requestedTime,
             }
         });
         res.status(201).json(result);
@@ -116,41 +150,37 @@ app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ error: "Gagal membuat jadwal pertemuan" });
     }
 }));
-// 3. Get Schedules
+// 4. Get Schedules
 app.get('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { role, userId } = req.query;
     try {
         const where = {};
-        // Validasi ID jika ada
         if (userId) {
             const parsedId = Number(userId);
-            if (isNaN(parsedId)) {
-                return res.status(400).json({ error: "ID pengguna tidak valid" });
+            if (!isNaN(parsedId)) {
+                if (role === 'dewan')
+                    where.dewanId = parsedId;
+                if (role === 'masyarakat')
+                    where.masyarakatId = parsedId;
             }
-            if (role === 'dewan')
-                where.dewanId = parsedId;
-            if (role === 'masyarakat')
-                where.masyarakatId = parsedId;
         }
         const result = yield prisma.schedule.findMany({
             where,
-            orderBy: { startTime: 'desc' }
+            orderBy: { startTime: 'desc' },
+            include: {
+                dewan: { select: { name: true } },
+                masyarakat: { select: { name: true } },
+                rating: true
+            }
         });
-        const mapped = result.map((s) => ({
-            id: s.id,
-            dewan_id: s.dewanId,
-            masyarakat_id: s.masyarakatId,
-            start_time: s.startTime,
-            status: s.status
-        }));
-        res.json(mapped);
+        res.json(result);
     }
     catch (err) {
         console.error("Error fetching schedules:", err);
         res.status(500).json({ error: "Gagal mengambil data jadwal" });
     }
 }));
-// 4. Update Schedule Status
+// 5. Update Schedule Status
 app.patch('/api/schedules/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { status } = req.body;
@@ -159,25 +189,24 @@ app.patch('/api/schedules/:id', (req, res) => __awaiter(void 0, void 0, void 0, 
             where: { id: Number(id) },
             data: { status }
         });
-        res.json({
-            id: result.id,
-            status: result.status
-        });
+        res.json(result);
     }
     catch (err) {
         console.error("Error updating schedule:", err);
         res.status(500).json({ error: "Gagal memperbarui status jadwal" });
     }
 }));
-// 5. Submit Rating
+// 6. Submit Multi-Aspect Rating
 app.post('/api/ratings', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { schedule_id, dewan_id, rating, comment } = req.body;
+    const { schedule_id, dewan_id, speaking_score, context_score, time_score, comment } = req.body;
     try {
         const result = yield prisma.rating.create({
             data: {
                 scheduleId: Number(schedule_id),
                 dewanId: Number(dewan_id),
-                rating: Number(rating),
+                speakingScore: Number(speaking_score),
+                contextScore: Number(context_score),
+                timeScore: Number(time_score),
                 comment
             }
         });
@@ -185,7 +214,27 @@ app.post('/api/ratings', (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
     catch (err) {
         console.error("Error submitting rating:", err);
-        res.status(500).json({ error: "Gagal mengirim penilaian. Anda mungkin sudah menilai pertemuan ini." });
+        res.status(500).json({ error: "Gagal mengirim penilaian" });
+    }
+}));
+// --- LIVEKIT REST ENDPOINTS ---
+app.post('/api/livekit/token', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { roomName, participantName } = req.body;
+    if (!roomName || !participantName) {
+        return res.status(400).json({ error: "roomName and participantName are required" });
+    }
+    try {
+        const at = new livekit_server_sdk_1.AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
+            identity: participantName,
+            name: participantName,
+        });
+        at.addGrant({ roomJoin: true, room: roomName });
+        const token = yield at.toJwt();
+        res.json({ token });
+    }
+    catch (error) {
+        console.error("Error generating LiveKit token:", error);
+        res.status(500).json({ error: "Failed to generate token" });
     }
 }));
 // --- SOCKET.IO ---
@@ -198,9 +247,9 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('user-connected', userId, socket.id);
         socket.on('disconnect', () => socket.to(roomId).emit('user-disconnected', socket.id));
     });
-    socket.on('offer', (p) => io.to(p.target).emit('offer', p));
-    socket.on('answer', (p) => io.to(p.target).emit('answer', p));
-    socket.on('ice-candidate', (p) => io.to(p.target).emit('ice-candidate', p));
+    socket.on('offer', (p) => io.to(p.target).emit('offer', Object.assign(Object.assign({}, p), { senderId: socket.id })));
+    socket.on('answer', (p) => io.to(p.target).emit('answer', Object.assign(Object.assign({}, p), { senderId: socket.id })));
+    socket.on('ice-candidate', (p) => io.to(p.target).emit('ice-candidate', Object.assign(Object.assign({}, p), { senderId: socket.id })));
 });
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));

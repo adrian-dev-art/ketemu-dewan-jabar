@@ -2,6 +2,25 @@
 
 Semua perubahan penting pada proyek ini akan dicatat dalam berkas ini.
 
+## [2026-03-15] - Migrasi ke LiveKit SFU
+
+### Ditambahkan
+- Implementasi **LiveKit SFU (Selective Forwarding Unit)** untuk menggantikan arsitektur Mesh lama.
+- Integrasi **LiveKit Server SDK** pada backend untuk otentikasi token.
+- Penambahan endpoint `/api/livekit/token` untuk manajemen akses peserta.
+- Implementasi **LiveKit React Components** pada frontend untuk pengalaman video call yang lebih stabil dan fitur-lengkap (grid layout, active speaker detection).
+- Konfigurasi **Redis** dalam `docker-compose.yml` untuk manajemen state LiveKit.
+- Penambahan lokasi `/ws` pada konfigurasi Nginx untuk proxy WebSocket Signaling LiveKit.
+
+### Diubah
+- Refaktor total `app/room/[id]/page.tsx` dari WebRTC manual menjadi LiveKit SDK.
+- Pembaruan konfigurasi `docker-compose.yml` untuk menyertakan layanan LiveKit dan Redis.
+- Menonaktifkan layanan **Coturn** karena fungsi STUN/TURN kini ditangani secara internal oleh LiveKit.
+
+### Diperbaiki
+- Perbaikan masalah skalabilitas pada pertemuan grup (dukungan peserta hingga 20+ orang dengan penggunaan CPU/Bandwidth client yang optimal).
+- Perbaikan berbagai error tipe data Prisma dan duplikasi impor pada `server.ts` backend.
+
 ## [2026-03-12] - Perbaikan Konektivitas WebRTC
 
 ### Ditambahkan
