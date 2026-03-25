@@ -4,8 +4,8 @@
 - **Frontend**: Next.js (React, TypeScript, Tailwind CSS). Terletak di folder `/frontend`.
 - **Backend**: Express.js (Node.js, Socket.io, Prisma ORM, helmet). Terletak di folder `/backend`.
 - **Database**: PostgreSQL (Prisma ORM - Pengguna, Jadwal, Penilaian).
-- **Teknologi Utama**: WebRTC untuk video, Socket.io untuk sinyal (signaling).
-- **Infrastruktur Relay**: Coturn (TURN server) untuk koneksi WebRTC antar jaringan yang berbeda.
+- **Teknologi Utama**: WebRTC (LiveKit SFU) untuk video, Socket.io untuk notifikasi real-time.
+- **Infrastruktur Relay**: LiveKit menangani STUN/TURN secara internal (Coturn dinonaktifkan).
 
 ## Peran Pengguna
 - **Masyarakat**: Menjelajahi profil Dewan, membuat jadwal pertemuan, bergabung dalam panggilan, dan memberikan penilaian.

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,136 +7,47 @@
 :root {
   --primary: #10b981;
   --primary-hover: #059669;
-  --secondary: #f59e0b;
-  --secondary-hover: #d97706;
-  --accent: #14b8a6;
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --border: rgba(0, 0, 0, 0.05);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --background: #ffffff;
+  --foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-fg: #6b7280;
+  --border: #e5e7eb;
+  --card-bg: #ffffff;
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --background: #0a0a0a;
+  --foreground: #f9fafb;
+  --muted: #18181b;
+  --muted-fg: #a1a1aa;
+  --border: #27272a;
+  --card-bg: #141414;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/20 shadow-xl;
-  }
-  
-  .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-800/30 shadow-2xl;
-  }
-  
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-indigo-600 to-teal-500 dark:from-indigo-400 dark:to-teal-400;
-  }
-}
-
-/* Premium Glass Style */
-.glass {
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 1.5rem;
-}
-
-.glass-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 2rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.glass-card:hover {
-  background: var(--card-bg);
-  border: 1px solid rgba(var(--primary), 0.2);
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.dark .glass-card:hover {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, #34d399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-secondary {
-  background: linear-gradient(135deg, var(--secondary) 0%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+/* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: var(--border);
+  border-radius: 999px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--muted-fg);
 }
 
-/* Button Variants */
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-}
-
-.btn-secondary {
-  background-color: var(--secondary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: var(--secondary-hover);
-}
-
-/* Accessibility: Ensure focus indicators are clearly visible */
+/* Focus */
 *:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;

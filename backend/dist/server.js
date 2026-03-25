@@ -21,26 +21,48 @@ const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_rate_limit_1 = require("express-rate-limit");
 const client_1 = require("@prisma/client");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+const prisma = new client_1.PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-123';
 // Trust proxy for accurate rate limiting (Nginx)
 app.set('trust proxy', 1);
 const limiter = (0, express_rate_limit_1.rateLimit)({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-    standardHeaders: 'draft-7', // set `RateLimit` and `RateLimit-Policy` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+    limit: 100,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
 });
-// Apply the rate limiting middleware to all requests.
 app.use(limiter);
-const server = http_1.default.createServer(app);
-const prisma = new client_1.PrismaClient();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
 app.use(express_1.default.json());
+const server = http_1.default.createServer(app);
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token)
+        return res.status(401).json({ error: "Akses ditolak. Token tidak ditemukan." });
+    jsonwebtoken_1.default.verify(token, JWT_SECRET, (err, user) => {
+        if (err)
+            return res.status(403).json({ error: "Token tidak valid atau kedaluwarsa." });
+        req.user = user;
+        next();
+    });
+};
+const authorizeRole = (roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({ error: "Anda tidak memiliki izin untuk akses ini." });
+        }
+        next();
+    };
+};
 // Database connection
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Mencoba menghubungkan ke database...");
@@ -54,27 +76,73 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 connectDB();
+// --- AUTH ROUTES ---
+app.post('/api/auth/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
+    try {
+        const user = yield prisma.user.findUnique({ where: { email } });
+        if (!user)
+            return res.status(404).json({ error: "Pengguna tidak ditemukan." });
+        // If no passwordHash set (legacy user), allow login for now OR handle it
+        if (user.passwordHash) {
+            const validPassword = yield bcryptjs_1.default.compare(password, user.passwordHash);
+            if (!validPassword)
+                return res.status(401).json({ error: "Password salah." });
+        }
+        else {
+            // For demo/dev purposes where seed didn't hash: 
+            // In production, we should force password reset or use a migration script
+            if (password !== 'password')
+                return res.status(401).json({ error: "Password salah (Legacy Check)." });
+        }
+        const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    }
+    catch (err) {
+        console.error("Login error:", err);
+        res.status(500).json({ error: "Gagal memproses login." });
+    }
+}));
+// Simple Register for demo
+app.post('/api/auth/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, email, password, role } = req.body;
+    try {
+        const salt = yield bcryptjs_1.default.genSalt(10);
+        const passwordHash = yield bcryptjs_1.default.hash(password, salt);
+        const user = yield prisma.user.create({
+            data: { name, email, passwordHash, role: role || 'masyarakat' }
+        });
+        res.status(201).json({ message: "Registrasi berhasil", userId: user.id });
+    }
+    catch (err) {
+        console.error("Register error:", err);
+        res.status(500).json({ error: "Gagal mendaftarkan pengguna (Email mungkin sudah terdaftar)." });
+    }
+}));
 // --- API ROUTES ---
-// 1. List all Dewan with Availability
+// 1. List all Dewan with Availability (Public)
 app.get('/api/dewan', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield prisma.user.findMany({
             where: { role: 'dewan' },
             include: {
                 availabilities: true,
-                ratingsAsDewan: {
-                    select: { speakingScore: true, contextScore: true, timeScore: true }
-                }
+                ratingsAsDewan: true
             }
         });
         const dewanWithDetails = result.map((d) => {
-            let avg = 0;
+            let avg = 4.5;
             if (d.ratingsAsDewan.length > 0) {
                 const totalScores = d.ratingsAsDewan.reduce((acc, r) => acc + (r.speakingScore + r.contextScore + r.timeScore) / 3, 0);
                 avg = totalScores / d.ratingsAsDewan.length;
-            }
-            else {
-                avg = 4.5; // Default rating
             }
             return {
                 id: d.id,
@@ -92,12 +160,13 @@ app.get('/api/dewan', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 }));
 // 2. Set Availability (Dewan only)
-app.post('/api/availability', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { dewan_id, start_time, end_time } = req.body;
+app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { start_time, end_time } = req.body;
+    const dewan_id = req.user.id;
     try {
         const result = yield prisma.availability.create({
             data: {
-                dewanId: Number(dewan_id),
+                dewanId: dewan_id,
                 startTime: new Date(start_time),
                 endTime: new Date(end_time),
             }
@@ -109,12 +178,12 @@ app.post('/api/availability', (req, res) => __awaiter(void 0, void 0, void 0, fu
         res.status(500).json({ error: "Gagal membuat ketersediaan waktu" });
     }
 }));
-// 3. Schedule a meeting (Masyarakat books a slot)
-app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { dewan_id, masyarakat_id, start_time } = req.body;
+// 3. Schedule a meeting (Protected)
+app.post('/api/schedules', authenticateToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { dewan_id, start_time, title } = req.body;
+    const masyarakat_id = req.user.id; // Current logged in user is the 'masyarakat'
     const requestedTime = new Date(start_time);
     try {
-        // Validation 1: Must be within Dewan's availability
         const availability = yield prisma.availability.findFirst({
             where: {
                 dewanId: Number(dewan_id),
@@ -125,7 +194,6 @@ app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!availability) {
             return res.status(400).json({ error: "Waktu ini tidak tersedia untuk Dewan tersebut" });
         }
-        // Validation 2: Must not overlap with existing confirmed booking
         const conflict = yield prisma.schedule.findFirst({
             where: {
                 dewanId: Number(dewan_id),
@@ -138,8 +206,9 @@ app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         const result = yield prisma.schedule.create({
             data: {
+                title: title || "Diskusi Aspirasi",
                 dewanId: Number(dewan_id),
-                masyarakatId: Number(masyarakat_id),
+                masyarakatId: masyarakat_id,
                 startTime: requestedTime,
             }
         });
@@ -150,20 +219,16 @@ app.post('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ error: "Gagal membuat jadwal pertemuan" });
     }
 }));
-// 4. Get Schedules
-app.get('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { role, userId } = req.query;
+// 4. Get Schedules (Protected - Context sensitive)
+app.get('/api/schedules', authenticateToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { role, id: userId } = req.user;
     try {
         const where = {};
-        if (userId) {
-            const parsedId = Number(userId);
-            if (!isNaN(parsedId)) {
-                if (role === 'dewan')
-                    where.dewanId = parsedId;
-                if (role === 'masyarakat')
-                    where.masyarakatId = parsedId;
-            }
-        }
+        if (role === 'dewan')
+            where.dewanId = userId;
+        if (role === 'masyarakat')
+            where.masyarakatId = userId;
+        // If admin, they see everything (where stays empty)
         const result = yield prisma.schedule.findMany({
             where,
             orderBy: { startTime: 'desc' },
@@ -180,8 +245,8 @@ app.get('/api/schedules', (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(500).json({ error: "Gagal mengambil data jadwal" });
     }
 }));
-// 5. Update Schedule Status
-app.patch('/api/schedules/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// 5. Update Schedule Status (Dewan/Admin only)
+app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { status } = req.body;
     try {
@@ -196,14 +261,14 @@ app.patch('/api/schedules/:id', (req, res) => __awaiter(void 0, void 0, void 0, 
         res.status(500).json({ error: "Gagal memperbarui status jadwal" });
     }
 }));
-// 6. Submit Multi-Aspect Rating
-app.post('/api/ratings', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// 6. Submit Multi-Aspect Rating (Masyarakat only)
+app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { schedule_id, dewan_id, speaking_score, context_score, time_score, comment } = req.body;
     try {
         const result = yield prisma.rating.create({
             data: {
-                scheduleId: Number(schedule_id),
-                dewanId: Number(dewan_id),
+                schedule: { connect: { id: Number(schedule_id) } },
+                dewan: { connect: { id: Number(dewan_id) } },
                 speakingScore: Number(speaking_score),
                 contextScore: Number(context_score),
                 timeScore: Number(time_score),
@@ -218,15 +283,16 @@ app.post('/api/ratings', (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 }));
 // --- LIVEKIT REST ENDPOINTS ---
-app.post('/api/livekit/token', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roomName, participantName } = req.body;
-    if (!roomName || !participantName) {
-        return res.status(400).json({ error: "roomName and participantName are required" });
+app.post('/api/livekit/token', authenticateToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { roomName } = req.body;
+    const participantName = req.user.email; // Use email as unique identity
+    if (!roomName) {
+        return res.status(400).json({ error: "roomName is required" });
     }
     try {
-        const at = new livekit_server_sdk_1.AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
+        const at = new livekit_server_sdk_1.AccessToken(process.env.LIVEKIT_API_KEY || 'devkey', process.env.LIVEKIT_API_SECRET || 'secretkey', {
             identity: participantName,
-            name: participantName,
+            name: req.user.role.toUpperCase() + ": " + participantName.split('@')[0],
         });
         at.addGrant({ roomJoin: true, room: roomName });
         const token = yield at.toJwt();
@@ -237,19 +303,13 @@ app.post('/api/livekit/token', (req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(500).json({ error: "Failed to generate token" });
     }
 }));
-// --- SOCKET.IO ---
+// --- SOCKET.IO (Removed legacy WebRTC signaling) ---
 const io = new socket_io_1.Server(server, {
     cors: { origin: process.env.FRONTEND_URL || 'http://localhost:3000', methods: ['GET', 'POST'] }
 });
 io.on('connection', (socket) => {
-    socket.on('join-room', (roomId, userId) => {
-        socket.join(roomId);
-        socket.to(roomId).emit('user-connected', userId, socket.id);
-        socket.on('disconnect', () => socket.to(roomId).emit('user-disconnected', socket.id));
-    });
-    socket.on('offer', (p) => io.to(p.target).emit('offer', Object.assign(Object.assign({}, p), { senderId: socket.id })));
-    socket.on('answer', (p) => io.to(p.target).emit('answer', Object.assign(Object.assign({}, p), { senderId: socket.id })));
-    socket.on('ice-candidate', (p) => io.to(p.target).emit('ice-candidate', Object.assign(Object.assign({}, p), { senderId: socket.id })));
+    console.log('User connected via Socket.io:', socket.id);
+    // Add real-time notifications here late if needed
 });
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));

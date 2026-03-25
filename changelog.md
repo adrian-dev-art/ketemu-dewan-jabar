@@ -1,3 +1,25 @@
+## [2026-03-25] - Keamanan, Otentikasi & Seeder Data
+
+### Ditambahkan
+- **JWT Authentication**: Implementasi sistem keamanan berbasis token pada Backend dan Frontend.
+- **Hashed Passwords**: Penggunaan `bcryptjs` untuk penyimpanan password yang aman di database.
+- **AuthContext**: Pengelola state otentikasi global di frontend untuk sinkronisasi sesi pengguna.
+- **Halaman Login & Registrasi**: Implementasi UI premium untuk akses masuk dan pendaftaran pengguna baru.
+- **ProtectedRoute**: Komponen untuk membatasi akses dashboard berdasarkan peran pengguna (Masyarakat, Dewan, Admin).
+- **Admin Dashboard**: Panel kontrol baru khusus untuk administrator sistem.
+- **Database Seeder**: Skrip otomatis (`seed.ts`) untuk mengisi data awal (users, schedules, availabilities) dengan password terenkripsi.
+
+### Diubah
+- **API Security**: Seluruh endpoint sensitif (scheduling, ratings, token LiveKit) kini memerlukan header `Authorization`.
+- **Dashboard Refactor**: Pembaruan dashboard Masyarakat, Dewan, dan Admin untuk mendukung pengambilan data dinamis berbasis sesi user.
+- **Availability Manager**: Integrasi otentikasi pada fitur manajemen jadwal Anggota Dewan.
+- **Room Logic**: Integrasi enkripsi media dan otentikasi token LiveKit berbasis identitas asli user.
+
+### Diperbaiki
+- Perbaikan berbagai bug sintaksis (extra tags) pada dashboard Admin.
+- Resolusi peringatan linting terkait null-checking pada objek `user`.
+- Perbaikan duplikasi impor dan prop yang tidak valid pada komponen LiveKit.
+
 ## [2026-03-15] - Revamp UI Premium & Fitur Konferensi Lanjutan
 
 ### Ditambahkan

@@ -1,47 +1,69 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('Mulai seeding data...');
 
-    // 1. Seed Dewan
+    // Hash password for all users
+    const passwordHash = await bcrypt.hash('password', 10);
+
+    // 1. Seed Admin
+    const admin = await prisma.user.upsert({
+        where: { email: 'admin@dewan.id' },
+        update: { passwordHash },
+        create: {
+            name: 'Super Admin',
+            role: 'admin',
+            email: 'admin@dewan.id',
+            passwordHash,
+        },
+    });
+
+    // 2. Seed Dewan
     const dewan1 = await prisma.user.upsert({
         where: { email: 'ahmad@dewan.id' },
-        update: {},
+        update: { passwordHash },
         create: {
             name: 'Ahmad Kurniawan',
             role: 'dewan',
             email: 'ahmad@dewan.id',
+            passwordHash,
             bio: 'Wakil Rakyat Dapil A - Fokus pada infrastruktur.',
         },
     });
 
     const dewan2 = await prisma.user.upsert({
         where: { email: 'siti@dewan.id' },
-        update: {},
+        update: { passwordHash },
         create: {
             name: 'Siti Aminah',
             role: 'dewan',
             email: 'siti@dewan.id',
+            passwordHash,
             bio: 'Wakil Rakyat Dapil B - Fokus pada pendidikan dan kesehatan.',
         },
     });
 
-    // 2. Seed Masyarakat Demo
+    // 3. Seed Masyarakat Demo
     const masyarakat = await prisma.user.upsert({
         where: { email: 'masyarakat@demo.id' },
-        update: {},
+        update: { passwordHash },
         create: {
-            id: 101,
             name: 'User Demo Masyarakat',
             role: 'masyarakat',
             email: 'masyarakat@demo.id',
+            passwordHash,
         },
     });
 
-    // 3. Seed Availability
+    // 4. Seed Availability
     const now = new Date();
+    
+    // Clean up existing availabilities to avoid duplicates in this simple seeder
+    await prisma.availability.deleteMany({});
+    
     await prisma.availability.createMany({
         data: [
             { dewanId: dewan1.id, startTime: new Date(now.getTime() + 60 * 60 * 1000), endTime: new Date(now.getTime() + 120 * 60 * 1000) },
@@ -50,7 +72,9 @@ async function main() {
         ]
     });
 
-    // 4. Seed Schedules (Meetings) for Dashboard Verification
+    // 5. Seed Schedules (Meetings) for Dashboard Verification
+    // Clean up existing schedules
+    await prisma.schedule.deleteMany({});
     
     // ACTIVE: Confirmed, starting now (with a bit of buffer into the past to be "ongoing")
     await prisma.schedule.create({
