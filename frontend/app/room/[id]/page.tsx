@@ -1,87 +1,241 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   LiveKitRoom,
-  VideoConference,
   RoomAudioRenderer,
   Chat,
   ControlBar,
-  LayoutContextProvider,
-  ParticipantLoop,
-  ParticipantTile,
   GridLayout,
+  ParticipantTile,
+  useTracks,
+  useParticipants,
+  useRoomInfo,
+  TrackToggle,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { Clock, Video, Users, MessageSquare, ArrowLeft, Loader2 } from "lucide-react";
+import { Track } from "livekit-client";
+import {
+  MessageSquare,
+  ArrowLeft,
+  Loader2,
+  X,
+  Users,
+  Radio,
+  Shield,
+  Video,
+  Mic,
+  MonitorUp,
+  LogOut,
+  VideoOff,
+  MicOff,
+} from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PreJoinComponent from "@/components/PreJoinComponent";
 
+// ─── Meeting Timer ───────────────────────────────────────────
+function MeetingTimer() {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setElapsed((p) => p + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const hrs = Math.floor(elapsed / 3600);
+  const mins = Math.floor((elapsed % 3600) / 60);
+  const secs = elapsed % 60;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return (
+    <span className="font-mono text-xs tabular-nums text-white/70">
+      {hrs > 0 ? `${pad(hrs)}:` : ""}{pad(mins)}:{pad(secs)}
+    </span>
+  );
+}
+
+// ─── Participant Count Badge ─────────────────────────────────
+function ParticipantCount() {
+  const participants = useParticipants();
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.06]">
+      <Users size={13} className="text-white/60" />
+      <span className="text-xs font-medium text-white/80">{participants.length}</span>
+    </div>
+  );
+}
+
+// ─── Video Stage ─────────────────────────────────────────────
+function VideoStage() {
+  const tracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: false }
+  );
+  return (
+    <GridLayout tracks={tracks} className="room-video-grid">
+      <ParticipantTile />
+    </GridLayout>
+  );
+}
+
+// ─── Active Room UI ──────────────────────────────────────────
+function ActiveRoom({ roomId, onLeave }: { roomId: string; onLeave: () => void }) {
+  const [chatOpen, setChatOpen] = useState(true);
+
+  return (
+    <div className="room-container">
+      {/* ── Top Bar ── */}
+      <div className="room-top-bar">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/30">
+            <Radio size={12} className="text-red-400 animate-pulse" />
+            <span className="text-xs font-semibold text-red-300 uppercase tracking-wider">Live</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.06]">
+            <span className="text-xs text-white/50">Ruang</span>
+            <span className="text-xs font-medium text-white/80">#{roomId}</span>
+          </div>
+          <MeetingTimer />
+        </div>
+        <div className="flex items-center gap-2">
+          <ParticipantCount />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
+            <Shield size={12} className="text-emerald-400" />
+            <span className="text-[10px] font-medium text-emerald-300">Terenkripsi</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main Content: Video + Chat side by side ── */}
+      <div className="room-main">
+        {/* Video Stage */}
+        <div className="room-video-area">
+          <VideoStage />
+        </div>
+
+        {/* Chat Sidebar */}
+        {chatOpen && (
+          <div className="room-chat-sidebar">
+            <div className="room-chat-header">
+              <div className="flex items-center gap-2">
+                <MessageSquare size={14} className="text-emerald-400" />
+                <span className="text-sm font-semibold text-white">Diskusi</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/20 text-emerald-300">
+                  Live
+                </span>
+              </div>
+              <button
+                onClick={() => setChatOpen(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="room-chat-body">
+              <Chat />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Bottom Control Bar ── */}
+      <div className="room-controls">
+        <div className="room-controls-inner">
+          <ControlBar
+            variation="minimal"
+            controls={{
+              microphone: true,
+              camera: true,
+              screenShare: true,
+              leave: true,
+              chat: false,
+              settings: false,
+            }}
+          />
+          {/* Chat toggle */}
+          <button
+            onClick={() => setChatOpen((p) => !p)}
+            className={`room-control-btn ${chatOpen ? "room-control-btn--active" : ""}`}
+            title="Toggle Chat"
+          >
+            <MessageSquare size={18} />
+            {chatOpen && <span className="room-control-indicator" />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────
 export default function RoomPage({ params }: { params: { id: string } }) {
   const roomId = params.id;
   const router = useRouter();
-  
   const { user, token: authToken } = useAuth();
+
   const [token, setToken] = useState("");
   const [meetingDetails, setMeetingDetails] = useState<any>(null);
   const [isJoined, setIsJoined] = useState(false);
-  
+  const [videoEnabled, setVideoEnabled] = useState(true);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+
   const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
 
   useEffect(() => {
     const initRoom = async () => {
       if (!authToken || !user) return;
-      
       try {
-        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/schedules`, {
-            headers: { "Authorization": `Bearer ${authToken}` }
-        });
-        
+        const detailsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/schedules`,
+          { headers: { Authorization: `Bearer ${authToken}` } }
+        );
         if (detailsRes.ok) {
-            const allSchedules = await detailsRes.json();
-            const currentSchedule = allSchedules.find((s: any) => s.id === Number(roomId) || s.id.toString() === roomId);
-            if (currentSchedule) {
-                setMeetingDetails(currentSchedule);
-            } else if (allSchedules.length > 0) {
-                setMeetingDetails(allSchedules[0]);
-            }
+          const allSchedules = await detailsRes.json();
+          const currentSchedule = allSchedules.find(
+            (s: any) => s.id === Number(roomId) || s.id.toString() === roomId
+          );
+          if (currentSchedule) setMeetingDetails(currentSchedule);
+          else if (allSchedules.length > 0) setMeetingDetails(allSchedules[0]);
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/livekit/token`, {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/livekit/token`,
+          {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
             },
-            body: JSON.stringify({
-                roomName: roomId,
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch token: ${response.statusText}`);
-        }
-
+            body: JSON.stringify({ roomName: roomId }),
+          }
+        );
+        if (!response.ok) throw new Error(`Failed to fetch token: ${response.statusText}`);
         const data = await response.json();
         setToken(data.token);
-
       } catch (e) {
         console.error("Failed to initialize LiveKit room", e);
       }
     };
-
     initRoom();
   }, [roomId, authToken, user]);
 
+  // ── Loading State ──
   if (token === "") {
     return (
-      <div className="flex flex-col flex-grow p-6 min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center border border-border rounded-xl p-10 bg-card">
-          <Loader2 size={28} className="text-primary animate-spin mb-4" />
-          <p className="font-semibold text-sm">Ketemu Dewan</p>
-          <p className="text-muted-foreground text-xs mt-1">Menyiapkan koneksi...</p>
+      <div className="room-loading-screen">
+        <div className="room-loading-card">
+          <div className="room-loading-pulse" />
+          <Loader2 size={28} className="text-emerald-400 animate-spin mb-4" />
+          <p className="font-semibold text-sm text-white">Ketemu Dewan</p>
+          <p className="text-white/40 text-xs mt-1">Menyiapkan koneksi aman...</p>
+          <div className="mt-4 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400/60 animate-pulse [animation-delay:150ms]" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400/30 animate-pulse [animation-delay:300ms]" />
+          </div>
         </div>
       </div>
     );
@@ -89,120 +243,44 @@ export default function RoomPage({ params }: { params: { id: string } }) {
 
   const handleDisconnected = () => {
     if (meetingDetails) {
-      router.push(`/masyarakat?ratedMeetingId=${roomId}&dewanId=${meetingDetails.dewanId || meetingDetails.dewan_id}`);
+      router.push(
+        `/masyarakat?ratedMeetingId=${roomId}&dewanId=${meetingDetails.dewanId || meetingDetails.dewan_id}`
+      );
     } else {
       router.push("/masyarakat");
     }
   };
 
+  // ── Pre-Join Screen ──
   if (!isJoined) {
     return (
       <ProtectedRoute>
-        <div className="flex flex-col flex-grow min-h-screen items-center justify-center p-4 sm:p-6">
-          <div className="w-full max-w-md">
-            <header className="mb-6 text-center">
-              <p className="text-xs font-medium text-primary tracking-wide uppercase mb-1">Konfigurasi Media</p>
-              <h2 className="text-2xl font-bold tracking-tight">
-                Siap untuk Bergabung?
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">Pastikan kamera dan mikrofon Anda berfungsi.</p>
-            </header>
-
-            <div className="border border-border rounded-xl p-6 bg-card">
-              <button 
-                onClick={() => setIsJoined(true)}
-                className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors text-sm"
-              >
-                Masuk ke Ruang Pertemuan
-              </button>
-            </div>
-
-            <button 
-              onClick={() => router.back()}
-              className="mt-4 mx-auto flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-xs font-medium"
-            >
-              <ArrowLeft size={14} />
-              Kembali ke Dashboard
-            </button>
-          </div>
-        </div>
+        <PreJoinComponent
+          onJoin={(v, a) => {
+            setVideoEnabled(v);
+            setAudioEnabled(a);
+            setIsJoined(true);
+          }}
+          onBack={() => router.back()}
+        />
       </ProtectedRoute>
     );
   }
 
+  // ── Connected Room ──
   return (
     <ProtectedRoute>
-      <div className="flex flex-col min-h-screen">
-        {/* Room Header */}
-        <header className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border">
-          <div className="flex items-center gap-3">
-            <Video size={18} className="text-primary" />
-            <div>
-              <h2 className="text-base font-semibold flex items-center gap-2">
-                Live Session
-              </h2>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                <p className="text-xs text-muted-foreground">Ruang #{roomId}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-xs font-medium text-muted-foreground">
-            <Clock size={14} />
-            Pertemuan Sedang Berjalan
-          </div>
-        </header>
-
-        {/* Video Area */}
-        <main className="flex-grow px-4 sm:px-6 py-4 flex overflow-hidden">
-          <div className="w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4 h-full">
-            <LiveKitRoom
-                video={true}
-                audio={true}
-                token={token}
-                serverUrl={liveKitUrl}
-                onDisconnected={handleDisconnected}
-                className="flex flex-col lg:flex-row w-full gap-4"
-            >
-                <div className="flex-grow flex flex-col min-h-[50vh]">
-                  <div className="flex-grow rounded-lg overflow-hidden border border-border bg-muted">
-                    <VideoConference />
-                  </div>
-                </div>
-
-                <div className="w-full lg:w-[360px] flex flex-col gap-3 h-full">
-                  <div className="flex-grow flex flex-col rounded-lg overflow-hidden border border-border bg-card">
-                    <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare size={14} className="text-primary" />
-                        <span className="font-medium text-xs">Diskusi Live</span>
-                      </div>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
-                        Aktif
-                      </span>
-                    </div>
-                    <div className="flex-grow overflow-hidden p-2">
-                      <Chat />
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg p-3 border border-border bg-card flex items-center gap-3">
-                    <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                      <Users size={14} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-medium">Peserta</p>
-                      <p className="text-xs font-medium">Terhubung Secara Aman</p>
-                    </div>
-                  </div>
-                </div>
-
-                <RoomAudioRenderer />
-            </LiveKitRoom>
-          </div>
-        </main>
-      </div>
+      <LiveKitRoom
+        video={videoEnabled}
+        audio={audioEnabled}
+        token={token}
+        serverUrl={liveKitUrl}
+        onDisconnected={handleDisconnected}
+        className="room-livekit-root"
+      >
+        <ActiveRoom roomId={roomId} onLeave={handleDisconnected} />
+        <RoomAudioRenderer />
+      </LiveKitRoom>
     </ProtectedRoute>
   );
 }

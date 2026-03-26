@@ -3,6 +3,7 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
+import RoomLayoutWrapper from "@/components/RoomLayoutWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,24 +27,26 @@ export default function RootLayout({
             Langsung ke konten utama
           </a>
           
-          <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm border-b border-border">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-                <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">K</span>
-                </div>
-                <h1 className="text-base font-bold tracking-tight">
-                  KETEMU<span className="text-primary">DEWAN</span>
-                </h1>
-              </Link>
-              
-              <nav className="flex items-center gap-3">
-                <Navbar />
-                <div className="w-px h-4 bg-border hidden sm:block mx-1" />
-                <ThemeToggle />
-              </nav>
-            </div>
-          </header>
+          <RoomLayoutWrapper>
+            <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm border-b border-border">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+                  <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">K</span>
+                  </div>
+                  <h1 className="text-base font-bold tracking-tight">
+                    KETEMU<span className="text-primary">DEWAN</span>
+                  </h1>
+                </Link>
+                
+                <nav className="flex items-center gap-3">
+                  <Navbar />
+                  <div className="w-px h-4 bg-border hidden sm:block mx-1" />
+                  <ThemeToggle />
+                </nav>
+              </div>
+            </header>
+          </RoomLayoutWrapper>
 
           <main id="main-content" className="flex-grow flex flex-col">
             {children}

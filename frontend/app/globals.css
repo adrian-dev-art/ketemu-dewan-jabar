@@ -33,22 +33,617 @@ body {
 }
 
 /* Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-fg);
-}
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--muted-fg); }
 
 /* Focus */
 *:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROOM / LIVE SESSION STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Loading Screen ── */
+.room-loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07070a;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 50% 120%, rgba(16, 185, 129, 0.05), transparent);
+}
+
+.room-loading-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 2.5rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+  overflow: hidden;
+}
+
+.room-loading-pulse {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.1), transparent 60%);
+  animation: room-pulse 3s ease-in-out infinite;
+}
+
+@keyframes room-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* ── Pre-join Card ── */
+.room-prejoin-card {
+  padding: 2rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+}
+
+.room-join-btn {
+  position: relative;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: white;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.room-join-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.35);
+}
+
+.room-join-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.room-join-btn:hover::before {
+  transform: translateX(100%);
+}
+
+/* ── Room Container ── */
+.room-livekit-root {
+  height: 100vh !important;
+  background: #07070a !important;
+  overflow: hidden;
+}
+
+.room-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #07070a;
+  overflow: hidden;
+}
+
+/* ── Top Bar ── */
+.room-top-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 20;
+}
+
+/* ── Main Content (video + chat side by side) ── */
+.room-main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Video Area ── */
+.room-video-area {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  display: flex;
+}
+
+/* ── Video Grid ── */
+.room-video-grid {
+  width: 100% !important;
+  height: 100% !important;
+  gap: 0.5rem !important;
+}
+
+/* ── Chat Sidebar ── */
+.room-chat-sidebar {
+  flex-shrink: 0;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(14, 14, 18, 0.95);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .room-main {
+    flex-direction: column;
+  }
+  .room-chat-sidebar {
+    width: 100%;
+    height: 45%;
+    flex-shrink: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.room-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.room-chat-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Floating Control Bar ── */
+.room-controls {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  z-index: 30;
+}
+
+.room-controls-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(20, 20, 28, 0.85);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.room-control-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.room-control-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  transform: scale(1.08);
+}
+
+.room-control-btn--active {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.room-control-indicator {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #10b981;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVEKIT COMPONENT STYLE OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Participant Tiles ── */
+.lk-participant-tile {
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: #111118 !important;
+  transition: all 0.3s ease !important;
+}
+
+.lk-participant-tile:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.08) !important;
+}
+
+.lk-participant-tile video {
+  border-radius: 1rem !important;
+}
+
+/* Participant name */
+.lk-participant-name {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 0.5rem !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.lk-participant-metadata {
+  padding: 0.5rem !important;
+}
+
+.lk-participant-metadata-item {
+  gap: 0.375rem !important;
+}
+
+/* Placeholder when camera is off */
+.lk-participant-placeholder {
+  background: linear-gradient(145deg, #111118, #0a0a10) !important;
+}
+
+/* ── Focus Layout ── */
+.lk-focus-layout {
+  gap: 0.5rem !important;
+}
+
+/* ── Grid Layout ── */
+.lk-grid-layout {
+  gap: 0.5rem !important;
+  padding: 0 !important;
+}
+
+/* ── Control Bar (LiveKit built-in) ── */
+.lk-control-bar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  gap: 0.375rem !important;
+}
+
+.lk-control-bar .lk-button {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: unset !important;
+  gap: 0 !important;
+}
+
+.lk-control-bar .lk-button:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: white !important;
+  transform: scale(1.08) !important;
+}
+
+/* Active mic/cam toggles */
+.lk-control-bar .lk-button[data-lk-enabled="true"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+.lk-control-bar .lk-button[data-lk-enabled="false"] {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #fca5a5 !important;
+}
+
+/* Disconnect / Leave button */
+.lk-control-bar .lk-disconnect-button,
+.lk-control-bar .lk-button.lk-disconnect-button {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+.lk-control-bar .lk-disconnect-button:hover,
+.lk-control-bar .lk-button.lk-disconnect-button:hover {
+  background: rgba(239, 68, 68, 0.3) !important;
+  color: #fecaca !important;
+  transform: scale(1.08) !important;
+}
+
+/* Hide button labels in the control bar */
+.lk-control-bar .lk-button-group-menu,
+.lk-control-bar .lk-button span:not(.lk-button-icon) {
+  display: none !important;
+}
+
+/* ── Chat Component ── */
+/* ── Chat Component Overhaul ── */
+.lk-chat {
+  background: transparent !important;
+  border: none !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 0 0.5rem !important;
+}
+
+.lk-chat-messages,
+.lk-chat .lk-message-list {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 1.5rem 0.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.25rem !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+/* Custom Scrollbar for Chat */
+.lk-chat-messages::-webkit-scrollbar,
+.lk-chat .lk-message-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.lk-chat-messages::-webkit-scrollbar-thumb,
+.lk-chat .lk-message-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+/* Individual Message Bubble */
+.lk-chat-entry,
+.lk-message-item {
+  position: relative !important;
+  max-width: 85% !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation: chat-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
+  align-self: flex-start !important;
+  word-break: break-word !important;
+}
+
+.lk-chat-entry:hover,
+.lk-message-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transform: translateY(-1px) translateX(1px) !important;
+}
+
+/* Self Message Differentiation (The User) */
+.lk-message-item[data-lk-self="true"],
+.lk-chat-entry[data-lk-self="true"] {
+  align-self: flex-end !important;
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1)) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Message Content */
+.lk-message-body {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Meta Data (Sender & Time) */
+.lk-meta-data,
+.lk-message-header {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+.lk-participant-name,
+.lk-message-sender {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  color: #34d399 !important;
+  letter-spacing: 0.025em !important;
+  text-transform: capitalize !important;
+}
+
+.lk-message-item[data-lk-self="true"] .lk-message-sender {
+  color: #6ee7b7 !important;
+}
+
+.lk-timestamp,
+.lk-message-timestamp {
+  font-size: 0.625rem !important;
+  color: rgba(255, 255, 255, 0.25) !important;
+  font-weight: 500 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* Floating Pill Chat Input */
+.lk-chat-form {
+  margin: 1rem 0.75rem !important;
+  padding: 0 !important;
+  border-top: none !important;
+  background: transparent !important;
+  display: flex !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+.lk-chat-form input,
+.lk-chat .lk-chat-form__input {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 9999px !important;
+  color: white !important;
+  padding: 0.75rem 1.25rem !important;
+  font-size: 0.875rem !important;
+  transition: all 0.3s ease !important;
+  flex: 1 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.lk-chat-form input:focus,
+.lk-chat .lk-chat-form__input:focus {
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Send Button inside pill looks more like a floating action */
+.lk-chat-form button,
+.lk-chat .lk-chat-form__button {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  border-radius: 9999px !important;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.lk-chat-form button:hover,
+.lk-chat .lk-chat-form__button:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.lk-chat-form button:active,
+.lk-chat .lk-chat-form__button:active {
+  transform: scale(0.95) !important;
+}
+
+/* ── Connection Quality Indicator ── */
+.lk-connection-quality {
+  color: #34d399 !important;
+}
+
+/* ── Track Muted Indicator ── */
+.lk-participant-tile .lk-track-muted-indicator-camera,
+.lk-participant-tile .lk-track-muted-indicator-microphone {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Screen Share ── */
+.lk-focus-layout .lk-participant-tile[data-lk-source="screen_share"] {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.08) !important;
+}
+
+/* ── Animations ── */
+@keyframes room-fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes room-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lk-participant-tile {
+  animation: room-fade-in 0.4s ease-out !important;
+}
+
+.room-controls {
+  animation: room-slide-up 0.5s ease-out 0.3s both;
+}
+
+.room-top-bar {
+  animation: room-fade-in 0.5s ease-out 0.2s both;
+}
+
+/* ── Toast / Notification ── */
+.lk-toast {
+  background: rgba(20, 20, 28, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0.75rem !important;
+  color: white !important;
+}
+
+/* ── Hide default LiveKit focus toggle & chat in conference ── */
+.lk-focus-toggle-button {
+  border-radius: 0.5rem !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+.lk-focus-toggle-button:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+}
+
+.mirror-mode {
+  transform: scaleX(-1);
+}
+
+@keyframes chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
