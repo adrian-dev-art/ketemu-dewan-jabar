@@ -35,6 +35,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PreJoinComponent from "@/components/PreJoinComponent";
+import CustomChat from "@/components/CustomChat";
 
 // ─── Meeting Timer ───────────────────────────────────────────
 function MeetingTimer() {
@@ -135,7 +136,7 @@ function ActiveRoom({ roomId, onLeave }: { roomId: string; onLeave: () => void }
               </button>
             </div>
             <div className="room-chat-body">
-              <Chat />
+              <CustomChat />
             </div>
           </div>
         )}
