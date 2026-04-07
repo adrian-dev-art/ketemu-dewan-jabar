@@ -8,16 +8,22 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String
-  email        String         @unique
-  role         String         // 'admin', 'dewan', 'masyarakat'
-  passwordHash String?        // Nullable for now to support existing seeded users
-  bio          String?
+  id                    Int            @id @default(autoincrement())
+  name                  String
+  email                 String         @unique
+  role                  String
+  bio                   String?
+  passwordHash          String?
+  centreId              String?        @unique
+  nip                   String?        @unique
+  fraksi                String?
+  jabatan               String?
+  dapil                 String?
+  isSync                Boolean        @default(false)
+  availabilities        Availability[] @relation("DewanAvailability")
+  ratingsAsDewan        Rating[]       @relation("DewanRatings")
   schedulesAsDewan      Schedule[]     @relation("DewanSchedules")
   schedulesAsMasyarakat Schedule[]     @relation("MasyarakatSchedules")
-  ratingsAsDewan        Rating[]       @relation("DewanRatings")
-  availabilities        Availability[] @relation("DewanAvailability")
 }
 
 model Availability {
@@ -32,27 +38,24 @@ model Schedule {
   id           Int      @id @default(autoincrement())
   title        String   @default("Diskusi Aspirasi")
   startTime    DateTime
-  status       String   @default("pending") // 'pending', 'confirmed', 'rejected'
-  
+  status       String   @default("pending")
   dewanId      Int
-  dewan        User     @relation("DewanSchedules", fields: [dewanId], references: [id])
-  
   masyarakatId Int
-  masyarakat   User     @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
-  
   rating       Rating?
+  dewan        User     @relation("DewanSchedules", fields: [dewanId], references: [id])
+  masyarakat   User     @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
 }
 
 model Rating {
-  id            Int      @id @default(autoincrement())
-  speakingScore Int
-  contextScore  Int
-  timeScore     Int
-  comment       String?
-  
-  scheduleId Int      @unique
-  schedule   Schedule @relation(fields: [scheduleId], references: [id])
-  
-  dewanId    Int
-  dewan      User     @relation("DewanRatings", fields: [dewanId], references: [id])
+  id                   Int      @id @default(autoincrement())
+  speakingScore        Int
+  contextScore         Int
+  timeScore            Int
+  responsivenessScore  Int      @default(0)
+  solutionScore        Int      @default(0)
+  comment              String?
+  scheduleId           Int      @unique
+  dewanId              Int
+  dewan                User     @relation("DewanRatings", fields: [dewanId], references: [id])
+  schedule             Schedule @relation(fields: [scheduleId], references: [id])
 }

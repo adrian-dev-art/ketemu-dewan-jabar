@@ -1,137 +1,213 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { syncHubData } from '../src/services/hubSync';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Mulai seeding data...');
+    console.log('🌱 Mulai seeding data lengkap...\n');
 
-    // Hash password for all users
     const passwordHash = await bcrypt.hash('password', 10);
+    const now = new Date();
+    const h = (hours: number) => new Date(now.getTime() + hours * 3600 * 1000);
+    const d = (days: number) => new Date(now.getTime() + days * 86400 * 1000);
 
-    // 1. Seed Admin
+    // ──────────────────────────────────────────────────
+    // 1. ADMIN
+    // ──────────────────────────────────────────────────
+    console.log('👤 Seeding admin...');
     const admin = await prisma.user.upsert({
         where: { email: 'admin@dewan.id' },
         update: { passwordHash },
-        create: {
-            name: 'Super Admin',
-            role: 'admin',
-            email: 'admin@dewan.id',
-            passwordHash,
-        },
+        create: { name: 'Super Admin', role: 'admin', email: 'admin@dewan.id', passwordHash },
     });
 
-    // 2. Seed Dewan
-    const dewan1 = await prisma.user.upsert({
-        where: { email: 'ahmad@dewan.id' },
-        update: { passwordHash },
-        create: {
-            name: 'Ahmad Kurniawan',
-            role: 'dewan',
-            email: 'ahmad@dewan.id',
-            passwordHash,
-            bio: 'Wakil Rakyat Dapil A - Fokus pada infrastruktur.',
-        },
-    });
+    // ──────────────────────────────────────────────────
+    // 2. ANGGOTA DEWAN (6 orang)
+    // ──────────────────────────────────────────────────
+    console.log('🏛️  Seeding anggota dewan...');
+    const dewanData = [
+        { email: 'ahmad@dewan.id',   name: 'Ahmad Kurniawan',    fraksi: 'Fraksi Golkar',   jabatan: 'Wakil Ketua Komisi II', dapil: 'Dapil Jabar I',   bio: 'Fokus pada infrastruktur jalan dan irigasi.' },
+        { email: 'siti@dewan.id',    name: 'Siti Aminah',        fraksi: 'Fraksi PKS',      jabatan: 'Ketua Komisi IV',       dapil: 'Dapil Jabar II',  bio: 'Fokus pada pendidikan dan kesehatan masyarakat.' },
+        { email: 'budi@dewan.id',    name: 'Budi Santoso',       fraksi: 'Fraksi PDIP',     jabatan: 'Anggota Komisi I',      dapil: 'Dapil Jabar III', bio: 'Fokus pada ketenagakerjaan dan ekonomi UMKM.' },
+        { email: 'dewi@dewan.id',    name: 'Dewi Ratnasari',     fraksi: 'Fraksi Gerindra',  jabatan: 'Wakil Ketua Komisi III', dapil: 'Dapil Jabar IV', bio: 'Fokus pada lingkungan hidup dan pertanian.' },
+        { email: 'hendra@dewan.id',  name: 'Hendra Wijaya',      fraksi: 'Fraksi Nasdem',   jabatan: 'Ketua Komisi I',        dapil: 'Dapil Jabar V',  bio: 'Fokus pada hukum, HAM, dan keamanan daerah.' },
+        { email: 'ratih@dewan.id',   name: 'Ratih Kusumawati',   fraksi: 'Fraksi PKB',      jabatan: 'Anggota Komisi V',      dapil: 'Dapil Jabar VI',  bio: 'Fokus pada keagamaan, sosial, dan pemberdayaan perempuan.' },
+    ];
 
-    const dewan2 = await prisma.user.upsert({
-        where: { email: 'siti@dewan.id' },
-        update: { passwordHash },
-        create: {
-            name: 'Siti Aminah',
-            role: 'dewan',
-            email: 'siti@dewan.id',
-            passwordHash,
-            bio: 'Wakil Rakyat Dapil B - Fokus pada pendidikan dan kesehatan.',
-        },
-    });
+    const dewanList: any[] = [];
+    for (const d of dewanData) {
+        const u = await prisma.user.upsert({
+            where: { email: d.email },
+            update: { passwordHash, fraksi: d.fraksi, jabatan: d.jabatan, dapil: d.dapil },
+            create: { ...d, role: 'dewan', passwordHash },
+        });
+        dewanList.push(u);
+    }
 
-    // 3. Seed Masyarakat Demo
-    const masyarakat = await prisma.user.upsert({
-        where: { email: 'masyarakat@demo.id' },
-        update: { passwordHash },
-        create: {
-            name: 'User Demo Masyarakat',
-            role: 'masyarakat',
-            email: 'masyarakat@demo.id',
-            passwordHash,
-        },
-    });
+    // ──────────────────────────────────────────────────
+    // 3. MASYARAKAT (8 orang)
+    // ──────────────────────────────────────────────────
+    console.log('👥 Seeding masyarakat...');
+    const masyarakatData = [
+        { email: 'masyarakat@demo.id',   name: 'User Demo Masyarakat' },
+        { email: 'andi@warga.id',        name: 'Andi Prasetyo' },
+        { email: 'nina@warga.id',        name: 'Nina Fitriani' },
+        { email: 'rudi@warga.id',        name: 'Rudi Hartono' },
+        { email: 'maya@warga.id',        name: 'Maya Sari' },
+        { email: 'joko@warga.id',        name: 'Joko Susilo' },
+        { email: 'wulan@warga.id',       name: 'Wulan Gustiani' },
+        { email: 'dimas@warga.id',       name: 'Dimas Nugraha' },
+    ];
+    const masyList: any[] = [];
+    for (const m of masyarakatData) {
+        const u = await prisma.user.upsert({
+            where: { email: m.email },
+            update: { passwordHash },
+            create: { ...m, role: 'masyarakat', passwordHash },
+        });
+        masyList.push(u);
+    }
+    const [masyarakat, andi, nina, rudi, maya, joko, wulan, dimas] = masyList;
 
-    // 4. Seed Availability
-    const now = new Date();
-    
-    // Clean up existing availabilities to avoid duplicates in this simple seeder
+    // ──────────────────────────────────────────────────
+    // 4. AVAILABILITY (per dewan)
+    // ──────────────────────────────────────────────────
+    console.log('📅 Seeding ketersediaan waktu...');
     await prisma.availability.deleteMany({});
-    
-    await prisma.availability.createMany({
-        data: [
-            { dewanId: dewan1.id, startTime: new Date(now.getTime() + 60 * 60 * 1000), endTime: new Date(now.getTime() + 120 * 60 * 1000) },
-            { dewanId: dewan1.id, startTime: new Date(now.getTime() + 24 * 60 * 60 * 1000), endTime: new Date(now.getTime() + 25 * 60 * 60 * 1000) },
-            { dewanId: dewan2.id, startTime: new Date(now.getTime() + 2 * 60 * 60 * 1000), endTime: new Date(now.getTime() + 3 * 60 * 60 * 1000) },
-        ]
-    });
+    const availabilities: any[] = [];
+    for (const dewan of dewanList) {
+        availabilities.push(
+            { dewanId: dewan.id, startTime: h(1),  endTime: h(2) },
+            { dewanId: dewan.id, startTime: h(24), endTime: h(25) },
+            { dewanId: dewan.id, startTime: h(48), endTime: h(50) },
+            { dewanId: dewan.id, startTime: h(72), endTime: h(74) },
+        );
+    }
+    await prisma.availability.createMany({ data: availabilities });
 
-    // 5. Seed Schedules (Meetings) for Dashboard Verification
-    // Clean up existing schedules
+    // ──────────────────────────────────────────────────
+    // 5. SCHEDULES + RATINGS
+    // ──────────────────────────────────────────────────
+    console.log('📋 Seeding jadwal dan penilaian...');
+    await prisma.rating.deleteMany({});
     await prisma.schedule.deleteMany({});
-    
-    // ACTIVE: Confirmed, starting now (with a bit of buffer into the past to be "ongoing")
-    await prisma.schedule.create({
-        data: {
-            title: 'Diskusi Jalan Rusak di Cibiru',
-            masyarakatId: masyarakat.id,
-            dewanId: dewan1.id,
-            startTime: new Date(now.getTime() - 5 * 60 * 1000), // Started 5 mins ago
-            status: 'confirmed'
+
+    const [dewan1, dewan2, dewan3, dewan4, dewan5, dewan6] = dewanList;
+
+    // Helper to create schedule + optional rating
+    const makeSchedule = async (
+        title: string,
+        masyarakatId: number,
+        dewanId: number,
+        startTime: Date,
+        status: string,
+        rating?: { sp: number; cx: number; tm: number; rs: number; sl: number; comment: string }
+    ) => {
+        const s = await prisma.schedule.create({
+            data: { title, masyarakatId, dewanId, startTime, status },
+        });
+        if (rating) {
+            await prisma.rating.create({
+                data: {
+                    scheduleId: s.id,
+                    dewanId,
+                    speakingScore: rating.sp,
+                    contextScore: rating.cx,
+                    timeScore: rating.tm,
+                    responsivenessScore: rating.rs,
+                    solutionScore: rating.sl,
+                    comment: rating.comment,
+                },
+            });
         }
+        return s;
+    };
+
+    // ── Sesi Aktif (sedang berlangsung, ~5 menit yang lalu) ──
+    await makeSchedule('Diskusi Jalan Rusak di Cibiru', masyarakat.id, dewan1.id, h(-0.08), 'confirmed');
+    await makeSchedule('Revitalisasi Pasar Tradisional Ujungberung', andi.id, dewan3.id, h(-0.05), 'confirmed');
+
+    // ── Jadwal Mendatang (confirmed, dalam beberapa jam/hari) ──
+    await makeSchedule('Pemerataan Fasilitas Sekolah Dasar', masyarakat.id, dewan2.id, h(2), 'confirmed');
+    await makeSchedule('Penanganan Kemacetan Ruas Buah Batu', nina.id, dewan1.id, h(4), 'confirmed');
+    await makeSchedule('Usulan Beasiswa bagi Pelajar Berprestasi', rudi.id, dewan4.id, h(6), 'confirmed');
+    await makeSchedule('Pengembangan BUMDes Wilayah Selatan', maya.id, dewan5.id, h(26), 'confirmed');
+    await makeSchedule('Perizinan Kegiatan Kesenian Daerah', joko.id, dewan6.id, h(48), 'confirmed');
+
+    // ── Menunggu Konfirmasi (pending) ──
+    await makeSchedule('Rekomendasi Penyaluran Pupuk Subsidi', masyarakat.id, dewan1.id, h(25), 'pending');
+    await makeSchedule('Bantuan Modal UMKM Terdampak Banjir', wulan.id, dewan3.id, h(36), 'pending');
+    await makeSchedule('Aspirasi Perluasan Jalur Angkot', dimas.id, dewan2.id, h(72), 'pending');
+    await makeSchedule('Pengaduan Limbah Industri di Sungai Citarum', andi.id, dewan4.id, h(50), 'pending');
+
+    // ── Ditolak ──
+    await makeSchedule('Izin Pembangunan Lapangan Basket', masyarakat.id, dewan2.id, d(-2), 'rejected');
+    await makeSchedule('Permohonan Tambahan Lampu Jalan', nina.id, dewan5.id, d(-3), 'rejected');
+
+    // ── Selesai + Penilaian (riwayat dengan rating) ──
+    await makeSchedule('Evaluasi Penanganan Banjir Musiman', masyarakat.id, dewan1.id, d(-1), 'confirmed', {
+        sp: 4, cx: 5, tm: 4, rs: 4, sl: 3,
+        comment: 'Bapak Ahmad sangat mendengarkan aspirasi, akan menindaklanjuti ke dinas PU.',
+    });
+    await makeSchedule('Kondisi Drainase RT 05 Kelurahan Antapani', andi.id, dewan1.id, d(-2), 'confirmed', {
+        sp: 5, cx: 4, tm: 5, rs: 5, sl: 4,
+        comment: 'Respon cepat dan langsung turun lapangan bersama tim teknis.',
+    });
+    await makeSchedule('Ketersediaan Guru di SDN 12 Cicendo', nina.id, dewan2.id, d(-3), 'confirmed', {
+        sp: 3, cx: 5, tm: 3, rs: 4, sl: 3,
+        comment: 'Penjelasan mendalam terkait kuota guru, namun solusi belum konkret.',
+    });
+    await makeSchedule('Program Beasiswa KIP Kuliah 2025', rudi.id, dewan2.id, d(-4), 'confirmed', {
+        sp: 5, cx: 5, tm: 5, rs: 5, sl: 5,
+        comment: 'Luar biasa! Ibu Siti langsung membantu proses administrasi di tempat.',
+    });
+    await makeSchedule('Krisis Air Bersih PDAM Wilayah Timur', maya.id, dewan3.id, d(-5), 'confirmed', {
+        sp: 4, cx: 4, tm: 3, rs: 4, sl: 3,
+        comment: 'Cukup responsif meski solusi masih butuh tindak lanjut jangka panjang.',
+    });
+    await makeSchedule('Keluhan Asap Pabrik Kawasan Industri Karawang', joko.id, dewan4.id, d(-6), 'confirmed', {
+        sp: 5, cx: 5, tm: 4, rs: 5, sl: 4,
+        comment: 'Ibu Dewi sangat aktif dan berjanji akan memanggil pihak industri.',
+    });
+    await makeSchedule('Hak Pesangon Karyawan Dirumahkan', wulan.id, dewan3.id, d(-7), 'confirmed', {
+        sp: 3, cx: 4, tm: 4, rs: 3, sl: 2,
+        comment: 'Memahami masalah, tapi belum ada kejelasan langkah selanjutnya.',
+    });
+    await makeSchedule('Permasalahan Sertifikat Tanah Warga', dimas.id, dewan5.id, d(-8), 'confirmed', {
+        sp: 4, cx: 3, tm: 4, rs: 4, sl: 3,
+        comment: 'Bapak Hendra merespons dengan baik namun topik agak melebar.',
+    });
+    await makeSchedule('Pengembalian Dana BOS yang Tidak Tepat Sasaran', andi.id, dewan2.id, d(-9), 'confirmed', {
+        sp: 5, cx: 5, tm: 5, rs: 5, sl: 4,
+        comment: 'Sangat profesional, langsung direspons dengan surat ke Disdik Provinsi.',
+    });
+    await makeSchedule('Usulan Pembangunan Posyandu di Dusun Terpencil', nina.id, dewan6.id, d(-10), 'confirmed', {
+        sp: 4, cx: 4, tm: 4, rs: 5, sl: 4,
+        comment: 'Ibu Ratih sangat peduli dan akan membawa usulan ke musrenbang.',
+    });
+    await makeSchedule('Konflik Pemilihan Ketua RT', maya.id, dewan5.id, d(-12), 'confirmed', {
+        sp: 3, cx: 3, tm: 3, rs: 4, sl: 2,
+        comment: 'Kurang bisa memberikan solusi konkret untuk kasus ini.',
+    });
+    await makeSchedule('Aspirasi Perawatan Makam Pahlawan Setempat', joko.id, dewan6.id, d(-15), 'confirmed', {
+        sp: 5, cx: 4, tm: 5, rs: 5, sl: 5,
+        comment: 'Sangat antusias dan berkomitmen menganggarkan di APBD perubahan.',
     });
 
-    // INCOMING: Confirmed, starting in 2 hours
-    await prisma.schedule.create({
-        data: {
-            title: 'Pemerataan Fasilitas Sekolah Dasar',
-            masyarakatId: masyarakat.id,
-            dewanId: dewan2.id,
-            startTime: new Date(now.getTime() + 120 * 60 * 1000),
-            status: 'confirmed'
-        }
-    });
+    // ── 6. Sinkronisasi Master Hub ──
+    console.log('\n🔄 Menghubungi Master Hub untuk sinkronisasi dewan...');
+    await syncHubData();
 
-    // PENDING: Waiting for approval, in 1 day
-    await prisma.schedule.create({
-        data: {
-            title: 'Rekomendasi Penyaluran Pupuk Subsidi',
-            masyarakatId: masyarakat.id,
-            dewanId: dewan1.id,
-            startTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
-            status: 'pending'
-        }
-    });
-
-    // REJECTED: Past or future
-    await prisma.schedule.create({
-        data: {
-            title: 'Izin Pembangunan Lapangan Basket',
-            masyarakatId: masyarakat.id,
-            dewanId: dewan2.id,
-            startTime: new Date(now.getTime() - 48 * 60 * 60 * 1000),
-            status: 'rejected'
-        }
-    });
-
-    // DONE: Past confirmed session
-    await prisma.schedule.create({
-        data: {
-            title: 'Evaluasi Penanganan Banjir Musiman',
-            masyarakatId: masyarakat.id,
-            dewanId: dewan1.id,
-            startTime: new Date(now.getTime() - 24 * 60 * 60 * 1000),
-            status: 'confirmed'
-        }
-    });
-
-    console.log('Seeding selesai!');
+    console.log('\n✅ Seeding selesai!');
+    console.log('──────────────────────────────────');
+    console.log(`  Admin          : 1 akun`);
+    console.log(`  Anggota Dewan  : ${dewanList.length} akun`);
+    console.log(`  Masyarakat     : ${masyList.length} akun`);
+    console.log(`  Ketersediaan   : ${availabilities.length} slot`);
+    console.log('──────────────────────────────────');
+    console.log('  Semua password : "password"');
+    console.log('──────────────────────────────────');
 }
 
 main()

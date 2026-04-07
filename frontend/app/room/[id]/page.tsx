@@ -223,22 +223,35 @@ export default function RoomPage({ params }: { params: { id: string } }) {
     initRoom();
   }, [roomId, authToken, user]);
 
-  // ── Loading State ──
+// ── Loading State ──
+  if (!user || !authToken) {
+    return (
+      <ProtectedRoute>
+        <div className="room-loading-screen">
+          <Loader2 size={28} className="text-emerald-400 animate-spin mb-4" />
+          <p className="font-semibold text-sm text-white">Memverifikasi Sesi...</p>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
   if (token === "") {
     return (
-      <div className="room-loading-screen">
-        <div className="room-loading-card">
-          <div className="room-loading-pulse" />
-          <Loader2 size={28} className="text-emerald-400 animate-spin mb-4" />
-          <p className="font-semibold text-sm text-white">Ketemu Dewan</p>
-          <p className="text-white/40 text-xs mt-1">Menyiapkan koneksi aman...</p>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <div className="w-2 h-2 rounded-full bg-emerald-400/60 animate-pulse [animation-delay:150ms]" />
-            <div className="w-2 h-2 rounded-full bg-emerald-400/30 animate-pulse [animation-delay:300ms]" />
+      <ProtectedRoute>
+        <div className="room-loading-screen">
+          <div className="room-loading-card">
+            <div className="room-loading-pulse" />
+            <Loader2 size={28} className="text-emerald-400 animate-spin mb-4" />
+            <p className="font-semibold text-sm text-white">Ketemu Dewan</p>
+            <p className="text-white/40 text-xs mt-1">Menyiapkan koneksi aman...</p>
+            <div className="mt-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-emerald-400/60 animate-pulse [animation-delay:150ms]" />
+              <div className="w-2 h-2 rounded-full bg-emerald-400/30 animate-pulse [animation-delay:300ms]" />
+            </div>
           </div>
         </div>
-      </div>
+      </ProtectedRoute>
     );
   }
 

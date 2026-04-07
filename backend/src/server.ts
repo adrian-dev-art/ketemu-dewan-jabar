@@ -9,6 +9,7 @@ import { rateLimit } from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { syncHubData } from './services/hubSync';
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
 app.use(express.json());
@@ -283,9 +284,19 @@ app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admi
     }
 });
 
-// 6. Submit Multi-Aspect Rating (Masyarakat only)
+// 6. Master Hub Sync (Admin only)
+app.post('/api/admin/sync-centre', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const result = await syncHubData();
+    if (result.success) {
+        res.json({ message: "Sinkronisasi dengan Master Hub berhasil.", members_processed: result.processed });
+    } else {
+        res.status(500).json({ error: `Gagal sinkronisasi: ${result.error}` });
+    }
+});
+
+// 7. Submit Multi-Aspect Rating (Masyarakat only)
 app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), async (req, res) => {
-    const { schedule_id, dewan_id, speaking_score, context_score, time_score, comment } = req.body;
+    const { schedule_id, dewan_id, speaking_score, context_score, time_score, responsiveness_score, solution_score, comment } = req.body;
     try {
         const result = await prisma.rating.create({
             data: {
@@ -294,6 +305,8 @@ app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), async
                 speakingScore: Number(speaking_score),
                 contextScore: Number(context_score),
                 timeScore: Number(time_score),
+                responsivenessScore: Number(responsiveness_score) || 0,
+                solutionScore: Number(solution_score) || 0,
                 comment
             }
         });
@@ -301,6 +314,188 @@ app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), async
     } catch (err) {
         console.error("Error submitting rating:", err);
         res.status(500).json({ error: "Gagal mengirim penilaian" });
+    }
+});
+
+// 8. Admin Stats (Admin only)
+app.get('/api/admin/stats', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const [totalUsers, totalMeetings, ratings] = await Promise.all([
+            prisma.user.count(),
+            prisma.schedule.count(),
+            prisma.rating.findMany()
+        ]);
+
+        let avgRating = 0;
+        if (ratings.length > 0) {
+            const totalScore = ratings.reduce((acc: number, r: any) => {
+                const avg = (r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5;
+                return acc + avg;
+            }, 0);
+            avgRating = Math.round((totalScore / ratings.length) * 10) / 10;
+        }
+
+        res.json({ totalUsers, totalMeetings, avgRating, totalRatings: ratings.length });
+    } catch (err) {
+        console.error("Error fetching admin stats:", err);
+        res.status(500).json({ error: "Gagal mengambil statistik" });
+    }
+});
+
+// 9. Admin - All Ratings (Admin only)
+app.get('/api/admin/ratings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const ratings = await prisma.rating.findMany({
+            orderBy: { id: 'desc' },
+            include: {
+                dewan: { select: { id: true, name: true, fraksi: true } },
+                schedule: {
+                    include: {
+                        masyarakat: { select: { name: true } }
+                    }
+                }
+            }
+        });
+
+        const formatted = ratings.map((r: any) => ({
+            id: r.id,
+            dewanId: r.dewanId,
+            dewanName: r.dewan?.name || 'N/A',
+            dewanFraksi: r.dewan?.fraksi || '-',
+            masyarakatName: r.schedule?.masyarakat?.name || 'N/A',
+            meetingTitle: r.schedule?.title || 'N/A',
+            meetingDate: r.schedule?.startTime,
+            speakingScore: r.speakingScore,
+            contextScore: r.contextScore,
+            timeScore: r.timeScore,
+            responsivenessScore: r.responsivenessScore,
+            solutionScore: r.solutionScore,
+            avgScore: Math.round(((r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5) * 10) / 10,
+            comment: r.comment,
+        }));
+
+        res.json(formatted);
+    } catch (err) {
+        console.error("Error fetching admin ratings:", err);
+        res.status(500).json({ error: "Gagal mengambil data penilaian" });
+    }
+});
+
+
+// 10. Centre Performance Pull (M2M - Shared Secret Auth)
+app.get('/api/centre/performance', async (req, res) => {
+    const secret = req.headers['x-centre-pull-secret'];
+    const expectedSecret = process.env.CENTRE_PULL_SECRET;
+
+    if (!expectedSecret || secret !== expectedSecret) {
+        return res.status(403).json({ error: "Akses ditolak. Secret tidak valid." });
+    }
+
+    try {
+        const [totalMeetings, allRatings, dewanUsers] = await Promise.all([
+            prisma.schedule.count(),
+            prisma.rating.findMany({
+                include: {
+                    dewan: { select: { id: true, name: true, nip: true, fraksi: true, jabatan: true, dapil: true } }
+                }
+            }),
+            prisma.user.findMany({
+                where: { role: 'dewan' },
+                select: { id: true, name: true, nip: true, fraksi: true, jabatan: true, dapil: true }
+            })
+        ]);
+
+        // Aggregate scores per dewan
+        const performanceMap: Record<number, {
+            dewanId: number, name: string, nip: string | null, fraksi: string | null,
+            jabatan: string | null, dapil: string | null,
+            meetingCount: number, totalRatings: number,
+            speaking: number, context: number, time: number, responsiveness: number, solution: number
+        }> = {};
+
+        // Initialize all dewan (even those with zero ratings)
+        for (const d of dewanUsers) {
+            performanceMap[d.id] = {
+                dewanId: d.id, name: d.name, nip: d.nip, fraksi: d.fraksi,
+                jabatan: d.jabatan, dapil: d.dapil,
+                meetingCount: 0, totalRatings: 0,
+                speaking: 0, context: 0, time: 0, responsiveness: 0, solution: 0
+            };
+        }
+
+        // Sum scores
+        for (const r of allRatings) {
+            const p = performanceMap[r.dewanId];
+            if (p) {
+                p.totalRatings++;
+                p.speaking += r.speakingScore;
+                p.context += r.contextScore;
+                p.time += r.timeScore;
+                p.responsiveness += r.responsivenessScore;
+                p.solution += r.solutionScore;
+            }
+        }
+
+        // Count completed meetings per dewan
+        const completedSchedules = await prisma.schedule.groupBy({
+            by: ['dewanId'],
+            where: { status: { in: ['completed', 'confirmed'] } },
+            _count: true
+        });
+        for (const s of completedSchedules) {
+            if (performanceMap[s.dewanId]) {
+                performanceMap[s.dewanId].meetingCount = s._count;
+            }
+        }
+
+        // Format output
+        const dewanPerformance = Object.values(performanceMap).map(p => {
+            const n = p.totalRatings || 1; // avoid div by zero
+            const avgScore = p.totalRatings > 0
+                ? Math.round(((p.speaking + p.context + p.time + p.responsiveness + p.solution) / (5 * p.totalRatings)) * 100) / 100
+                : 0;
+            return {
+                dewanId: p.dewanId,
+                name: p.name,
+                nip: p.nip || '',
+                fraksi: p.fraksi || '',
+                jabatan: p.jabatan || '',
+                dapil: p.dapil || '',
+                meetingCount: p.meetingCount,
+                totalRatings: p.totalRatings,
+                avgScore,
+                scores: {
+                    speaking: p.totalRatings > 0 ? Math.round((p.speaking / n) * 100) / 100 : 0,
+                    context: p.totalRatings > 0 ? Math.round((p.context / n) * 100) / 100 : 0,
+                    time: p.totalRatings > 0 ? Math.round((p.time / n) * 100) / 100 : 0,
+                    responsiveness: p.totalRatings > 0 ? Math.round((p.responsiveness / n) * 100) / 100 : 0,
+                    solution: p.totalRatings > 0 ? Math.round((p.solution / n) * 100) / 100 : 0,
+                }
+            };
+        });
+
+        // Global stats
+        let globalAvg = 0;
+        if (allRatings.length > 0) {
+            const total = allRatings.reduce((acc, r) =>
+                acc + (r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5, 0);
+            globalAvg = Math.round((total / allRatings.length) * 10) / 10;
+        }
+
+        res.json({
+            stats: {
+                totalMeetings,
+                totalRatings: allRatings.length,
+                avgRating: globalAvg,
+                totalDewan: dewanUsers.length,
+            },
+            dewanPerformance,
+            pulledAt: new Date().toISOString()
+        });
+
+    } catch (err) {
+        console.error("Error fetching centre performance data:", err);
+        res.status(500).json({ error: "Gagal mengambil data performa." });
     }
 });
 
@@ -335,7 +530,10 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
 
 // --- SOCKET.IO (Removed legacy WebRTC signaling) ---
 const io = new Server(server, {
-    cors: { origin: process.env.FRONTEND_URL || 'http://localhost:3000', methods: ['GET', 'POST'] }
+    cors: { 
+        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'], 
+        methods: ['GET', 'POST'] 
+    }
 });
 
 io.on('connection', (socket) => {

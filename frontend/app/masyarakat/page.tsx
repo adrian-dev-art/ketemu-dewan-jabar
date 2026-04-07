@@ -109,13 +109,15 @@ function MasyarakatDashboardContent() {
         speaking_score: scores.speaking_score,
         context_score: scores.context_score,
         time_score: scores.time_score,
+        responsiveness_score: scores.responsiveness_score,
+        solution_score: scores.solution_score,
         comment
       })
     });
 
     if (res.ok) {
       setAnnouncement("Terima kasih atas penilaian Anda!");
-      setTimeout(() => router.replace("/masyarakat"), 2000);
+      setTimeout(() => router.replace("/masyarakat"), 3000);
     }
   };
 

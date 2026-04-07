@@ -23,6 +23,7 @@ const express_rate_limit_1 = require("express-rate-limit");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const hubSync_1 = require("./services/hubSync");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
@@ -38,7 +39,7 @@ const limiter = (0, express_rate_limit_1.rateLimit)({
 app.use(limiter);
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
 app.use(express_1.default.json());
@@ -261,9 +262,19 @@ app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admi
         res.status(500).json({ error: "Gagal memperbarui status jadwal" });
     }
 }));
-// 6. Submit Multi-Aspect Rating (Masyarakat only)
+// 6. Master Hub Sync (Admin only)
+app.post('/api/admin/sync-centre', authenticateToken, authorizeRole(['admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, hubSync_1.syncHubData)();
+    if (result.success) {
+        res.json({ message: "Sinkronisasi dengan Master Hub berhasil.", members_processed: result.processed });
+    }
+    else {
+        res.status(500).json({ error: `Gagal sinkronisasi: ${result.error}` });
+    }
+}));
+// 7. Submit Multi-Aspect Rating (Masyarakat only)
 app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { schedule_id, dewan_id, speaking_score, context_score, time_score, comment } = req.body;
+    const { schedule_id, dewan_id, speaking_score, context_score, time_score, responsiveness_score, solution_score, comment } = req.body;
     try {
         const result = yield prisma.rating.create({
             data: {
@@ -272,6 +283,8 @@ app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), (req,
                 speakingScore: Number(speaking_score),
                 contextScore: Number(context_score),
                 timeScore: Number(time_score),
+                responsivenessScore: Number(responsiveness_score) || 0,
+                solutionScore: Number(solution_score) || 0,
                 comment
             }
         });
@@ -280,6 +293,170 @@ app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), (req,
     catch (err) {
         console.error("Error submitting rating:", err);
         res.status(500).json({ error: "Gagal mengirim penilaian" });
+    }
+}));
+// 8. Admin Stats (Admin only)
+app.get('/api/admin/stats', authenticateToken, authorizeRole(['admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const [totalUsers, totalMeetings, ratings] = yield Promise.all([
+            prisma.user.count(),
+            prisma.schedule.count(),
+            prisma.rating.findMany()
+        ]);
+        let avgRating = 0;
+        if (ratings.length > 0) {
+            const totalScore = ratings.reduce((acc, r) => {
+                const avg = (r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5;
+                return acc + avg;
+            }, 0);
+            avgRating = Math.round((totalScore / ratings.length) * 10) / 10;
+        }
+        res.json({ totalUsers, totalMeetings, avgRating, totalRatings: ratings.length });
+    }
+    catch (err) {
+        console.error("Error fetching admin stats:", err);
+        res.status(500).json({ error: "Gagal mengambil statistik" });
+    }
+}));
+// 9. Admin - All Ratings (Admin only)
+app.get('/api/admin/ratings', authenticateToken, authorizeRole(['admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const ratings = yield prisma.rating.findMany({
+            orderBy: { id: 'desc' },
+            include: {
+                dewan: { select: { id: true, name: true, fraksi: true } },
+                schedule: {
+                    include: {
+                        masyarakat: { select: { name: true } }
+                    }
+                }
+            }
+        });
+        const formatted = ratings.map((r) => {
+            var _a, _b, _c, _d, _e, _f;
+            return ({
+                id: r.id,
+                dewanId: r.dewanId,
+                dewanName: ((_a = r.dewan) === null || _a === void 0 ? void 0 : _a.name) || 'N/A',
+                dewanFraksi: ((_b = r.dewan) === null || _b === void 0 ? void 0 : _b.fraksi) || '-',
+                masyarakatName: ((_d = (_c = r.schedule) === null || _c === void 0 ? void 0 : _c.masyarakat) === null || _d === void 0 ? void 0 : _d.name) || 'N/A',
+                meetingTitle: ((_e = r.schedule) === null || _e === void 0 ? void 0 : _e.title) || 'N/A',
+                meetingDate: (_f = r.schedule) === null || _f === void 0 ? void 0 : _f.startTime,
+                speakingScore: r.speakingScore,
+                contextScore: r.contextScore,
+                timeScore: r.timeScore,
+                responsivenessScore: r.responsivenessScore,
+                solutionScore: r.solutionScore,
+                avgScore: Math.round(((r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5) * 10) / 10,
+                comment: r.comment,
+            });
+        });
+        res.json(formatted);
+    }
+    catch (err) {
+        console.error("Error fetching admin ratings:", err);
+        res.status(500).json({ error: "Gagal mengambil data penilaian" });
+    }
+}));
+// 10. Centre Performance Pull (M2M - Shared Secret Auth)
+app.get('/api/centre/performance', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const secret = req.headers['x-centre-pull-secret'];
+    const expectedSecret = process.env.CENTRE_PULL_SECRET;
+    if (!expectedSecret || secret !== expectedSecret) {
+        return res.status(403).json({ error: "Akses ditolak. Secret tidak valid." });
+    }
+    try {
+        const [totalMeetings, allRatings, dewanUsers] = yield Promise.all([
+            prisma.schedule.count(),
+            prisma.rating.findMany({
+                include: {
+                    dewan: { select: { id: true, name: true, nip: true, fraksi: true, jabatan: true, dapil: true } }
+                }
+            }),
+            prisma.user.findMany({
+                where: { role: 'dewan' },
+                select: { id: true, name: true, nip: true, fraksi: true, jabatan: true, dapil: true }
+            })
+        ]);
+        // Aggregate scores per dewan
+        const performanceMap = {};
+        // Initialize all dewan (even those with zero ratings)
+        for (const d of dewanUsers) {
+            performanceMap[d.id] = {
+                dewanId: d.id, name: d.name, nip: d.nip, fraksi: d.fraksi,
+                jabatan: d.jabatan, dapil: d.dapil,
+                meetingCount: 0, totalRatings: 0,
+                speaking: 0, context: 0, time: 0, responsiveness: 0, solution: 0
+            };
+        }
+        // Sum scores
+        for (const r of allRatings) {
+            const p = performanceMap[r.dewanId];
+            if (p) {
+                p.totalRatings++;
+                p.speaking += r.speakingScore;
+                p.context += r.contextScore;
+                p.time += r.timeScore;
+                p.responsiveness += r.responsivenessScore;
+                p.solution += r.solutionScore;
+            }
+        }
+        // Count completed meetings per dewan
+        const completedSchedules = yield prisma.schedule.groupBy({
+            by: ['dewanId'],
+            where: { status: { in: ['completed', 'confirmed'] } },
+            _count: true
+        });
+        for (const s of completedSchedules) {
+            if (performanceMap[s.dewanId]) {
+                performanceMap[s.dewanId].meetingCount = s._count;
+            }
+        }
+        // Format output
+        const dewanPerformance = Object.values(performanceMap).map(p => {
+            const n = p.totalRatings || 1; // avoid div by zero
+            const avgScore = p.totalRatings > 0
+                ? Math.round(((p.speaking + p.context + p.time + p.responsiveness + p.solution) / (5 * p.totalRatings)) * 100) / 100
+                : 0;
+            return {
+                dewanId: p.dewanId,
+                name: p.name,
+                nip: p.nip || '',
+                fraksi: p.fraksi || '',
+                jabatan: p.jabatan || '',
+                dapil: p.dapil || '',
+                meetingCount: p.meetingCount,
+                totalRatings: p.totalRatings,
+                avgScore,
+                scores: {
+                    speaking: p.totalRatings > 0 ? Math.round((p.speaking / n) * 100) / 100 : 0,
+                    context: p.totalRatings > 0 ? Math.round((p.context / n) * 100) / 100 : 0,
+                    time: p.totalRatings > 0 ? Math.round((p.time / n) * 100) / 100 : 0,
+                    responsiveness: p.totalRatings > 0 ? Math.round((p.responsiveness / n) * 100) / 100 : 0,
+                    solution: p.totalRatings > 0 ? Math.round((p.solution / n) * 100) / 100 : 0,
+                }
+            };
+        });
+        // Global stats
+        let globalAvg = 0;
+        if (allRatings.length > 0) {
+            const total = allRatings.reduce((acc, r) => acc + (r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5, 0);
+            globalAvg = Math.round((total / allRatings.length) * 10) / 10;
+        }
+        res.json({
+            stats: {
+                totalMeetings,
+                totalRatings: allRatings.length,
+                avgRating: globalAvg,
+                totalDewan: dewanUsers.length,
+            },
+            dewanPerformance,
+            pulledAt: new Date().toISOString()
+        });
+    }
+    catch (err) {
+        console.error("Error fetching centre performance data:", err);
+        res.status(500).json({ error: "Gagal mengambil data performa." });
     }
 }));
 // --- LIVEKIT REST ENDPOINTS ---
@@ -305,7 +482,10 @@ app.post('/api/livekit/token', authenticateToken, (req, res) => __awaiter(void 0
 }));
 // --- SOCKET.IO (Removed legacy WebRTC signaling) ---
 const io = new socket_io_1.Server(server, {
-    cors: { origin: process.env.FRONTEND_URL || 'http://localhost:3000', methods: ['GET', 'POST'] }
+    cors: {
+        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
+        methods: ['GET', 'POST']
+    }
 });
 io.on('connection', (socket) => {
     console.log('User connected via Socket.io:', socket.id);
