@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     ports:
-      - "5432:5432"
+      - "5435:5432"
     networks:
       - meetdewan_net
     healthcheck:

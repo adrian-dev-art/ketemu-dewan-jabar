@@ -247,8 +247,8 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
     const { role, id: userId } = req.user!;
     try {
         const where: any = {};
-        if (role === 'dewan') where.dewanId = userId;
-        if (role === 'masyarakat') where.masyarakatId = userId;
+        if (role === 'dewan') where.dewanId = Number(userId);
+        if (role === 'masyarakat') where.masyarakatId = Number(userId);
         // If admin, they see everything (where stays empty)
 
         const result = await prisma.schedule.findMany({
