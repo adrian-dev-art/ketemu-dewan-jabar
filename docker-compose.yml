@@ -25,6 +25,8 @@ services:
       dockerfile: Dockerfile
     container_name: meetdewan_backend
     restart: always
+    volumes:
+      - ./backend/src:/app/src
     environment:
       DATABASE_URL: postgresql://${DB_USER:-meetdewan_user}:${DB_PASSWORD:-meetdewan_pass}@db:5432/${DB_NAME:-meetdewan_db}?schema=public
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
@@ -32,6 +34,8 @@ services:
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
       CENTRE_PULL_SECRET: ${CENTRE_PULL_SECRET:-centre-pull-secret-dprd-2025}
+      CENTRE_HUB_URL: http://dprd_centre_backend:8000/api/v1/members
+      CENTRE_API_KEY: c1547650-291c-4ce7-a78d-e889a4f9b767
     ports:
       - "5001:5000"
     depends_on:

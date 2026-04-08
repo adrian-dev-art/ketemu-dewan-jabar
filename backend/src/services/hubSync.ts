@@ -40,33 +40,38 @@ export async function syncHubData() {
 
         let processed = 0;
         for (const member of members) {
-            // Fallback email if Hub doesn't provide one
-            const fallbackEmail = `${member.id}@dprd.go.id`;
+            if (processed === 0) {
+                console.log("DEBUG: First member to sync:", member.nama, "ID:", member.id);
+            }
             
-            await prisma.user.upsert({
-                where: { centreId: member.id },
-                update: {
-                    name: member.nama,
-                    nip: member.nip,
-                    fraksi: member.fraksi,
-                    jabatan: member.jabatan,
-                    dapil: member.dapil,
-                    isSync: true
-                },
-                create: {
-                    centreId: member.id,
-                    name: member.nama,
-                    email: member.email || fallbackEmail,
-                    role: 'dewan',
-                    nip: member.nip,
-                    fraksi: member.fraksi,
-                    jabatan: member.jabatan,
-                    dapil: member.dapil,
-                    passwordHash: '', // server.ts handles empty hash by allowing 'password' in dev
-                    isSync: true
-                }
-            });
-            processed++;
+            try {
+                await prisma.user.upsert({
+                    where: { centreId: member.id },
+                    update: {
+                        name: member.nama,
+                        nip: member.nip,
+                        fraksi: member.fraksi,
+                        jabatan: member.jabatan,
+                        dapil: member.dapil,
+                        isSync: true
+                    },
+                    create: {
+                        centreId: member.id,
+                        name: member.nama,
+                        email: member.email || `${member.id}@dprd.go.id`,
+                        role: 'dewan',
+                        nip: member.nip,
+                        fraksi: member.fraksi,
+                        jabatan: member.jabatan,
+                        dapil: member.dapil,
+                        passwordHash: '',
+                        isSync: true
+                    }
+                });
+                processed++;
+            } catch (err: any) {
+                console.error(`ERROR Syncing member ${member.nama}:`, err.message);
+            }
         }
 
         console.log(`--- HUB SYNC COMPLETE: ${processed} users processed ---`);
