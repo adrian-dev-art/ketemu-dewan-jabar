@@ -83,7 +83,8 @@ function VideoStage() {
 }
 
 // ─── Active Room UI ──────────────────────────────────────────
-function ActiveRoom({ roomId, onLeave }: { roomId: string; onLeave: () => void }) {
+function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: string; meetingId: string; meetingDetails: any; onLeave: () => void }) {
+  const { user } = useAuth();
   const [chatOpen, setChatOpen] = useState(true);
 
   return (
@@ -91,10 +92,17 @@ function ActiveRoom({ roomId, onLeave }: { roomId: string; onLeave: () => void }
       {/* ── Top Bar ── */}
       <div className="room-top-bar">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/30">
-            <Radio size={12} className="text-red-400 animate-pulse" />
-            <span className="text-xs font-semibold text-red-300 uppercase tracking-wider">Live</span>
-          </div>
+          {meetingDetails?.isStreaming ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/30">
+              <Radio size={12} className="text-red-400 animate-pulse" />
+              <span className="text-xs font-semibold text-red-300 uppercase tracking-wider">Live Streaming</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/[0.06]">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+              <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">Internal Meeting</span>
+            </div>
+          )}
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.06]">
             <span className="text-xs text-white/50">Ruang</span>
             <span className="text-xs font-medium text-white/80">#{roomId}</span>
@@ -102,6 +110,58 @@ function ActiveRoom({ roomId, onLeave }: { roomId: string; onLeave: () => void }
           <MeetingTimer />
         </div>
         <div className="flex items-center gap-2">
+          {user?.role === 'admin' && (
+            meetingDetails?.isStreaming ? (
+              <button
+                onClick={async () => {
+                  if (confirm("Hentikan live streaming?")) {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/egress/stop`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                      },
+                      body: JSON.stringify({ scheduleId: meetingId })
+                    });
+                    if (res.ok) {
+                      alert("Streaming dihentikan.");
+                      window.location.reload();
+                    }
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors border border-red-500/30"
+              >
+                <LogOut size={12} className="rotate-180" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Stop Stream</span>
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  if (confirm("Mulai live streaming manual?")) {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/egress/start`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                      },
+                      body: JSON.stringify({ scheduleId: meetingId, roomName: roomId })
+                    });
+                    if (res.ok) {
+                      alert("Streaming dimulai.");
+                      window.location.reload();
+                    } else {
+                      const data = await res.json();
+                      alert("Gagal memulai stream: " + data.error);
+                    }
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500/30"
+              >
+                <Radio size={12} />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Start Stream</span>
+              </button>
+            )
+          )}
           <ParticipantCount />
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
             <Shield size={12} className="text-emerald-400" />
@@ -210,7 +270,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${authToken}`,
             },
-            body: JSON.stringify({ roomName: roomId }),
+            body: JSON.stringify({ roomName: roomId, scheduleId: roomId }),
           }
         );
         if (!response.ok) throw new Error(`Failed to fetch token: ${response.statusText}`);
@@ -292,7 +352,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         onDisconnected={handleDisconnected}
         className="room-livekit-root"
       >
-        <ActiveRoom roomId={roomId} onLeave={handleDisconnected} />
+        <ActiveRoom roomId={roomId} meetingId={roomId} meetingDetails={meetingDetails} onLeave={handleDisconnected} />
         <RoomAudioRenderer />
       </LiveKitRoom>
     </ProtectedRoute>

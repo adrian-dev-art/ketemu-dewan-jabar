@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, EgressClient, EncodedFileOutput, EncodedFileType, StreamOutput, EncodingOptionsPreset } from 'livekit-server-sdk';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -16,6 +16,12 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-123';
+const LIVEKIT_HOST = process.env.LIVEKIT_URL || 'http://localhost:7880';
+const egressClient = new EgressClient(
+    LIVEKIT_HOST,
+    process.env.LIVEKIT_API_KEY || 'devkey',
+    process.env.LIVEKIT_API_SECRET || 'secretkey'
+);
 
 // Trust proxy for accurate rate limiting (Nginx)
 app.set('trust proxy', 1);
@@ -500,15 +506,67 @@ app.get('/api/centre/performance', async (req, res) => {
 });
 
 // --- LIVEKIT REST ENDPOINTS ---
+
+// Admin: Get Streaming Settings
+app.get('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findMany({
+            where: {
+                key: { in: ['stream_url', 'stream_key', 'is_auto_stream'] }
+            }
+        });
+        
+        const result = {
+            stream_url: settings.find(s => s.key === 'stream_url')?.value || '',
+            stream_key: settings.find(s => s.key === 'stream_key')?.value || '',
+            is_auto_stream: settings.find(s => s.key === 'is_auto_stream')?.value === 'true'
+        };
+        
+        res.json(result);
+    } catch (err) {
+        console.error("Error fetching stream settings:", err);
+        res.status(500).json({ error: "Gagal mengambil pengaturan streaming" });
+    }
+});
+
+// Admin: Update Streaming Settings
+app.post('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const { stream_url, stream_key, is_auto_stream } = req.body;
+    try {
+        await prisma.$transaction([
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_url' },
+                update: { value: stream_url },
+                create: { key: 'stream_url', value: stream_url }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_key' },
+                update: { value: stream_key },
+                create: { key: 'stream_key', value: stream_key }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'is_auto_stream' },
+                update: { value: String(is_auto_stream) },
+                create: { key: 'is_auto_stream', value: String(is_auto_stream) }
+            })
+        ]);
+        res.json({ message: "Pengaturan streaming berhasil diperbarui" });
+    } catch (err) {
+        console.error("Error updating stream settings:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengaturan streaming" });
+    }
+});
+
 app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) => {
-    const { roomName } = req.body;
-    const participantName = req.user!.email; // Use email as unique identity
+    const { roomName, scheduleId } = req.body;
+    const participantName = req.user!.email;
 
     if (!roomName) {
         return res.status(400).json({ error: "roomName is required" });
     }
 
     try {
+        // Create token
         const at = new AccessToken(
             process.env.LIVEKIT_API_KEY || 'devkey',
             process.env.LIVEKIT_API_SECRET || 'secretkey',
@@ -519,12 +577,125 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
         );
 
         at.addGrant({ roomJoin: true, room: roomName });
-
         const token = await at.toJwt();
+
+        // Check if we should auto-start streaming
+        const parsedScheduleId = Number(scheduleId);
+        if (scheduleId && !isNaN(parsedScheduleId)) {
+            const autoStream = await prisma.systemSetting.findUnique({ where: { key: 'is_auto_stream' } });
+            if (autoStream?.value === 'true') {
+                const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+                if (schedule && !schedule.isStreaming) {
+                    const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
+                    const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
+                    
+                    if (url?.value && key?.value) {
+                        const fullStreamUrl = `${url.value}/${key.value}`;
+                        try {
+                            console.log(`[STREAM API] Starting auto-egress for room: ${roomName} to ${url.value}`);
+                            const info = await egressClient.startRoomCompositeEgress(roomName, {
+                                stream: { urls: [fullStreamUrl] },
+                                options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                            } as any);
+                            
+                            await prisma.schedule.update({
+                                where: { id: parsedScheduleId },
+                                data: { isStreaming: true, egressId: info.egressId }
+                            });
+                            console.log(`[STREAM API] Auto-streaming started successfully for room ${roomName}, egressId: ${info.egressId}`);
+                        } catch (egressErr) {
+                            console.error("[STREAM API] Failed to auto-start egress:", egressErr);
+                        }
+                    }
+                }
+            }
+        }
+
         res.json({ token });
     } catch (error) {
         console.error("Error generating LiveKit token:", error);
         res.status(500).json({ error: "Failed to generate token" });
+    }
+});
+
+// Manual Egress Start/Stop
+app.post('/api/livekit/egress/start', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId, roomName } = req.body;
+    try {
+        console.log(`[STREAM API] Manual stream start requested for room: ${roomName}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            console.error(`[STREAM API] Manual start failed: Invalid scheduleId (${scheduleId})`);
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        if (schedule && !schedule.isStreaming) {
+            const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
+            const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
+            
+            if (url?.value && key?.value) {
+                const fullStreamUrl = `${url.value}/${key.value}`;
+                console.log(`[STREAM API] Streaming destination: ${url.value}`);
+                
+                const info = await egressClient.startRoomCompositeEgress(roomName, {
+                    stream: { urls: [fullStreamUrl] },
+                    options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                } as any);
+                
+                await prisma.schedule.update({
+                    where: { id: parsedScheduleId },
+                    data: { isStreaming: true, egressId: info.egressId }
+                });
+                console.log(`[STREAM API] Manual streaming started successfully! egressId: ${info.egressId}`);
+                res.json({ message: "Streaming dimulai", egressId: info.egressId });
+            } else {
+                console.error(`[STREAM API] Manual start failed: Missing stream keys in database!`);
+                res.status(400).json({ error: "Stream URL / Key kosong di pengaturan" });
+            }
+        } else {
+            console.log(`[STREAM API] Manual start failed: Either active or schedule missing.`);
+            res.status(400).json({ error: "Sesi sudah streaming atau tidak ditemukan" });
+        }
+    } catch (err) {
+        console.error("[STREAM API] Error starting egress manually:", err);
+        res.status(500).json({ error: "Gagal memulai streaming" });
+    }
+});
+
+app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId } = req.body;
+    try {
+        console.log(`[STREAM API] Manual stream stop requested for scheduleId: ${scheduleId}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            console.error(`[STREAM API] Manual stop failed: Invalid scheduleId (${scheduleId})`);
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        
+        if (schedule?.egressId) {
+            try {
+                await egressClient.stopEgress(schedule.egressId);
+            } catch (egressErr: any) {
+                // If egress is already stopped/aborted, LiveKit returns 412. 
+                // We still want to clear our DB state in this case.
+                console.warn(`[STREAM API] LiveKit stopEgress warned: ${egressErr.message}`);
+                if (egressErr.status !== 412 && !egressErr.message?.includes("cannot be stopped")) {
+                    throw egressErr; // Re-throw if it's a real connection error
+                }
+            }
+
+            await prisma.schedule.update({
+                where: { id: parsedScheduleId },
+                data: { isStreaming: false, egressId: null }
+            });
+            res.json({ message: "Streaming dihentikan" });
+        } else {
+            res.status(404).json({ error: "Tidak ada session streaming aktif" });
+        }
+    } catch (err) {
+        console.error("[STREAM API] Error stopping egress:", err);
+        res.status(500).json({ error: "Gagal menghentikan streaming" });
     }
 });
 
