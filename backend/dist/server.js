@@ -28,6 +28,8 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-123';
+const LIVEKIT_HOST = process.env.LIVEKIT_URL || 'http://localhost:7880';
+const egressClient = new livekit_server_sdk_1.EgressClient(LIVEKIT_HOST, process.env.LIVEKIT_API_KEY || 'devkey', process.env.LIVEKIT_API_SECRET || 'secretkey');
 // Trust proxy for accurate rate limiting (Nginx)
 app.set('trust proxy', 1);
 const limiter = (0, express_rate_limit_1.rateLimit)({
@@ -226,9 +228,9 @@ app.get('/api/schedules', authenticateToken, (req, res) => __awaiter(void 0, voi
     try {
         const where = {};
         if (role === 'dewan')
-            where.dewanId = userId;
+            where.dewanId = Number(userId);
         if (role === 'masyarakat')
-            where.masyarakatId = userId;
+            where.masyarakatId = Number(userId);
         // If admin, they see everything (where stays empty)
         const result = yield prisma.schedule.findMany({
             where,
@@ -460,24 +462,125 @@ app.get('/api/centre/performance', (req, res) => __awaiter(void 0, void 0, void 
     }
 }));
 // --- LIVEKIT REST ENDPOINTS ---
+// Admin: Get Streaming Settings
+app.get('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
+    try {
+        const settings = yield prisma.systemSetting.findMany({
+            where: {
+                key: { in: ['stream_url', 'stream_key', 'is_auto_stream'] }
+            }
+        });
+        const result = {
+            stream_url: ((_a = settings.find(s => s.key === 'stream_url')) === null || _a === void 0 ? void 0 : _a.value) || '',
+            stream_key: ((_b = settings.find(s => s.key === 'stream_key')) === null || _b === void 0 ? void 0 : _b.value) || '',
+            is_auto_stream: ((_c = settings.find(s => s.key === 'is_auto_stream')) === null || _c === void 0 ? void 0 : _c.value) === 'true'
+        };
+        res.json(result);
+    }
+    catch (err) {
+        console.error("Error fetching stream settings:", err);
+        res.status(500).json({ error: "Gagal mengambil pengaturan streaming" });
+    }
+}));
+// Admin: Update Streaming Settings
+app.post('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { stream_url, stream_key, is_auto_stream } = req.body;
+    try {
+        yield prisma.$transaction([
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_url' },
+                update: { value: stream_url },
+                create: { key: 'stream_url', value: stream_url }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_key' },
+                update: { value: stream_key },
+                create: { key: 'stream_key', value: stream_key }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'is_auto_stream' },
+                update: { value: String(is_auto_stream) },
+                create: { key: 'is_auto_stream', value: String(is_auto_stream) }
+            })
+        ]);
+        res.json({ message: "Pengaturan streaming berhasil diperbarui" });
+    }
+    catch (err) {
+        console.error("Error updating stream settings:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengaturan streaming" });
+    }
+}));
 app.post('/api/livekit/token', authenticateToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roomName } = req.body;
-    const participantName = req.user.email; // Use email as unique identity
+    const { roomName, scheduleId } = req.body;
+    const participantName = req.user.email;
     if (!roomName) {
         return res.status(400).json({ error: "roomName is required" });
     }
     try {
+        // Create token
         const at = new livekit_server_sdk_1.AccessToken(process.env.LIVEKIT_API_KEY || 'devkey', process.env.LIVEKIT_API_SECRET || 'secretkey', {
             identity: participantName,
             name: req.user.role.toUpperCase() + ": " + participantName.split('@')[0],
         });
         at.addGrant({ roomJoin: true, room: roomName });
         const token = yield at.toJwt();
+        // Check if we should auto-start streaming
+        if (scheduleId) {
+            const autoStream = yield prisma.systemSetting.findUnique({ where: { key: 'is_auto_stream' } });
+            if ((autoStream === null || autoStream === void 0 ? void 0 : autoStream.value) === 'true') {
+                const schedule = yield prisma.schedule.findUnique({ where: { id: Number(scheduleId) } });
+                if (schedule && !schedule.isStreaming) {
+                    const url = yield prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
+                    const key = yield prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
+                    if ((url === null || url === void 0 ? void 0 : url.value) && (key === null || key === void 0 ? void 0 : key.value)) {
+                        const fullStreamUrl = `${url.value}/${key.value}`;
+                        try {
+                            const info = yield egressClient.startRoomCompositeEgress(roomName, {
+                                stream: {
+                                    urls: [fullStreamUrl]
+                                }
+                            });
+                            yield prisma.schedule.update({
+                                where: { id: Number(scheduleId) },
+                                data: { isStreaming: true, egressId: info.egressId }
+                            });
+                            console.log(`Auto-streaming started for room ${roomName}, egressId: ${info.egressId}`);
+                        }
+                        catch (egressErr) {
+                            console.error("Failed to auto-start egress:", egressErr);
+                        }
+                    }
+                }
+            }
+        }
         res.json({ token });
     }
     catch (error) {
         console.error("Error generating LiveKit token:", error);
         res.status(500).json({ error: "Failed to generate token" });
+    }
+}));
+// Manual Egress Start/Stop
+app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 'dewan']), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { scheduleId } = req.body;
+    try {
+        const schedule = yield prisma.schedule.findUnique({ where: { id: Number(scheduleId) } });
+        if (schedule === null || schedule === void 0 ? void 0 : schedule.egressId) {
+            yield egressClient.stopEgress(schedule.egressId);
+            yield prisma.schedule.update({
+                where: { id: Number(scheduleId) },
+                data: { isStreaming: false, egressId: null }
+            });
+            res.json({ message: "Streaming dihentikan" });
+        }
+        else {
+            res.status(404).json({ error: "Tidak ada session streaming aktif" });
+        }
+    }
+    catch (err) {
+        console.error("Error stopping egress:", err);
+        res.status(500).json({ error: "Gagal menghentikan streaming" });
     }
 }));
 // --- SOCKET.IO (Removed legacy WebRTC signaling) ---

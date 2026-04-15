@@ -129,13 +129,20 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Simple Register for demo
 app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, noKtp, instansi } = req.body;
     try {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
         
         const user = await prisma.user.create({
-            data: { name, email, passwordHash, role: role || 'masyarakat' }
+            data: { 
+                name, 
+                email, 
+                passwordHash, 
+                role: 'masyarakat', // Enforce role to be masyarakat
+                noKtp,
+                instansi
+            }
         });
 
         res.status(201).json({ message: "Registrasi berhasil", userId: user.id });
@@ -154,7 +161,10 @@ app.get('/api/dewan', async (req, res) => {
             where: { role: 'dewan' },
             include: {
                 availabilities: true,
-                ratingsAsDewan: true
+                ratingsAsDewan: true,
+                akdMemberships: {
+                    include: { akd: true }
+                }
             }
         });
 
@@ -166,12 +176,36 @@ app.get('/api/dewan', async (req, res) => {
                 avg = totalScores / d.ratingsAsDewan.length;
             }
 
+            // Temukan AKD yang bertipe 'KOMISI' atau yang namanya memuat kata 'Komisi'
+            let komisi = null;
+            if (d.akdMemberships && Array.isArray(d.akdMemberships)) {
+                const komisiMembership = d.akdMemberships.find((m: any) => {
+                    const isTipeKomisi = m.akd && m.akd.tipe && m.akd.tipe.toLowerCase() === 'komisi';
+                    const isNamaKomisi = m.akd && m.akd.nama && m.akd.nama.toLowerCase().includes('komisi');
+                    return isTipeKomisi || isNamaKomisi;
+                });
+                if (komisiMembership) {
+                    komisi = komisiMembership.akd.nama;
+                }
+            }
+
+            // Fallback: Jika data relasional AKD belum tersedia (contoh: data dumi dari seeder yang belum ikut Hub Sync)
+            if (!komisi) {
+                let komisiMatch = d.jabatan ? d.jabatan.match(/Komisi\s+[A-VIX]+/) : null;
+                komisi = komisiMatch ? komisiMatch[0] : "Lainnya";
+            }
+
             return {
                 id: d.id,
                 name: d.name,
                 bio: d.bio || "Tidak ada biodata.",
                 rating: avg,
-                availabilities: d.availabilities
+                availabilities: d.availabilities,
+                fraksi: d.fraksi,
+                jabatan: d.jabatan,
+                komisi: komisi,
+                dapil: d.dapil,
+                akdMemberships: d.akdMemberships // Ekstra relasi agar frontend bisa pakai jika perlu
             };
         });
 
@@ -182,10 +216,21 @@ app.get('/api/dewan', async (req, res) => {
     }
 });
 
-// 2. Set Availability (Dewan only)
+// 2. Set Availability (Dewan can no longer do this, handled by Admin)
 app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin']), async (req: AuthRequest, res) => {
     const { start_time, end_time } = req.body;
-    const dewan_id = req.user!.id;
+    let dewan_id = req.user!.id;
+    
+    // If admin is doing it, they must provide dewan_id
+    if (req.user!.role === 'admin') {
+        if (!req.body.dewan_id) {
+            return res.status(400).json({ error: "Admin harus menyertakan dewan_id" });
+        }
+        dewan_id = Number(req.body.dewan_id);
+    } else {
+        // According to new rules, dewan can't add availability anymore
+        return res.status(403).json({ error: "Hanya Admin yang dapat mengelola jadwal ketersediaan saat ini." });
+    }
     
     try {
         const result = await prisma.availability.create({
@@ -204,42 +249,28 @@ app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin'
 
 // 3. Schedule a meeting (Protected)
 app.post('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
-    const { dewan_id, start_time, title } = req.body;
-    const masyarakat_id = req.user!.id; // Current logged in user is the 'masyarakat'
+    const { dewan_ids, start_time, title } = req.body;
+    const masyarakat_id = req.user!.id; 
     const requestedTime = new Date(start_time);
     
+    if (!dewan_ids || !Array.isArray(dewan_ids) || dewan_ids.length === 0) {
+        return res.status(400).json({ error: "Harus memilih minimal satu Anggota Dewan" });
+    }
+
     try {
-        const availability = await prisma.availability.findFirst({
-            where: {
-                dewanId: Number(dewan_id),
-                startTime: { lte: requestedTime },
-                endTime: { gte: requestedTime }
-            }
-        });
-
-        if (!availability) {
-            return res.status(400).json({ error: "Waktu ini tidak tersedia untuk Dewan tersebut" });
-        }
-
-        const conflict = await prisma.schedule.findFirst({
-            where: {
-                dewanId: Number(dewan_id),
-                startTime: requestedTime,
-                status: { in: ['pending', 'confirmed'] }
-            }
-        });
-
-        if (conflict) {
-            return res.status(400).json({ error: "Waktu ini sudah dipesan oleh orang lain" });
-        }
-
         const result = await prisma.schedule.create({
             data: {
                 title: title || "Diskusi Aspirasi",
-                dewanId: Number(dewan_id),
                 masyarakatId: masyarakat_id,
                 startTime: requestedTime,
-            }
+                participants: {
+                    create: dewan_ids.map((id: number) => ({
+                        dewanId: Number(id),
+                        status: 'pending'
+                    }))
+                }
+            },
+            include: { participants: true }
         });
         res.status(201).json(result);
     } catch (err) {
@@ -253,21 +284,40 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
     const { role, id: userId } = req.user!;
     try {
         const where: any = {};
-        if (role === 'dewan') where.dewanId = Number(userId);
+        if (role === 'dewan') where.participants = { some: { dewanId: Number(userId) } };
         if (role === 'masyarakat') where.masyarakatId = Number(userId);
-        // If admin, they see everything (where stays empty)
 
         const result = await prisma.schedule.findMany({
             where,
             orderBy: { startTime: 'desc' },
             include: {
-                dewan: { select: { name: true } },
                 masyarakat: { select: { name: true } },
-                rating: true
+                participants: {
+                    include: { dewan: { select: { id: true, name: true, fraksi: true } } }
+                },
+                ratings: true
             }
         });
 
-        res.json(result);
+        // Format to map old structure logic slightly to help frontend gracefully fall back
+        const formatted = result.map((s: any) => {
+            // Find specific user's status if role is dewan. Otherwise overall status
+            let myStatus = 'pending';
+            if (role === 'dewan') {
+                const myParticipant = s.participants.find((p:any) => p.dewanId === Number(userId));
+                if (myParticipant) myStatus = myParticipant.status;
+            } else {
+                // If any confirmed, mark overall as confirmed for UI simplistic rendering
+                myStatus = s.participants.some((p:any) => p.status === 'confirmed') ? 'confirmed' : s.participants.every((p:any) => p.status === 'rejected') ? 'rejected' : 'pending';
+            }
+
+            return {
+                ...s,
+                status: myStatus, 
+            };
+        });
+
+        res.json(formatted);
     } catch (err) {
         console.error("Error fetching schedules:", err);
         res.status(500).json({ error: "Gagal mengambil data jadwal" });
@@ -275,18 +325,28 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 5. Update Schedule Status (Dewan/Admin only)
-app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admin']), async (req, res) => {
+app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admin']), async (req: AuthRequest, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, dewan_id } = req.body;
+    let targetDewanId = req.user!.id;
+    if (req.user!.role === 'admin' && dewan_id) {
+        targetDewanId = Number(dewan_id);
+    }
+
     try {
-        const result = await prisma.schedule.update({
-            where: { id: Number(id) },
+        const result = await prisma.scheduleParticipant.update({
+            where: {
+                scheduleId_dewanId: {
+                    scheduleId: Number(id),
+                    dewanId: targetDewanId
+                }
+            },
             data: { status }
         });
         res.json(result);
-    } catch (err) {
-        console.error("Error updating schedule:", err);
-        res.status(500).json({ error: "Gagal memperbarui status jadwal" });
+    } catch (err: any) {
+        console.error("Error updating schedule participant:", err);
+        res.status(500).json({ error: "Gagal memperbarui status. Mungkin Anda bukan partisipan di jadwal ini." });
     }
 });
 
@@ -442,8 +502,8 @@ app.get('/api/centre/performance', async (req, res) => {
             }
         }
 
-        // Count completed meetings per dewan
-        const completedSchedules = await prisma.schedule.groupBy({
+        // Count completed meetings per dewan (using participants)
+        const completedSchedules = await prisma.scheduleParticipant.groupBy({
             by: ['dewanId'],
             where: { status: { in: ['completed', 'confirmed'] } },
             _count: true

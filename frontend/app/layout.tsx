@@ -7,8 +7,8 @@ import RoomLayoutWrapper from "@/components/RoomLayoutWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ketemu Dewan - Konferensi Video",
-  description: "Aplikasi konferensi video yang aman dan efektif untuk aspirasi masyarakat.",
+  title: "DPRD HUDANG - Konferensi Video",
+  description: "Aplikasi konferensi video yang aman dan efektif untuk aspirasi masyarakat bersama DPRD HUDANG.",
 };
 
 export default function RootLayout({
@@ -32,10 +32,10 @@ export default function RootLayout({
               <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
                   <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">K</span>
+                    <span className="text-white font-bold text-sm">D</span>
                   </div>
                   <h1 className="text-base font-bold tracking-tight">
-                    KETEMU<span className="text-primary">DEWAN</span>
+                    DPRD<span className="text-primary">HUDANG</span>
                   </h1>
                 </Link>
                 

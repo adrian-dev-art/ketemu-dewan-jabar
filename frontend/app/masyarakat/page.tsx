@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import DewanCard from "@/components/DewanCard";
 import RatingSystem from "@/components/RatingSystem";
 import { Clock, Calendar, CheckCircle, X, ExternalLink, Award, Video } from "lucide-react";
@@ -11,10 +11,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 function MasyarakatDashboardContent() {
   const [dewanList, setDewanList] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
-  const [selectedDewan, setSelectedDewan] = useState<any | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [selectedDewans, setSelectedDewans] = useState<number[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [announcement, setAnnouncement] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
+  const [groupBy, setGroupBy] = useState<'none' | 'komisi' | 'dapil'>('komisi');
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,9 +66,42 @@ function MasyarakatDashboardContent() {
     s.status !== 'confirmed' || (new Date(s.startTime).getTime() + 30 * 60 * 1000 < new Date().getTime())
   );
 
+  const groupedDewan = useMemo(() => {
+    if (groupBy === 'none') return { 'Semua Anggota': dewanList };
+    
+    const grouped = dewanList.reduce((acc, dewan) => {
+      const key = dewan[groupBy] || "Lainnya";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(dewan);
+      return acc;
+    }, {} as Record<string, any[]>);
+    
+    const sortedKeys = Object.keys(grouped).sort();
+    const sortedGrouped: Record<string, any[]> = {};
+    sortedKeys.forEach(k => {
+      sortedGrouped[k] = grouped[k];
+    });
+    
+    return sortedGrouped;
+  }, [dewanList, groupBy]);
+
+  const toggleDewanSelection = (id: number) => {
+    setSelectedDewans(prev => 
+      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    );
+  };
+
   const handleScheduleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDewan || !selectedSlot || !token) return;
+    if (selectedDewans.length === 0) {
+      setAnnouncement("Mohon pilih setidaknya satu Anggota Dewan.");
+      return;
+    }
+    if (!selectedSlot) {
+      setAnnouncement("Mohon pilih tanggal dan waktu terlebih dahulu.");
+      return;
+    }
+    if (!token) return;
 
     const res = await fetch(`${backendUrl}/api/schedules`, {
       method: 'POST',
@@ -76,8 +110,8 @@ function MasyarakatDashboardContent() {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        dewan_id: selectedDewan.id,
-        start_time: selectedSlot,
+        dewan_ids: selectedDewans,
+        start_time: new Date(selectedSlot).toISOString(),
         title: meetingTitle || "Diskusi Aspirasi"
       })
     });
@@ -85,8 +119,8 @@ function MasyarakatDashboardContent() {
     if (res.ok) {
       const newSchedule = await res.json();
       setSchedules([newSchedule, ...schedules]);
-      setSelectedDewan(null);
-      setSelectedSlot(null);
+      setSelectedDewans([]);
+      setSelectedSlot("");
       setMeetingTitle("");
       setAnnouncement("Permohonan pertemuan berhasil dikirim. Menunggu konfirmasi Anggota Dewan.");
     } else {
@@ -162,106 +196,7 @@ function MasyarakatDashboardContent() {
           </div>
         )}
 
-        {/* Schedule Meeting Modal */}
-        {selectedDewan && (
-          <section className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-card border border-border p-6 rounded-xl max-w-md w-full">
-              <div className="flex justify-between items-start mb-5">
-                <div>
-                  <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1">Atur Pertemuan</p>
-                  <h3 className="text-lg font-bold">{selectedDewan.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-0.5">Pilih waktu untuk menyampaikan aspirasi Anda.</p>
-                </div>
-                <button 
-                  onClick={() => { setSelectedDewan(null); setSelectedSlot(null); }}
-                  className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              
-              <form onSubmit={handleScheduleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="meetingTitle" className="block text-xs font-medium text-muted-foreground">
-                    Judul Pertemuan
-                  </label>
-                  <input
-                    id="meetingTitle"
-                    type="text"
-                    value={meetingTitle}
-                    onChange={(e) => setMeetingTitle(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm placeholder:text-muted-foreground"
-                    placeholder="Contoh: Diskusi Drainase Wilayah"
-                    required
-                  />
-                </div>
-
-                <div className="max-h-60 overflow-y-auto space-y-2 custom-scrollbar">
-                  {selectedDewan.availabilities?.map((slot: any) => (
-                    <label 
-                      key={slot.id} 
-                      className={`block p-3.5 rounded-lg border cursor-pointer transition-colors ${
-                        selectedSlot === slot.startTime 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-foreground/20'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="slot"
-                        className="sr-only"
-                        onChange={() => setSelectedSlot(slot.startTime)}
-                      />
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Calendar size={16} className={selectedSlot === slot.startTime ? 'text-primary' : 'text-muted-foreground'} />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {new Date(slot.startTime).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Pukul {new Date(slot.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                            </p>
-                          </div>
-                        </div>
-                        {selectedSlot === slot.startTime && (
-                          <CheckCircle size={16} className="text-primary" />
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                  {(!selectedDewan.availabilities || selectedDewan.availabilities.length === 0) && (
-                    <div className="py-8 text-center text-muted-foreground">
-                      <Calendar size={24} className="mx-auto mb-2 opacity-40" />
-                      <p className="text-sm">Tidak ada slot terbuka</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedDewan(null); setSelectedSlot(null); }}
-                    className="flex-1 px-4 py-2.5 bg-muted text-muted-foreground font-medium rounded-lg hover:bg-border transition-colors text-sm"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!selectedSlot}
-                    className={`flex-1 px-4 py-2.5 font-medium rounded-lg transition-colors text-sm ${
-                      !selectedSlot 
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                        : 'bg-primary text-white hover:bg-primary-hover'
-                    }`}
-                  >
-                    Kirim
-                  </button>
-                </div>
-              </form>
-            </div>
-          </section>
-        )}
+        {/* Replaced Modal with Inline Form */}
 
         {/* Rating Modal */}
         {ratedMeetingId && (
@@ -278,26 +213,100 @@ function MasyarakatDashboardContent() {
           </section>
         )}
 
-        {/* Dewan List */}
-        <section className="mb-10">
-          <div className="flex items-center gap-2.5 mb-5">
-            <Award size={18} className="text-primary" />
-            <div>
-              <h3 className="text-lg font-semibold">Daftar Anggota Dewan</h3>
-              <p className="text-xs text-muted-foreground">Pilih perwakilan Anda untuk berdiskusi</p>
+        {/* Inline Schedule Form & Dewan List */}
+        <section className="mb-10 p-6 bg-card border border-border rounded-xl">
+          <form onSubmit={handleScheduleSubmit} className="mb-8">
+            <h3 className="text-lg font-bold mb-4">Buat Permohonan Jadwal Baru</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Judul / Topik Pertemuan</label>
+                <input
+                  type="text"
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                  placeholder="Cth: Sosialisasi UMKM Daerah"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Pilih Tanggal & Waktu</label>
+                <input
+                  type="datetime-local"
+                  value={selectedSlot}
+                  onChange={(e) => setSelectedSlot(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <p className="text-sm">Anda mengundang <strong>{selectedDewans.length}</strong> Anggota Dewan</p>
+              <button
+                type="submit"
+                disabled={selectedDewans.length === 0 || !selectedSlot}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  selectedDewans.length === 0 || !selectedSlot 
+                    ? 'bg-muted-foreground/30 text-white cursor-not-allowed' 
+                    : 'bg-primary text-white hover:bg-primary-hover'
+                }`}
+              >
+                Kirim Permohonan
+              </button>
+            </div>
+          </form>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-2.5">
+              <Award size={18} className="text-primary" />
+              <div>
+                <h3 className="text-lg font-semibold">Daftar Anggota Dewan</h3>
+                <p className="text-xs text-muted-foreground">Pilih perwakilan yang ingin diundang</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm z-10">
+              <span className="text-muted-foreground">Grup Berdasarkan:</span>
+              <select 
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value as any)}
+                className="bg-background border border-border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary/20 outline-none text-sm font-medium"
+              >
+                <option value="komisi">Komisi</option>
+                <option value="dapil">Dapil</option>
+                <option value="none">Semua</option>
+              </select>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {dewanList.map(dewan => (
-              <DewanCard key={dewan.id} dewan={dewan} onSelect={(d) => setSelectedDewan(d)} />
-            ))}
-            {dewanList.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-border rounded-lg">
-                <p className="text-sm text-muted-foreground">Mengambil data Legislator...</p>
-              </div>
-            )}
-          </div>
+          {dewanList.length === 0 ? (
+            <div className="py-12 text-center border border-dashed border-border rounded-lg">
+              <p className="text-sm text-muted-foreground">Mengambil data Legislator...</p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {Object.entries(groupedDewan).map(([groupName, groupList]) => (
+                <div key={groupName}>
+                  {groupBy !== 'none' && (
+                    <div className="flex items-center gap-3 mb-4">
+                      <h4 className="text-sm font-semibold bg-primary/10 text-primary px-3 py-1 rounded-full">{groupName}</h4>
+                      <div className="h-px bg-border flex-grow"></div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {groupList.map(dewan => (
+                      <DewanCard 
+                        key={dewan.id} 
+                        dewan={dewan} 
+                        isSelected={selectedDewans.includes(dewan.id)}
+                        onSelect={(d) => toggleDewanSelection(d.id)} 
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Active Sessions */}

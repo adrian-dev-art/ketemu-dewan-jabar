@@ -19,13 +19,12 @@ interface Dewan {
 interface DewanCardProps {
   dewan: Dewan;
   onSelect: (dewan: Dewan) => void;
+  isSelected?: boolean;
 }
 
-export default function DewanCard({ dewan, onSelect }: DewanCardProps) {
-  const hasAvailability = dewan.availabilities && dewan.availabilities.length > 0;
-
+export default function DewanCard({ dewan, onSelect, isSelected }: DewanCardProps) {
   return (
-    <article className="border border-border rounded-lg p-4 bg-card hover:border-foreground/20 transition-colors">
+    <article className={`border rounded-lg p-4 bg-card hover:border-primary/50 transition-colors ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-border'}`}>
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
           {dewan.name.charAt(0)}
@@ -42,31 +41,15 @@ export default function DewanCard({ dewan, onSelect }: DewanCardProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full ${hasAvailability ? 'bg-primary' : 'bg-muted-foreground/30'}`}></div>
-          <span className={`text-xs font-medium ${hasAvailability ? 'text-primary' : 'text-muted-foreground'}`}>
-            {hasAvailability ? 'Tersedia' : 'Sibuk'}
-          </span>
-        </div>
-        {hasAvailability && (
-          <span className="text-xs text-muted-foreground">
-            {dewan.availabilities?.length} slot
-          </span>
-        )}
-      </div>
-      
       <button
         onClick={() => onSelect(dewan)}
         className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-xs transition-colors ${
-          hasAvailability 
-            ? 'bg-primary text-white hover:bg-primary-hover' 
-            : 'bg-muted text-muted-foreground cursor-not-allowed'
+          isSelected 
+            ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20' 
+            : 'bg-muted text-muted-foreground hover:bg-border'
         }`}
-        disabled={!hasAvailability}
       >
-        <Calendar size={14} />
-        {hasAvailability ? 'Atur Pertemuan' : 'Tidak Ada Jadwal'}
+        {isSelected ? '✓ Terpilih' : '+ Pilih Dewan'}
       </button>
     </article>
   );

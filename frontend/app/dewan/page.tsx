@@ -122,6 +122,7 @@ export default function DewanDashboard() {
                         </div>
                         <div>
                           <h4 className="text-sm font-semibold">{s.title || `Agenda Aspirasi #${s.id}`}</h4>
+                          <p className="text-xs text-primary font-medium mt-0.5">Pemohon: {s.masyarakat?.name || 'Masyarakat'}</p>
                           <div className="flex items-center text-xs text-muted-foreground mt-0.5">
                             <Clock size={12} className="mr-1" />
                             {new Date(s.startTime).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WIB
@@ -170,9 +171,15 @@ export default function DewanDashboard() {
               </div>
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar (Removed AvailabilityManager per request) */}
             <div>
-              {user && <AvailabilityManager dewanId={user.id} onAvailabilityUpdate={fetchSchedules} />}
+              <div className="border border-border rounded-lg p-5">
+                <h3 className="text-sm font-semibold mb-2">Informasi Penting</h3>
+                <p className="text-xs text-muted-foreground text-left">
+                  Modul pengaturan jadwal ketersediaan kini dikelola secara terpusat oleh Admin.
+                  Untuk menambah atau mengubah slot ketersediaan waktu Anda, harap hubungi administrator sistem.
+                </p>
+              </div>
             </div>
           </div>
         </div>
