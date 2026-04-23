@@ -12,10 +12,10 @@ export default function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   const linkClass = (path: string) =>
-    `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+    `flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 ${
       isActive(path)
-        ? "bg-primary/10 text-primary"
-        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+        ? "bg-primary text-white shadow-md shadow-primary/20"
+        : "text-muted-foreground hover:text-primary hover:bg-primary/5"
     }`;
 
   if (isLoading) return null;

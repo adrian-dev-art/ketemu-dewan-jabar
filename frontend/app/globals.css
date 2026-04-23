@@ -1,27 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #10b981;
-  --primary-hover: #059669;
-  --background: #ffffff;
-  --foreground: #111827;
-  --muted: #f3f4f6;
-  --muted-fg: #6b7280;
-  --border: #e5e7eb;
-  --card-bg: #ffffff;
+  --primary: #D4AF37;
+  --primary-hover: #C09D32;
+  --background: #FFFFFF;
+  --foreground: #333333;
+  --muted: #F8F9FA;
+  --muted-fg: #666666;
+  --border: #E9ECEF;
+  --card-bg: #FFFFFF;
+  --radius: 0.75rem;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #f9fafb;
-  --muted: #18181b;
-  --muted-fg: #a1a1aa;
-  --border: #27272a;
-  --card-bg: #141414;
+  --background: #0F0F12;
+  --foreground: #F8F9FA;
+  --muted: #1A1A1F;
+  --muted-fg: #A0A0AB;
+  --border: #2D2D35;
+  --card-bg: #141418;
 }
 
 body {
@@ -30,6 +31,10 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
 }
 
 /* Scrollbar */
