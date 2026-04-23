@@ -617,6 +617,93 @@ app.post('/api/admin/settings/streaming', authenticateToken, authorizeRole(['adm
     }
 });
 
+// Admin: Get All System Settings
+app.get('/api/admin/settings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findMany();
+        const settingsMap = settings.reduce((acc: Record<string, string>, curr) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {});
+        res.json(settingsMap);
+    } catch (err) {
+        console.error("Error fetching all settings:", err);
+        res.status(500).json({ error: "Gagal mengambil pengaturan sistem" });
+    }
+});
+
+// Admin: Bulk Update System Settings
+app.post('/api/admin/settings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const settings = req.body; // Expecting { key: value, ... }
+    try {
+        const operations = Object.entries(settings).map(([key, value]) => 
+            prisma.systemSetting.upsert({
+                where: { key },
+                update: { value: String(value) },
+                create: { key, value: String(value) }
+            })
+        );
+        await prisma.$transaction(operations);
+        res.json({ message: "Pengaturan berhasil diperbarui" });
+    } catch (err) {
+        console.error("Error updating bulk settings:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengaturan" });
+    }
+});
+
+// Admin: Data Export
+app.get('/api/admin/management/export', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const [users, schedules, ratings, settings] = await Promise.all([
+            prisma.user.findMany({ select: { id: true, name: true, email: true, role: true, nip: true, fraksi: true, jabatan: true } }),
+            prisma.schedule.findMany({ include: { participants: true } }),
+            prisma.rating.findMany(),
+            prisma.systemSetting.findMany()
+        ]);
+        
+        const exportData = {
+            exportedAt: new Date().toISOString(),
+            users,
+            schedules,
+            ratings,
+            settings
+        };
+        
+        res.setHeader('Content-disposition', 'attachment; filename=meetdewan_export.json');
+        res.setHeader('Content-type', 'application/json');
+        res.status(200).send(JSON.stringify(exportData, null, 2));
+    } catch (err) {
+        console.error("Error exporting data:", err);
+        res.status(500).json({ error: "Gagal mengekspor data" });
+    }
+});
+
+// Admin: Data Cleanup
+app.post('/api/admin/management/cleanup', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const { daysOld, type } = req.body;
+    if (!daysOld || isNaN(Number(daysOld))) {
+        return res.status(400).json({ error: "Parameter daysOld tidak valid" });
+    }
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - Number(daysOld));
+
+    try {
+        let deletedCount = 0;
+        if (type === 'schedules' || type === 'all') {
+            const result = await prisma.schedule.deleteMany({
+                where: { startTime: { lt: cutoffDate } }
+            });
+            deletedCount += result.count;
+        }
+        
+        res.json({ message: `Cleanup berhasil. ${deletedCount} item dihapus.`, deletedCount });
+    } catch (err) {
+        console.error("Error during cleanup:", err);
+        res.status(500).json({ error: "Gagal melakukan cleanup data" });
+    }
+});
+
 app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) => {
     const { roomName, scheduleId } = req.body;
     const participantName = req.user!.email;
