@@ -7,8 +7,8 @@ import RoomLayoutWrapper from "@/components/RoomLayoutWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ketemu Dewan - Konferensi Video",
-  description: "Aplikasi konferensi video yang aman dan efektif untuk aspirasi masyarakat.",
+  title: "DPRD HUDANG - Konferensi Video",
+  description: "Aplikasi konferensi video yang aman dan efektif untuk aspirasi masyarakat bersama DPRD HUDANG.",
 };
 
 export default function RootLayout({
@@ -28,15 +28,20 @@ export default function RootLayout({
           </a>
           
           <RoomLayoutWrapper>
-            <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-sm border-b border-border">
-              <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-                  <div className="w-7 h-7 bg-primary rounded-md flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">K</span>
+            <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/50">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity group">
+                  <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
+                    <span className="text-white font-bold text-lg">D</span>
                   </div>
-                  <h1 className="text-base font-bold tracking-tight">
-                    KETEMU<span className="text-primary">DEWAN</span>
-                  </h1>
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight font-outfit leading-none">
+                      DPRD<span className="text-primary">HUDANG</span>
+                    </h1>
+                    <p className="text-[9px] text-muted-foreground font-bold mt-1 uppercase tracking-wider">
+                      Sekretariat DPRD Jawa Barat
+                    </p>
+                  </div>
                 </Link>
                 
                 <nav className="flex items-center gap-3">

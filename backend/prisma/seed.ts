@@ -33,14 +33,33 @@ async function main() {
         { email: 'dewi@dewan.id',    name: 'Dewi Ratnasari',     fraksi: 'Fraksi Gerindra',  jabatan: 'Wakil Ketua Komisi III', dapil: 'Dapil Jabar IV', bio: 'Fokus pada lingkungan hidup dan pertanian.' },
         { email: 'hendra@dewan.id',  name: 'Hendra Wijaya',      fraksi: 'Fraksi Nasdem',   jabatan: 'Ketua Komisi I',        dapil: 'Dapil Jabar V',  bio: 'Fokus pada hukum, HAM, dan keamanan daerah.' },
         { email: 'ratih@dewan.id',   name: 'Ratih Kusumawati',   fraksi: 'Fraksi PKB',      jabatan: 'Anggota Komisi V',      dapil: 'Dapil Jabar VI',  bio: 'Fokus pada keagamaan, sosial, dan pemberdayaan perempuan.' },
+        { centreId: 'dc8625c9-e952-4722-b619-c850ea8d9e93', email: 'dedi@dewan.id', name: 'H. Dedi Aroza, S.Ag., M.Si.', fraksi: 'Fraksi PKS', jabatan: 'Anggota Komisi I', dapil: 'Dapil Jabar VI (Bogor)', bio: 'Anggota Komisi I DPRD Jawa Barat.' },
     ];
 
     const dewanList: any[] = [];
     for (const d of dewanData) {
+        // Find existing user by centreId OR email to prevent duplicates
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    d.centreId ? { centreId: d.centreId } : {},
+                    { email: d.email }
+                ]
+            }
+        });
+
         const u = await prisma.user.upsert({
-            where: { email: d.email },
-            update: { passwordHash, fraksi: d.fraksi, jabatan: d.jabatan, dapil: d.dapil },
-            create: { ...d, role: 'dewan', passwordHash },
+            where: { id: existingUser?.id || -1 }, // Use ID if found, else -1 to force create
+            update: { 
+                passwordHash, 
+                fraksi: d.fraksi, 
+                jabatan: d.jabatan, 
+                dapil: d.dapil, 
+                name: d.name, 
+                email: d.email,
+                centreId: d.centreId as string | undefined
+            },
+            create: { ...d as any, role: 'dewan', passwordHash },
         });
         dewanList.push(u);
     }
@@ -105,8 +124,17 @@ async function main() {
         rating?: { sp: number; cx: number; tm: number; rs: number; sl: number; comment: string }
     ) => {
         const s = await prisma.schedule.create({
-            data: { title, masyarakatId, dewanId, startTime, status },
+            data: { title, masyarakatId, startTime },
         });
+        
+        await prisma.scheduleParticipant.create({
+            data: {
+                scheduleId: s.id,
+                dewanId,
+                status // mapping overall status to participant status
+            }
+        });
+
         if (rating) {
             await prisma.rating.create({
                 data: {

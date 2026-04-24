@@ -55,21 +55,21 @@ export default function PreJoinComponent({ onJoin, onBack }: PreJoinProps) {
     <div className="room-loading-screen">
       <div className="w-full max-w-lg px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-            <Video size={14} className="text-emerald-400" />
-            <span className="text-xs font-medium text-emerald-300 uppercase tracking-wider">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 mb-5 shadow-sm">
+            <Video size={16} className="text-primary" />
+            <span className="text-[11px] font-bold text-primary uppercase tracking-[0.1em]">
               Konfigurasi Media
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Siap untuk Bergabung?</h2>
-          <p className="text-sm text-white/40 mt-2">Pastikan kamera dan mikrofon Anda berfungsi dengan baik.</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight font-outfit">Siap untuk Bergabung?</h2>
+          <p className="text-sm text-white/50 mt-2 font-medium">Pastikan kamera dan mikrofon Anda berfungsi dengan baik.</p>
         </div>
 
         {/* Card */}
-        <div className="room-prejoin-card">
+        <div className="room-prejoin-card rounded-3xl p-8 bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl">
           {/* Preview Area */}
-          <div className="aspect-video rounded-xl bg-black border border-white/[0.06] flex items-center justify-center mb-6 overflow-hidden relative">
+          <div className="aspect-video rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center mb-8 overflow-hidden relative shadow-inner">
             {videoEnabled ? (
               <video
                 ref={videoRef}
@@ -109,28 +109,28 @@ export default function PreJoinComponent({ onJoin, onBack }: PreJoinProps) {
           {/* Info chips */}
           <div className="flex flex-wrap gap-2 mb-6 justify-center">
             <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition-all duration-300 ${
                 audioEnabled
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  ? "bg-primary/20 border-primary/30 text-primary shadow-sm shadow-primary/10"
                   : "bg-white/[0.05] border-white/[0.06] text-white/30"
               }`}
             >
-              {audioEnabled ? <Mic size={12} /> : <MicOff size={12} />}
-              <span className="text-[11px] font-medium">{audioEnabled ? "Mikrofon Aktif" : "Mikrofon Bisukan"}</span>
+              {audioEnabled ? <Mic size={14} /> : <MicOff size={14} />}
+              <span className="text-[11px] font-bold tracking-tight">{audioEnabled ? "Mikrofon Aktif" : "Mikrofon Bisukan"}</span>
             </div>
             <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition-all duration-300 ${
                 videoEnabled
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  ? "bg-primary/20 border-primary/30 text-primary shadow-sm shadow-primary/10"
                   : "bg-white/[0.05] border-white/[0.06] text-white/30"
               }`}
             >
-              {videoEnabled ? <Video size={12} /> : <VideoOff size={12} />}
-              <span className="text-[11px] font-medium">{videoEnabled ? "Kamera Aktif" : "Kamera Mati"}</span>
+              {videoEnabled ? <Video size={14} /> : <VideoOff size={14} />}
+              <span className="text-[11px] font-bold tracking-tight">{videoEnabled ? "Kamera Aktif" : "Kamera Mati"}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.06] text-white/40">
-              <Shield size={12} className="text-emerald-400" />
-              <span className="text-[11px] font-medium">Koneksi Aman</span>
+            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.06] text-white/40">
+              <Shield size={14} className="text-primary" />
+              <span className="text-[11px] font-bold tracking-tight">Koneksi Aman</span>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, EgressClient, EncodedFileOutput, EncodedFileType, StreamOutput, EncodingOptionsPreset } from 'livekit-server-sdk';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -16,6 +16,12 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-123';
+const LIVEKIT_HOST = process.env.LIVEKIT_URL || 'http://localhost:7880';
+const egressClient = new EgressClient(
+    LIVEKIT_HOST,
+    process.env.LIVEKIT_API_KEY || 'devkey',
+    process.env.LIVEKIT_API_SECRET || 'secretkey'
+);
 
 // Trust proxy for accurate rate limiting (Nginx)
 app.set('trust proxy', 1);
@@ -123,13 +129,20 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Simple Register for demo
 app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, noKtp, instansi } = req.body;
     try {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
         
         const user = await prisma.user.create({
-            data: { name, email, passwordHash, role: role || 'masyarakat' }
+            data: { 
+                name, 
+                email, 
+                passwordHash, 
+                role: 'masyarakat', // Enforce role to be masyarakat
+                noKtp,
+                instansi
+            }
         });
 
         res.status(201).json({ message: "Registrasi berhasil", userId: user.id });
@@ -148,7 +161,10 @@ app.get('/api/dewan', async (req, res) => {
             where: { role: 'dewan' },
             include: {
                 availabilities: true,
-                ratingsAsDewan: true
+                ratingsAsDewan: true,
+                akdMemberships: {
+                    include: { akd: true }
+                }
             }
         });
 
@@ -160,12 +176,36 @@ app.get('/api/dewan', async (req, res) => {
                 avg = totalScores / d.ratingsAsDewan.length;
             }
 
+            // Temukan AKD yang bertipe 'KOMISI' atau yang namanya memuat kata 'Komisi'
+            let komisi = null;
+            if (d.akdMemberships && Array.isArray(d.akdMemberships)) {
+                const komisiMembership = d.akdMemberships.find((m: any) => {
+                    const isTipeKomisi = m.akd && m.akd.tipe && m.akd.tipe.toLowerCase() === 'komisi';
+                    const isNamaKomisi = m.akd && m.akd.nama && m.akd.nama.toLowerCase().includes('komisi');
+                    return isTipeKomisi || isNamaKomisi;
+                });
+                if (komisiMembership) {
+                    komisi = komisiMembership.akd.nama;
+                }
+            }
+
+            // Fallback: Jika data relasional AKD belum tersedia (contoh: data dumi dari seeder yang belum ikut Hub Sync)
+            if (!komisi) {
+                let komisiMatch = d.jabatan ? d.jabatan.match(/Komisi\s+[A-VIX]+/) : null;
+                komisi = komisiMatch ? komisiMatch[0] : "Lainnya";
+            }
+
             return {
                 id: d.id,
                 name: d.name,
                 bio: d.bio || "Tidak ada biodata.",
                 rating: avg,
-                availabilities: d.availabilities
+                availabilities: d.availabilities,
+                fraksi: d.fraksi,
+                jabatan: d.jabatan,
+                komisi: komisi,
+                dapil: d.dapil,
+                akdMemberships: d.akdMemberships // Ekstra relasi agar frontend bisa pakai jika perlu
             };
         });
 
@@ -176,10 +216,21 @@ app.get('/api/dewan', async (req, res) => {
     }
 });
 
-// 2. Set Availability (Dewan only)
+// 2. Set Availability (Dewan can no longer do this, handled by Admin)
 app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin']), async (req: AuthRequest, res) => {
     const { start_time, end_time } = req.body;
-    const dewan_id = req.user!.id;
+    let dewan_id = req.user!.id;
+    
+    // If admin is doing it, they must provide dewan_id
+    if (req.user!.role === 'admin') {
+        if (!req.body.dewan_id) {
+            return res.status(400).json({ error: "Admin harus menyertakan dewan_id" });
+        }
+        dewan_id = Number(req.body.dewan_id);
+    } else {
+        // According to new rules, dewan can't add availability anymore
+        return res.status(403).json({ error: "Hanya Admin yang dapat mengelola jadwal ketersediaan saat ini." });
+    }
     
     try {
         const result = await prisma.availability.create({
@@ -198,42 +249,28 @@ app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin'
 
 // 3. Schedule a meeting (Protected)
 app.post('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
-    const { dewan_id, start_time, title } = req.body;
-    const masyarakat_id = req.user!.id; // Current logged in user is the 'masyarakat'
+    const { dewan_ids, start_time, title } = req.body;
+    const masyarakat_id = req.user!.id; 
     const requestedTime = new Date(start_time);
     
+    if (!dewan_ids || !Array.isArray(dewan_ids) || dewan_ids.length === 0) {
+        return res.status(400).json({ error: "Harus memilih minimal satu Anggota Dewan" });
+    }
+
     try {
-        const availability = await prisma.availability.findFirst({
-            where: {
-                dewanId: Number(dewan_id),
-                startTime: { lte: requestedTime },
-                endTime: { gte: requestedTime }
-            }
-        });
-
-        if (!availability) {
-            return res.status(400).json({ error: "Waktu ini tidak tersedia untuk Dewan tersebut" });
-        }
-
-        const conflict = await prisma.schedule.findFirst({
-            where: {
-                dewanId: Number(dewan_id),
-                startTime: requestedTime,
-                status: { in: ['pending', 'confirmed'] }
-            }
-        });
-
-        if (conflict) {
-            return res.status(400).json({ error: "Waktu ini sudah dipesan oleh orang lain" });
-        }
-
         const result = await prisma.schedule.create({
             data: {
                 title: title || "Diskusi Aspirasi",
-                dewanId: Number(dewan_id),
                 masyarakatId: masyarakat_id,
                 startTime: requestedTime,
-            }
+                participants: {
+                    create: dewan_ids.map((id: number) => ({
+                        dewanId: Number(id),
+                        status: 'pending'
+                    }))
+                }
+            },
+            include: { participants: true }
         });
         res.status(201).json(result);
     } catch (err) {
@@ -247,21 +284,40 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
     const { role, id: userId } = req.user!;
     try {
         const where: any = {};
-        if (role === 'dewan') where.dewanId = userId;
-        if (role === 'masyarakat') where.masyarakatId = userId;
-        // If admin, they see everything (where stays empty)
+        if (role === 'dewan') where.participants = { some: { dewanId: Number(userId) } };
+        if (role === 'masyarakat') where.masyarakatId = Number(userId);
 
         const result = await prisma.schedule.findMany({
             where,
             orderBy: { startTime: 'desc' },
             include: {
-                dewan: { select: { name: true } },
                 masyarakat: { select: { name: true } },
-                rating: true
+                participants: {
+                    include: { dewan: { select: { id: true, name: true, fraksi: true } } }
+                },
+                ratings: true
             }
         });
 
-        res.json(result);
+        // Format to map old structure logic slightly to help frontend gracefully fall back
+        const formatted = result.map((s: any) => {
+            // Find specific user's status if role is dewan. Otherwise overall status
+            let myStatus = 'pending';
+            if (role === 'dewan') {
+                const myParticipant = s.participants.find((p:any) => p.dewanId === Number(userId));
+                if (myParticipant) myStatus = myParticipant.status;
+            } else {
+                // If any confirmed, mark overall as confirmed for UI simplistic rendering
+                myStatus = s.participants.some((p:any) => p.status === 'confirmed') ? 'confirmed' : s.participants.every((p:any) => p.status === 'rejected') ? 'rejected' : 'pending';
+            }
+
+            return {
+                ...s,
+                status: myStatus, 
+            };
+        });
+
+        res.json(formatted);
     } catch (err) {
         console.error("Error fetching schedules:", err);
         res.status(500).json({ error: "Gagal mengambil data jadwal" });
@@ -269,18 +325,28 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
 });
 
 // 5. Update Schedule Status (Dewan/Admin only)
-app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admin']), async (req, res) => {
+app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admin']), async (req: AuthRequest, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, dewan_id } = req.body;
+    let targetDewanId = req.user!.id;
+    if (req.user!.role === 'admin' && dewan_id) {
+        targetDewanId = Number(dewan_id);
+    }
+
     try {
-        const result = await prisma.schedule.update({
-            where: { id: Number(id) },
+        const result = await prisma.scheduleParticipant.update({
+            where: {
+                scheduleId_dewanId: {
+                    scheduleId: Number(id),
+                    dewanId: targetDewanId
+                }
+            },
             data: { status }
         });
         res.json(result);
-    } catch (err) {
-        console.error("Error updating schedule:", err);
-        res.status(500).json({ error: "Gagal memperbarui status jadwal" });
+    } catch (err: any) {
+        console.error("Error updating schedule participant:", err);
+        res.status(500).json({ error: "Gagal memperbarui status. Mungkin Anda bukan partisipan di jadwal ini." });
     }
 });
 
@@ -436,8 +502,8 @@ app.get('/api/centre/performance', async (req, res) => {
             }
         }
 
-        // Count completed meetings per dewan
-        const completedSchedules = await prisma.schedule.groupBy({
+        // Count completed meetings per dewan (using participants)
+        const completedSchedules = await prisma.scheduleParticipant.groupBy({
             by: ['dewanId'],
             where: { status: { in: ['completed', 'confirmed'] } },
             _count: true
@@ -500,15 +566,154 @@ app.get('/api/centre/performance', async (req, res) => {
 });
 
 // --- LIVEKIT REST ENDPOINTS ---
+
+// Admin: Get Streaming Settings
+app.get('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findMany({
+            where: {
+                key: { in: ['stream_url', 'stream_key', 'is_auto_stream'] }
+            }
+        });
+        
+        const result = {
+            stream_url: settings.find(s => s.key === 'stream_url')?.value || '',
+            stream_key: settings.find(s => s.key === 'stream_key')?.value || '',
+            is_auto_stream: settings.find(s => s.key === 'is_auto_stream')?.value === 'true'
+        };
+        
+        res.json(result);
+    } catch (err) {
+        console.error("Error fetching stream settings:", err);
+        res.status(500).json({ error: "Gagal mengambil pengaturan streaming" });
+    }
+});
+
+// Admin: Update Streaming Settings
+app.post('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const { stream_url, stream_key, is_auto_stream } = req.body;
+    try {
+        await prisma.$transaction([
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_url' },
+                update: { value: stream_url },
+                create: { key: 'stream_url', value: stream_url }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'stream_key' },
+                update: { value: stream_key },
+                create: { key: 'stream_key', value: stream_key }
+            }),
+            prisma.systemSetting.upsert({
+                where: { key: 'is_auto_stream' },
+                update: { value: String(is_auto_stream) },
+                create: { key: 'is_auto_stream', value: String(is_auto_stream) }
+            })
+        ]);
+        res.json({ message: "Pengaturan streaming berhasil diperbarui" });
+    } catch (err) {
+        console.error("Error updating stream settings:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengaturan streaming" });
+    }
+});
+
+// Admin: Get All System Settings
+app.get('/api/admin/settings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findMany();
+        const settingsMap = settings.reduce((acc: Record<string, string>, curr) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {});
+        res.json(settingsMap);
+    } catch (err) {
+        console.error("Error fetching all settings:", err);
+        res.status(500).json({ error: "Gagal mengambil pengaturan sistem" });
+    }
+});
+
+// Admin: Bulk Update System Settings
+app.post('/api/admin/settings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const settings = req.body; // Expecting { key: value, ... }
+    try {
+        const operations = Object.entries(settings).map(([key, value]) => 
+            prisma.systemSetting.upsert({
+                where: { key },
+                update: { value: String(value) },
+                create: { key, value: String(value) }
+            })
+        );
+        await prisma.$transaction(operations);
+        res.json({ message: "Pengaturan berhasil diperbarui" });
+    } catch (err) {
+        console.error("Error updating bulk settings:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengaturan" });
+    }
+});
+
+// Admin: Data Export
+app.get('/api/admin/management/export', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const [users, schedules, ratings, settings] = await Promise.all([
+            prisma.user.findMany({ select: { id: true, name: true, email: true, role: true, nip: true, fraksi: true, jabatan: true } }),
+            prisma.schedule.findMany({ include: { participants: true } }),
+            prisma.rating.findMany(),
+            prisma.systemSetting.findMany()
+        ]);
+        
+        const exportData = {
+            exportedAt: new Date().toISOString(),
+            users,
+            schedules,
+            ratings,
+            settings
+        };
+        
+        res.setHeader('Content-disposition', 'attachment; filename=meetdewan_export.json');
+        res.setHeader('Content-type', 'application/json');
+        res.status(200).send(JSON.stringify(exportData, null, 2));
+    } catch (err) {
+        console.error("Error exporting data:", err);
+        res.status(500).json({ error: "Gagal mengekspor data" });
+    }
+});
+
+// Admin: Data Cleanup
+app.post('/api/admin/management/cleanup', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const { daysOld, type } = req.body;
+    if (!daysOld || isNaN(Number(daysOld))) {
+        return res.status(400).json({ error: "Parameter daysOld tidak valid" });
+    }
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - Number(daysOld));
+
+    try {
+        let deletedCount = 0;
+        if (type === 'schedules' || type === 'all') {
+            const result = await prisma.schedule.deleteMany({
+                where: { startTime: { lt: cutoffDate } }
+            });
+            deletedCount += result.count;
+        }
+        
+        res.json({ message: `Cleanup berhasil. ${deletedCount} item dihapus.`, deletedCount });
+    } catch (err) {
+        console.error("Error during cleanup:", err);
+        res.status(500).json({ error: "Gagal melakukan cleanup data" });
+    }
+});
+
 app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) => {
-    const { roomName } = req.body;
-    const participantName = req.user!.email; // Use email as unique identity
+    const { roomName, scheduleId } = req.body;
+    const participantName = req.user!.email;
 
     if (!roomName) {
         return res.status(400).json({ error: "roomName is required" });
     }
 
     try {
+        // Create token
         const at = new AccessToken(
             process.env.LIVEKIT_API_KEY || 'devkey',
             process.env.LIVEKIT_API_SECRET || 'secretkey',
@@ -519,12 +724,125 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
         );
 
         at.addGrant({ roomJoin: true, room: roomName });
-
         const token = await at.toJwt();
+
+        // Check if we should auto-start streaming
+        const parsedScheduleId = Number(scheduleId);
+        if (scheduleId && !isNaN(parsedScheduleId)) {
+            const autoStream = await prisma.systemSetting.findUnique({ where: { key: 'is_auto_stream' } });
+            if (autoStream?.value === 'true') {
+                const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+                if (schedule && !schedule.isStreaming) {
+                    const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
+                    const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
+                    
+                    if (url?.value && key?.value) {
+                        const fullStreamUrl = `${url.value}/${key.value}`;
+                        try {
+                            console.log(`[STREAM API] Starting auto-egress for room: ${roomName} to ${url.value}`);
+                            const info = await egressClient.startRoomCompositeEgress(roomName, {
+                                stream: { urls: [fullStreamUrl] },
+                                options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                            } as any);
+                            
+                            await prisma.schedule.update({
+                                where: { id: parsedScheduleId },
+                                data: { isStreaming: true, egressId: info.egressId }
+                            });
+                            console.log(`[STREAM API] Auto-streaming started successfully for room ${roomName}, egressId: ${info.egressId}`);
+                        } catch (egressErr) {
+                            console.error("[STREAM API] Failed to auto-start egress:", egressErr);
+                        }
+                    }
+                }
+            }
+        }
+
         res.json({ token });
     } catch (error) {
         console.error("Error generating LiveKit token:", error);
         res.status(500).json({ error: "Failed to generate token" });
+    }
+});
+
+// Manual Egress Start/Stop
+app.post('/api/livekit/egress/start', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId, roomName } = req.body;
+    try {
+        console.log(`[STREAM API] Manual stream start requested for room: ${roomName}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            console.error(`[STREAM API] Manual start failed: Invalid scheduleId (${scheduleId})`);
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        if (schedule && !schedule.isStreaming) {
+            const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
+            const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
+            
+            if (url?.value && key?.value) {
+                const fullStreamUrl = `${url.value}/${key.value}`;
+                console.log(`[STREAM API] Streaming destination: ${url.value}`);
+                
+                const info = await egressClient.startRoomCompositeEgress(roomName, {
+                    stream: { urls: [fullStreamUrl] },
+                    options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                } as any);
+                
+                await prisma.schedule.update({
+                    where: { id: parsedScheduleId },
+                    data: { isStreaming: true, egressId: info.egressId }
+                });
+                console.log(`[STREAM API] Manual streaming started successfully! egressId: ${info.egressId}`);
+                res.json({ message: "Streaming dimulai", egressId: info.egressId });
+            } else {
+                console.error(`[STREAM API] Manual start failed: Missing stream keys in database!`);
+                res.status(400).json({ error: "Stream URL / Key kosong di pengaturan" });
+            }
+        } else {
+            console.log(`[STREAM API] Manual start failed: Either active or schedule missing.`);
+            res.status(400).json({ error: "Sesi sudah streaming atau tidak ditemukan" });
+        }
+    } catch (err) {
+        console.error("[STREAM API] Error starting egress manually:", err);
+        res.status(500).json({ error: "Gagal memulai streaming" });
+    }
+});
+
+app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId } = req.body;
+    try {
+        console.log(`[STREAM API] Manual stream stop requested for scheduleId: ${scheduleId}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            console.error(`[STREAM API] Manual stop failed: Invalid scheduleId (${scheduleId})`);
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        
+        if (schedule?.egressId) {
+            try {
+                await egressClient.stopEgress(schedule.egressId);
+            } catch (egressErr: any) {
+                // If egress is already stopped/aborted, LiveKit returns 412. 
+                // We still want to clear our DB state in this case.
+                console.warn(`[STREAM API] LiveKit stopEgress warned: ${egressErr.message}`);
+                if (egressErr.status !== 412 && !egressErr.message?.includes("cannot be stopped")) {
+                    throw egressErr; // Re-throw if it's a real connection error
+                }
+            }
+
+            await prisma.schedule.update({
+                where: { id: parsedScheduleId },
+                data: { isStreaming: false, egressId: null }
+            });
+            res.json({ message: "Streaming dihentikan" });
+        } else {
+            res.status(404).json({ error: "Tidak ada session streaming aktif" });
+        }
+    } catch (err) {
+        console.error("[STREAM API] Error stopping egress:", err);
+        res.status(500).json({ error: "Gagal menghentikan streaming" });
     }
 });
 

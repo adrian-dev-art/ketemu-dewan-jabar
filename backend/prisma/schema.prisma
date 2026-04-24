@@ -19,11 +19,30 @@ model User {
   fraksi                String?
   jabatan               String?
   dapil                 String?
+  noKtp                 String?
+  instansi              String?
   isSync                Boolean        @default(false)
   availabilities        Availability[] @relation("DewanAvailability")
-  ratingsAsDewan        Rating[]       @relation("DewanRatings")
-  schedulesAsDewan      Schedule[]     @relation("DewanSchedules")
-  schedulesAsMasyarakat Schedule[]     @relation("MasyarakatSchedules")
+  ratingsAsDewan        Rating[]              @relation("DewanRatings")
+  schedulesAsMasyarakat Schedule[]            @relation("MasyarakatSchedules")
+  scheduleParticipations ScheduleParticipant[] @relation("DewanScheduleParticipants")
+  akdMemberships        AKDMember[]
+}
+
+model AKD {
+  id      String      @id
+  nama    String
+  tipe    String?
+  members AKDMember[]
+}
+
+model AKDMember {
+  id      String  @id @default(uuid())
+  akdId   String
+  akd     AKD     @relation(fields: [akdId], references: [id])
+  dewanId Int
+  dewan   User    @relation(fields: [dewanId], references: [id])
+  jabatan String?
 }
 
 model Availability {
@@ -35,15 +54,32 @@ model Availability {
 }
 
 model Schedule {
-  id           Int      @id @default(autoincrement())
-  title        String   @default("Diskusi Aspirasi")
+  id           Int                   @id @default(autoincrement())
+  title        String                @default("Diskusi Aspirasi")
   startTime    DateTime
-  status       String   @default("pending")
-  dewanId      Int
   masyarakatId Int
-  rating       Rating?
-  dewan        User     @relation("DewanSchedules", fields: [dewanId], references: [id])
-  masyarakat   User     @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
+  ratings      Rating[]
+  isStreaming  Boolean               @default(false)
+  egressId     String?
+  masyarakat   User                  @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
+  participants ScheduleParticipant[]
+}
+
+model ScheduleParticipant {
+  id         Int      @id @default(autoincrement())
+  scheduleId Int
+  dewanId    Int
+  status     String   @default("pending")
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dewan      User     @relation("DewanScheduleParticipants", fields: [dewanId], references: [id])
+
+  @@unique([scheduleId, dewanId])
+}
+
+model SystemSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
 }
 
 model Rating {
@@ -54,8 +90,10 @@ model Rating {
   responsivenessScore  Int      @default(0)
   solutionScore        Int      @default(0)
   comment              String?
-  scheduleId           Int      @unique
+  scheduleId           Int
   dewanId              Int
   dewan                User     @relation("DewanRatings", fields: [dewanId], references: [id])
-  schedule             Schedule @relation(fields: [scheduleId], references: [id])
+  schedule             Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, dewanId])
 }

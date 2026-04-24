@@ -8,7 +8,8 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('masyarakat');
+  const [noKtp, setNoKtp] = useState('');
+  const [instansi, setInstansi] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +23,7 @@ export default function RegisterPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, noKtp, instansi }),
       });
 
       const data = await response.json();
@@ -135,22 +136,36 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Daftar Sebagai</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRole('masyarakat')}
-                  className={`py-2 rounded-lg border text-xs font-medium transition-colors ${role === 'masyarakat' ? 'bg-primary/10 border-primary text-primary' : 'border-border text-muted-foreground hover:border-foreground/20'}`}
-                >
-                  Masyarakat
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('dewan')}
-                  className={`py-2 rounded-lg border text-xs font-medium transition-colors ${role === 'dewan' ? 'bg-primary/10 border-primary text-primary' : 'border-border text-muted-foreground hover:border-foreground/20'}`}
-                >
-                  Dewan
-                </button>
+              <label className="text-xs font-medium text-muted-foreground">Nomor KTP (NIK)</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User size={16} className="text-muted-foreground" />
+                </div>
+                <input
+                  type="text"
+                  value={noKtp}
+                  onChange={(e) => setNoKtp(e.target.value)}
+                  className="block w-full pl-9 pr-3 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm placeholder:text-muted-foreground"
+                  placeholder="327xxxxxxxxxxxx"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Instansi / Organisasi Kemasyarakatan</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User size={16} className="text-muted-foreground" />
+                </div>
+                <input
+                  type="text"
+                  value={instansi}
+                  onChange={(e) => setInstansi(e.target.value)}
+                  className="block w-full pl-9 pr-3 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm placeholder:text-muted-foreground"
+                  placeholder="Nama Instansi atau Kelompok"
+                  required
+                />
               </div>
             </div>
 

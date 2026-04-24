@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const ASPECT_LABELS: Record<string, string> = {
   speakingScore: "Artikulasi",
@@ -105,6 +106,7 @@ function DewanPerformanceCard({ dewan, ratings }: { dewan: any; ratings: any[] }
 
 export default function AdminDashboard() {
   const { token } = useAuth();
+  const router = useRouter();
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   const [stats, setStats] = useState({ totalUsers: 0, totalMeetings: 0, avgRating: 0, totalRatings: 0 });
@@ -192,6 +194,13 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg text-xs font-medium text-muted-foreground">
                   <ShieldCheck size={14} />Administrator
                 </div>
+                <button
+                  onClick={() => router.push("/admin/settings")}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg text-xs font-bold text-primary hover:bg-primary/20 transition-all shadow-sm shadow-primary/5 active:scale-95"
+                >
+                  <Settings size={14} />
+                  Pengaturan
+                </button>
                 <button
                   onClick={fetchData}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-muted border border-border rounded-lg text-xs font-medium text-muted-foreground hover:bg-border transition-colors"

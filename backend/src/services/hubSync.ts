@@ -45,7 +45,7 @@ export async function syncHubData() {
             }
             
             try {
-                await prisma.user.upsert({
+                const updatedUser = await prisma.user.upsert({
                     where: { centreId: member.id },
                     update: {
                         name: member.nama,
@@ -68,6 +68,32 @@ export async function syncHubData() {
                         isSync: true
                     }
                 });
+
+                // Sync AKD relationships
+                await prisma.aKDMember.deleteMany({ where: { dewanId: updatedUser.id } });
+
+                if (member.memberships && Array.isArray(member.memberships)) {
+                    for (const ms of member.memberships) {
+                        if (!ms.akd) continue;
+                        
+                        // Ensure AKD exists
+                        await prisma.aKD.upsert({
+                            where: { id: ms.akd.id },
+                            update: { nama: ms.akd.nama, tipe: ms.akd.tipe },
+                            create: { id: ms.akd.id, nama: ms.akd.nama, tipe: ms.akd.tipe }
+                        });
+                        
+                        // Create relationship
+                        await prisma.aKDMember.create({
+                            data: {
+                                akdId: ms.akd.id,
+                                dewanId: updatedUser.id,
+                                jabatan: ms.jabatan
+                            }
+                        });
+                    }
+                }
+
                 processed++;
             } catch (err: any) {
                 console.error(`ERROR Syncing member ${member.nama}:`, err.message);

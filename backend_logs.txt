@@ -1,0 +1,32 @@
+
+> meetdewan-backend@1.0.0 start
+> node dist/server.js
+
+Mencoba menghubungkan ke database...
+Server berjalan di port 5000
+Gagal menghubungkan ke database:
+PrismaClientInitializationError: Can't reach database server at `db:5432`
+
+Please make sure your database server is running at `db:5432`.
+    at t (/app/node_modules/@prisma/client/runtime/library.js:112:2488) {
+  clientVersion: '5.22.0',
+  errorCode: 'P1001'
+}
+Error fetching dewan: PrismaClientInitializationError: 
+Invalid `prisma.user.findMany()` invocation in
+/app/dist/server.js:135:42
+
+  132 // 1. List all Dewan with Availability (Public)
+  133 app.get('/api/dewan', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+  134     try {
+ÔåÆ 135         const result = yield prisma.user.findMany(
+Can't reach database server at `db:5432`
+
+Please make sure your database server is running at `db:5432`.
+    at $n.handleRequestError (/app/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/app/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/app/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/app/node_modules/@prisma/client/runtime/library.js:130:9633) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
