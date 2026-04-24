@@ -41,12 +41,18 @@ export default function Navbar() {
               <span className="hidden sm:inline">Dewan</span>
             </Link>
           )}
+
           {user.role === "admin" && (
             <Link href="/admin" className={linkClass("/admin")}>
               <ShieldCheck size={14} />
               <span className="hidden sm:inline">Admin</span>
             </Link>
           )}
+
+          <Link href="/profile" className={linkClass("/profile")}>
+            <UserCog size={14} />
+            <span className="hidden sm:inline">Profil</span>
+          </Link>
 
           <div className="w-px h-5 bg-border mx-1 hidden sm:block" />
 

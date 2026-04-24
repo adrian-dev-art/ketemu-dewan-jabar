@@ -15,12 +15,28 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-123';
+
+// CRITICAL: Enforce JWT_SECRET and LIVEKIT keys. Crash if missing in production.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+    console.error("FATAL: JWT_SECRET must be set in production environment.");
+    process.exit(1);
+}
+const FINAL_JWT_SECRET = JWT_SECRET || 'dev-secret-key-only';
+
 const LIVEKIT_HOST = process.env.LIVEKIT_URL || 'http://localhost:7880';
+const LIVEKIT_KEY = process.env.LIVEKIT_API_KEY;
+const LIVEKIT_SECRET = process.env.LIVEKIT_API_SECRET;
+
+if ((!LIVEKIT_KEY || !LIVEKIT_SECRET) && process.env.NODE_ENV === 'production') {
+    console.error("FATAL: LiveKit API Key and Secret must be set in production.");
+    process.exit(1);
+}
+
 const egressClient = new EgressClient(
     LIVEKIT_HOST,
-    process.env.LIVEKIT_API_KEY || 'devkey',
-    process.env.LIVEKIT_API_SECRET || 'secretkey'
+    LIVEKIT_KEY || 'devkey',
+    LIVEKIT_SECRET || 'secretkey'
 );
 
 // Trust proxy for accurate rate limiting (Nginx)
@@ -34,6 +50,16 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 10, // Max 10 attempts per IP per 15 mins
+    message: { error: "Terlalu banyak percobaan login. Silakan coba lagi nanti." },
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+});
+
 app.use(helmet());
 app.use(cors({
     origin: (origin, callback) => {
@@ -68,7 +94,7 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
 
     if (!token) return res.status(401).json({ error: "Akses ditolak. Token tidak ditemukan." });
 
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    jwt.verify(token, FINAL_JWT_SECRET, (err: any, user: any) => {
         if (err) return res.status(403).json({ error: "Token tidak valid atau kedaluwarsa." });
         req.user = user;
         next();
@@ -100,7 +126,7 @@ connectDB();
 
 // --- AUTH ROUTES ---
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await prisma.user.findUnique({ where: { email } });
@@ -111,14 +137,12 @@ app.post('/api/auth/login', async (req, res) => {
             const validPassword = await bcrypt.compare(password, user.passwordHash);
             if (!validPassword) return res.status(401).json({ error: "Password salah." });
         } else {
-            // For demo/dev purposes where seed didn't hash: 
-            // In production, we should force password reset or use a migration script
-            if (password !== 'password') return res.status(401).json({ error: "Password salah (Legacy Check)." });
+            return res.status(403).json({ error: "Akun Anda memerlukan reset password demi keamanan. Hubungi Admin." });
         }
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
-            JWT_SECRET,
+            FINAL_JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -458,6 +482,169 @@ app.get('/api/admin/ratings', authenticateToken, authorizeRole(['admin']), async
 });
 
 
+// 14. Admin - All Users (Admin only)
+app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            orderBy: { id: 'desc' },
+            select: {
+                id: true, name: true, email: true, role: true, bio: true,
+                nip: true, fraksi: true, jabatan: true, dapil: true,
+                noKtp: true, instansi: true, isSync: true
+            }
+        });
+        res.json(users);
+    } catch (err) {
+        console.error("Error fetching admin users:", err);
+        res.status(500).json({ error: "Gagal mengambil data pengguna" });
+    }
+});
+
+// 15. Admin - Update User (Admin only)
+app.patch('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const id = parseInt(req.params.id);
+    const data = req.body;
+    try {
+        const updated = await prisma.user.update({
+            where: { id },
+            data
+        });
+        res.json({ message: "Pengguna berhasil diperbarui", user: updated });
+    } catch (err) {
+        console.error("Error updating user:", err);
+        res.status(500).json({ error: "Gagal memperbarui pengguna" });
+    }
+});
+
+// 16. Admin - Delete User (Admin only)
+app.delete('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        await prisma.user.delete({ where: { id } });
+        res.json({ message: "Pengguna berhasil dihapus" });
+    } catch (err) {
+        console.error("Error deleting user:", err);
+        res.status(500).json({ error: "Gagal menghapus pengguna" });
+    }
+});
+
+
+// 17. Admin - All Schedules (Admin only)
+app.get('/api/admin/schedules', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const schedules = await prisma.schedule.findMany({
+            orderBy: { startTime: 'desc' },
+            include: {
+                masyarakat: { select: { id: true, name: true, email: true } },
+                participants: {
+                    include: {
+                        dewan: { select: { id: true, name: true, fraksi: true } }
+                    }
+                }
+            }
+        });
+        
+        // Flatten status for easier consumption (assumes one main status for the session)
+        const formatted = schedules.map(s => ({
+            ...s,
+            status: s.participants[0]?.status || 'pending'
+        }));
+        
+        res.json(formatted);
+    } catch (err) {
+        console.error("Error fetching admin schedules:", err);
+        res.status(500).json({ error: "Gagal mengambil data jadwal" });
+    }
+});
+
+// 18. Admin - Update Schedule (Admin only)
+app.patch('/api/admin/schedules/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { title, startTime, status } = req.body;
+    try {
+        const updatedSchedule = await prisma.schedule.update({
+            where: { id },
+            data: { 
+                title, 
+                startTime: startTime ? new Date(startTime) : undefined 
+            }
+        });
+        
+        if (status) {
+            await prisma.scheduleParticipant.updateMany({
+                where: { scheduleId: id },
+                data: { status }
+            });
+        }
+        
+        res.json({ message: "Jadwal berhasil diperbarui", schedule: updatedSchedule });
+    } catch (err) {
+        console.error("Error updating schedule:", err);
+        res.status(500).json({ error: "Gagal memperbarui jadwal" });
+    }
+});
+
+// 19. Admin - Delete Schedule (Admin only)
+app.delete('/api/admin/schedules/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        await prisma.schedule.delete({ where: { id } });
+        res.json({ message: "Jadwal berhasil dihapus" });
+    } catch (err) {
+        console.error("Error deleting schedule:", err);
+        res.status(500).json({ error: "Gagal menghapus jadwal" });
+    }
+});
+
+// 11. Public System Info
+app.get('/api/system/info', async (req, res) => {
+    try {
+        const settings = await prisma.systemSetting.findMany({
+            where: {
+                key: { in: ['app_name', 'app_logo', 'app_description'] }
+            }
+        });
+        const result = settings.reduce((acc: Record<string, string>, curr) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {});
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: "Gagal mengambil info sistem" });
+    }
+});
+
+// 12. Get User Profile
+app.get('/api/user/profile', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user!.id },
+            select: {
+                id: true, name: true, email: true, role: true, bio: true,
+                nip: true, fraksi: true, jabatan: true, dapil: true,
+                noKtp: true, instansi: true
+            }
+        });
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: "Gagal mengambil profil" });
+    }
+});
+
+// 13. Update User Profile
+app.patch('/api/user/profile', authenticateToken, async (req: AuthRequest, res) => {
+    const { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi } = req.body;
+    try {
+        const updated = await prisma.user.update({
+            where: { id: req.user!.id },
+            data: { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi }
+        });
+        res.json({ message: "Profil berhasil diperbarui", user: { id: updated.id, name: updated.name } });
+    } catch (err) {
+        res.status(500).json({ error: "Gagal memperbarui profil" });
+    }
+});
+
 // 10. Centre Performance Pull (M2M - Shared Secret Auth)
 app.get('/api/centre/performance', async (req, res) => {
     const secret = req.headers['x-centre-pull-secret'];
@@ -718,15 +905,35 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
     const { roomName, scheduleId } = req.body;
     const participantName = req.user!.email;
 
-    if (!roomName) {
-        return res.status(400).json({ error: "roomName is required" });
-    }
-
     try {
+        // SECURITY: Verify the user is a legitimate participant of the schedule
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            return res.status(400).json({ error: "scheduleId is required and must be a number" });
+        }
+
+        const isParticipant = await prisma.scheduleParticipant.findFirst({
+            where: {
+                scheduleId: parsedScheduleId,
+                dewanId: req.user!.role === 'dewan' ? req.user!.id : undefined,
+            }
+        });
+
+        const isMasyarakat = await prisma.schedule.findFirst({
+            where: {
+                id: parsedScheduleId,
+                masyarakatId: req.user!.id
+            }
+        });
+
+        if (!isParticipant && !isMasyarakat && req.user!.role !== 'admin') {
+            return res.status(403).json({ error: "Anda bukan partisipan resmi untuk pertemuan ini." });
+        }
+
         // Create token
         const at = new AccessToken(
-            process.env.LIVEKIT_API_KEY || 'devkey',
-            process.env.LIVEKIT_API_SECRET || 'secretkey',
+            LIVEKIT_KEY || 'devkey',
+            LIVEKIT_SECRET || 'secretkey',
             {
                 identity: participantName,
                 name: req.user!.role.toUpperCase() + ": " + participantName.split('@')[0],
@@ -737,7 +944,6 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
         const token = await at.toJwt();
 
         // Check if we should auto-start streaming
-        const parsedScheduleId = Number(scheduleId);
         if (scheduleId && !isNaN(parsedScheduleId)) {
             const autoStream = await prisma.systemSetting.findUnique({ where: { key: 'is_auto_stream' } });
             if (autoStream?.value === 'true') {

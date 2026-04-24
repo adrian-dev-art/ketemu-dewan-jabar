@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   Users, Video, Star, Settings, ShieldCheck, TrendingUp,
   MessageSquare, RefreshCw, ChevronDown, ChevronUp, Search,
-  Download, BarChart2, Filter, Database
+  Download, BarChart2, Filter, Database, Trash2, Edit, Check, X, Calendar
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
@@ -116,20 +116,32 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"avgScore" | "meetingDate">("meetingDate");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
-  const [activeTab, setActiveTab] = useState<"overview" | "ratings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "ratings" | "users" | "schedules">("overview");
+  const [users, setUsers] = useState<any[]>([]);
+  const [schedulesList, setSchedulesList] = useState<any[]>([]);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [scheduleSearch, setScheduleSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [scheduleStatusFilter, setScheduleStatusFilter] = useState("all");
 
   const fetchData = async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const [statsRes, ratingsRes, dewanRes] = await Promise.all([
+      const [statsRes, ratingsRes, dewanRes, usersRes, schedulesRes] = await Promise.all([
         fetch(`${backendUrl}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${backendUrl}/api/admin/ratings`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${backendUrl}/api/dewan`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${backendUrl}/api/admin/users`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${backendUrl}/api/admin/schedules`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       if (statsRes.ok) setStats(await statsRes.json());
       if (ratingsRes.ok) setRatings(await ratingsRes.json());
       if (dewanRes.ok) setDewanList(await dewanRes.json());
+      if (usersRes.ok) setUsers(await usersRes.json());
+      if (schedulesRes.ok) setSchedulesList(await schedulesRes.json());
     } finally {
       setLoading(false);
     }
@@ -175,6 +187,80 @@ export default function AdminDashboard() {
   const toggleSort = (col: "avgScore" | "meetingDate") => {
     if (sortBy === col) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
     else { setSortBy(col); setSortDir("desc"); }
+  };
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      const matchesSearch = u.name.toLowerCase().includes(userSearch.toLowerCase()) || 
+                           u.email.toLowerCase().includes(userSearch.toLowerCase());
+      const matchesRole = roleFilter === "all" || u.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
+  }, [users, userSearch, roleFilter]);
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser || !token) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/admin/users/${editingUser.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingUser),
+      });
+      if (res.ok) {
+        setUsers(users.map((u) => (u.id === editingUser.id ? editingUser : u)));
+        setEditingUser(null);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!token || !confirm("Yakin ingin menghapus pengguna ini?")) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setUsers(users.filter((u) => u.id !== id));
+    } catch (err) { console.error(err); }
+  };
+
+  const filteredSchedules = useMemo(() => {
+    return schedulesList.filter((s) => {
+      const dewanNames = s.participants.map((p: any) => p.dewan.name).join(" ").toLowerCase();
+      const matchesSearch = (s.title || "").toLowerCase().includes(scheduleSearch.toLowerCase()) || 
+                           (s.masyarakat?.name || "").toLowerCase().includes(scheduleSearch.toLowerCase()) ||
+                           dewanNames.includes(scheduleSearch.toLowerCase());
+      const matchesStatus = scheduleStatusFilter === "all" || s.status === scheduleStatusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [schedulesList, scheduleSearch, scheduleStatusFilter]);
+
+  const handleUpdateSchedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSchedule || !token) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/admin/schedules/${editingSchedule.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingSchedule),
+      });
+      if (res.ok) {
+        setSchedulesList(schedulesList.map((s) => (s.id === editingSchedule.id ? { ...s, ...editingSchedule } : s)));
+        setEditingSchedule(null);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteSchedule = async (id: number) => {
+    if (!token || !confirm("Yakin ingin menghapus jadwal ini?")) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/admin/schedules/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) setSchedulesList(schedulesList.filter((s) => s.id !== id));
+    } catch (err) { console.error(err); }
   };
 
   return (
@@ -235,6 +321,8 @@ export default function AdminDashboard() {
             {[
               { key: "overview", label: "Kinerja Dewan", icon: TrendingUp },
               { key: "ratings", label: "Semua Penilaian", icon: MessageSquare },
+              { key: "users", label: "Manajemen Pengguna", icon: Users },
+              { key: "schedules", label: "Manajemen Jadwal", icon: Calendar },
             ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -367,8 +455,397 @@ export default function AdminDashboard() {
             </section>
           )}
 
+          {/* User Management Tab */}
+          {activeTab === "users" && (
+            <section>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <div className="flex gap-2 flex-grow max-w-xl">
+                  <div className="relative flex-grow">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+                      placeholder="Cari nama atau email..."
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    className="px-3 py-2 text-sm bg-background border border-border rounded-lg outline-none font-medium"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                  >
+                    <option value="all">Semua Peran</option>
+                    <option value="dewan">Dewan</option>
+                    <option value="masyarakat">Masyarakat</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="py-16 text-center text-muted-foreground text-sm">Memuat pengguna...</div>
+              ) : (
+                <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-muted/50 border-b border-border">
+                        <tr>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Pengguna</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Peran</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Detail Info</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filteredUsers.length === 0 ? (
+                          <tr><td colSpan={4} className="px-4 py-12 text-center text-muted-foreground text-sm">Tidak ada pengguna ditemukan.</td></tr>
+                        ) : (
+                          filteredUsers.map((u) => (
+                            <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-sm">{u.name}</span>
+                                  <span className="text-[10px] text-muted-foreground">{u.email}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase border ${
+                                  u.role === 'admin' ? 'bg-purple-500/10 border-purple-500/20 text-purple-600' :
+                                  u.role === 'dewan' ? 'bg-primary/10 border-primary/20 text-primary' :
+                                  'bg-blue-500/10 border-blue-500/20 text-blue-600'
+                                }`}>
+                                  {u.role}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-[11px] text-muted-foreground">
+                                {u.role === 'dewan' ? (
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="font-medium text-foreground/80">NIP: {u.nip || '-'}</span>
+                                    <span>{u.fraksi} · {u.jabatan}</span>
+                                  </div>
+                                ) : (
+                                  <span className="line-clamp-2">{u.instansi || u.bio || '-'}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => setEditingUser({ ...u })}
+                                    className="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-colors"
+                                    title="Edit"
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteUser(u.id)}
+                                    className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
+                                    title="Hapus"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Schedule Management Tab */}
+          {activeTab === "schedules" && (
+            <section>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <div className="flex gap-2 flex-grow max-w-2xl">
+                  <div className="relative flex-grow">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 outline-none"
+                      placeholder="Cari topik, dewan, atau masyarakat..."
+                      value={scheduleSearch}
+                      onChange={(e) => setScheduleSearch(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    className="px-3 py-2 text-sm bg-background border border-border rounded-lg outline-none font-medium"
+                    value={scheduleStatusFilter}
+                    onChange={(e) => setScheduleStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Semua Status</option>
+                    <option value="pending">Menunggu</option>
+                    <option value="confirmed">Dikonfirmasi</option>
+                    <option value="rejected">Ditolak</option>
+                  </select>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="py-16 text-center text-muted-foreground text-sm">Memuat jadwal...</div>
+              ) : (
+                <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-muted/50 border-b border-border">
+                        <tr>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Pertemuan</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Waktu</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Partisipan</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                          <th className="px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filteredSchedules.length === 0 ? (
+                          <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground text-sm">Tidak ada jadwal ditemukan.</td></tr>
+                        ) : (
+                          filteredSchedules.map((s) => (
+                            <tr key={s.id} className="hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-sm">{s.title || "Diskusi Aspirasi"}</span>
+                                  <span className="text-[10px] text-muted-foreground">ID: #{s.id}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex flex-col text-[11px]">
+                                  <span className="font-medium text-foreground/80">
+                                    {new Date(s.startTime).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </span>
+                                  <span className="text-muted-foreground font-mono">
+                                    {new Date(s.startTime).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })} WIB
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-[11px]">
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <Users size={10} className="text-blue-500" />
+                                    <span className="font-semibold text-foreground/70">{s.masyarakat?.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <ShieldCheck size={10} className="text-primary" />
+                                    <span className="text-muted-foreground">{s.participants.map((p: any) => p.dewan.name).join(", ")}</span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase border ${
+                                  s.status === 'confirmed' ? 'bg-green-500/10 border-green-500/20 text-green-600' :
+                                  s.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-600' :
+                                  'bg-amber-500/10 border-amber-500/20 text-amber-600'
+                                }`}>
+                                  {s.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => setEditingSchedule({ ...s, startTime: new Date(s.startTime).toISOString().slice(0, 16) })}
+                                    className="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-colors"
+                                    title="Edit"
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSchedule(s.id)}
+                                    className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
+                                    title="Hapus"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
         </div>
       </div>
+
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-card border border-border w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+              <h3 className="font-bold text-lg">Edit Profil Pengguna</h3>
+              <button onClick={() => setEditingUser(null)} className="p-2 hover:bg-muted rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateUser}>
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingUser.name}
+                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Email</label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingUser.email}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Peran (Role)</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingUser.role}
+                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                  >
+                    <option value="masyarakat">Masyarakat</option>
+                    <option value="dewan">Dewan</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                {editingUser.role === 'dewan' ? (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">NIP</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                        value={editingUser.nip || ""}
+                        onChange={(e) => setEditingUser({ ...editingUser, nip: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Fraksi</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                        value={editingUser.fraksi || ""}
+                        onChange={(e) => setEditingUser({ ...editingUser, fraksi: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Jabatan</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                        value={editingUser.jabatan || ""}
+                        onChange={(e) => setEditingUser({ ...editingUser, jabatan: e.target.value })}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Instansi / Bio</label>
+                    <textarea
+                      className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium h-20 resize-none"
+                      value={editingUser.instansi || editingUser.bio || ""}
+                      onChange={(e) => setEditingUser({ ...editingUser, instansi: e.target.value, bio: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="p-6 bg-muted/10 border-t border-border flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  className="px-6 py-2 text-sm font-bold text-muted-foreground hover:bg-muted rounded-xl transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-8 py-2 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                >
+                  <Check size={16} /> Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Schedule Modal */}
+      {editingSchedule && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-card border border-border w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+              <h3 className="font-bold text-lg">Edit Jadwal Pertemuan</h3>
+              <button onClick={() => setEditingSchedule(null)} className="p-2 hover:bg-muted rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateSchedule}>
+              <div className="p-6 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Topik Pertemuan</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingSchedule.title || ""}
+                    onChange={(e) => setEditingSchedule({ ...editingSchedule, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Waktu Mulai</label>
+                  <input
+                    type="datetime-local"
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingSchedule.startTime}
+                    onChange={(e) => setEditingSchedule({ ...editingSchedule, startTime: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase ml-1">Status Kehadiran</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                    value={editingSchedule.status}
+                    onChange={(e) => setEditingSchedule({ ...editingSchedule, status: e.target.value })}
+                  >
+                    <option value="pending">Menunggu</option>
+                    <option value="confirmed">Dikonfirmasi</option>
+                    <option value="rejected">Ditolak</option>
+                  </select>
+                </div>
+                
+                <div className="p-4 bg-muted/5 rounded-2xl border border-border/50 text-[11px] space-y-1">
+                   <p className="text-muted-foreground font-bold uppercase">Informasi Relasi:</p>
+                   <p><span className="font-semibold text-foreground/70">Masyarakat:</span> {editingSchedule.masyarakat?.name}</p>
+                   <p><span className="font-semibold text-foreground/70">Legislator:</span> {editingSchedule.participants?.map((p: any) => p.dewan.name).join(", ")}</p>
+                </div>
+              </div>
+              <div className="p-6 bg-muted/10 border-t border-border flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingSchedule(null)}
+                  className="px-6 py-2 text-sm font-bold text-muted-foreground hover:bg-muted rounded-xl transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-8 py-2 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                >
+                  <Check size={16} /> Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }
