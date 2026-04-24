@@ -36,8 +36,18 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(cors({
-    origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
-    methods: ['GET', 'POST', 'PATCH', 'DELETE']
+    origin: (origin, callback) => {
+        const allowedOrigins = process.env.FRONTEND_URL 
+            ? process.env.FRONTEND_URL.split(',').map(o => o.trim()).map(o => o.trim()) 
+            : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true
 }));
 app.use(express.json());
 
@@ -849,7 +859,7 @@ app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 
 // --- SOCKET.IO (Removed legacy WebRTC signaling) ---
 const io = new Server(server, {
     cors: { 
-        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'], 
+        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'], 
         methods: ['GET', 'POST'] 
     }
 });
