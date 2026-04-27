@@ -15,7 +15,7 @@ interface SettingsContextType {
 
 const defaultSettings: SystemSettings = {
   app_name: "DPRD HUDANG",
-  app_logo: "",
+  app_logo: "/images/logo-1.png",
   app_description: "Aplikasi konferensi video aspirasi masyarakat bersama DPRD.",
 };
 

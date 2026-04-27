@@ -25,7 +25,7 @@ export default function AdminSettingsPage() {
 
   const [settings, setSettings] = useState<Record<string, string>>({
     app_name: "DPRD HUDANG",
-    app_logo: "",
+    app_logo: "/images/logo-1.png",
     app_description: "Konferensi video aspirasi masyarakat bersama DPRD.",
     stream_url: "",
     stream_key: "",

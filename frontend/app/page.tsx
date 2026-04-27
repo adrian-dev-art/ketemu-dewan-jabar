@@ -25,8 +25,8 @@ export default function Home() {
         {/* Navigation - Minimalist */}
         <nav className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-primary/20">D</div>
-            <span className="font-bold text-lg tracking-tight">DPRD<span className="text-primary font-black italic">HUDANG</span></span>
+            <Image src="/images/logo-1.png" alt="DPRD HUDANG Logo" width={200} height={50} className="h-12 w-auto object-contain dark:hidden" />
+            <Image src="/images/logo-2.png" alt="DPRD HUDANG Logo" width={200} height={50} className="h-12 w-auto object-contain hidden dark:block" />
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">Filosofi</a>
@@ -175,7 +175,7 @@ export default function Home() {
             </div>
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { char: "H-U", title: "Hirupkeun Usulan", desc: "Membangkitkan ide inovatif dari warga." },
+                { char: "H-U", title: "Hadirkeun Usulan", desc: "Membangkitkan ide inovatif dari warga." },
                 { char: "D-A", title: "Dangukeun Aspirasi", desc: "Suara didengar langsung oleh dewan." },
                 { char: "N-G", title: "Nyatakeun Gagasan", desc: "Mewujudkan kebijakan yang nyata." },
               ].map((h, i) => (
@@ -193,8 +193,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-100">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white text-sm">D</div>
-          <span className="font-bold text-sm tracking-tight">DPRD<span className="text-primary">HUDANG</span></span>
+          <Image src="/images/logo-1.png" alt="DPRD HUDANG Logo" width={150} height={38} className="h-8 w-auto object-contain dark:hidden" />
+          <Image src="/images/logo-2.png" alt="DPRD HUDANG Logo" width={150} height={38} className="h-8 w-auto object-contain hidden dark:block" />
         </div>
         <p className="text-[11px] text-muted-foreground font-medium italic">© 2026 Sekretariat DPRD Provinsi Jawa Barat.</p>
         <div className="flex gap-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
