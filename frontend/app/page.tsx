@@ -8,6 +8,8 @@ import {
   MessageSquare, Heart, Lightbulb, CheckCircle2, 
   Monitor, CalendarCheck, Zap, Globe, Lock
 } from "lucide-react";
+import DashboardCharts from "@/components/DashboardCharts";
+
 
 export default function Home() {
   const router = useRouter();
@@ -22,24 +24,7 @@ export default function Home() {
       </div>
 
       <div className="relative z-10">
-        {/* Navigation - Minimalist */}
-        <nav className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image src="/images/logo-1.png" alt="DPRD HUDANG Logo" width={200} height={50} className="h-12 w-auto object-contain dark:hidden" />
-            <Image src="/images/logo-2.png" alt="DPRD HUDANG Logo" width={200} height={50} className="h-12 w-auto object-contain hidden dark:block" />
-          </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">Filosofi</a>
-            <a href="#" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">Statistik</a>
-            <a href="#" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">Bantuan</a>
-            <button 
-              onClick={() => router.push('/dewan')}
-              className="px-6 py-2.5 bg-foreground text-background text-sm font-bold rounded-xl hover:opacity-90 transition-all"
-            >
-              Portal Dewan
-            </button>
-          </div>
-        </nav>
+
 
         {/* Hero Section - Big Refinement */}
         <section className="max-w-7xl mx-auto px-6 py-12 lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -104,98 +89,100 @@ export default function Home() {
                   </div>
                </div>
 
-               {/* Video Call Grid Mockup */}
-               <div className="p-4 grid grid-cols-2 gap-4 h-[400px] bg-slate-50">
-                  <div className="relative rounded-2xl bg-slate-900 overflow-hidden shadow-lg group-hover:scale-[1.02] transition-transform duration-500">
-                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover opacity-80" alt="Dewan" />
-                     <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[10px] text-white font-bold flex items-center gap-2 border border-white/10">
-                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                        Anggota Dewan
-                     </div>
-                  </div>
-                  <div className="relative rounded-2xl bg-slate-800 overflow-hidden shadow-lg group-hover:scale-[1.02] transition-transform duration-500 delay-75">
-                     <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover opacity-80" alt="Masyarakat" />
-                     <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/40 backdrop-blur-md rounded-lg text-[10px] text-white font-bold border border-white/10">
-                        Anda (Masyarakat)
-                     </div>
-                  </div>
-                  
-                  {/* Floating Controls Overlay */}
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-3 bg-white shadow-2xl rounded-2xl border border-slate-100 animate-in slide-in-from-bottom duration-1000 delay-700">
-                     <div className="p-2 bg-slate-100 rounded-xl"><Monitor size={18} className="text-slate-600" /></div>
-                     <div className="p-2 bg-slate-100 rounded-xl"><Video size={18} className="text-slate-600" /></div>
-                     <div className="p-2 bg-rose-500 rounded-xl text-white flex items-center justify-center">
-                        <div className="w-4 h-4 bg-white rounded-full"></div>
-                     </div>
-                     <div className="w-px h-6 bg-slate-200 mx-1"></div>
-                     <div className="text-xs font-bold text-slate-800">Sesi Berlangsung</div>
-                  </div>
+                {/* Focused Single Image Mockup */}
+                <div className="p-4 h-[400px] bg-slate-50 relative">
+                   <div className="relative w-full h-full rounded-2xl bg-slate-900 overflow-hidden shadow-lg group-hover:scale-[1.01] transition-transform duration-500">
+                      <img src="/images/dprd-building.png" className="w-full h-full object-cover opacity-95" alt="Gedung DPRD Jabar" />
+                      <div className="absolute top-4 right-4 px-3 py-1.5 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-lg">
+                        <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                        Live Conference
+                      </div>
+                      <div className="absolute bottom-6 left-6 p-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 text-white">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Lokasi Utama</p>
+                        <h3 className="text-lg font-bold">Gedung DPRD Provinsi Jawa Barat</h3>
+                      </div>
+                   </div>
+                   
+                   {/* Floating Controls Overlay */}
+                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-3 bg-white shadow-2xl rounded-2xl border border-slate-100 animate-in slide-in-from-bottom duration-1000 delay-700">
+                      <div className="p-2 bg-slate-100 rounded-xl"><Monitor size={18} className="text-slate-600" /></div>
+                      <div className="p-2 bg-slate-100 rounded-xl"><Video size={18} className="text-slate-600" /></div>
+                      <div className="p-2 bg-rose-500 rounded-xl text-white flex items-center justify-center">
+                         <div className="w-4 h-4 bg-white rounded-full"></div>
+                      </div>
+                      <div className="w-px h-6 bg-slate-200 mx-1"></div>
+                      <div className="text-xs font-bold text-slate-800">Sesi Berlangsung</div>
+                   </div>
+                </div>
+             </div>
+
+             {/* Decorative Floating Badges */}
+             <div className="absolute -top-6 -right-6 p-5 bg-white shadow-2xl rounded-[2rem] border border-slate-100 animate-bounce duration-[4000ms]">
+                <CheckCircle2 className="text-emerald-500" size={32} />
+             </div>
+             <div className="absolute top-1/2 -left-12 p-5 bg-white shadow-2xl rounded-[2rem] border border-slate-100 animate-bounce duration-[5000ms] delay-1000">
+                <Zap className="text-primary" size={32} />
+             </div>
+           </div>
+         </section>
+
+         {/* Re-implementing simplified Stats/Trust below */}
+         <section className="max-w-7xl mx-auto px-6 py-20">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 border-y border-slate-100 py-12">
+             {[
+               { label: "Dewan Aktif", value: "120+", icon: ShieldCheck },
+               { label: "Sesi Diskusi", value: "5.4k+", icon: Video },
+               { label: "Umpan Balik", value: "98%", icon: Heart },
+               { label: "Warga Jabar", value: "10k+", icon: Users },
+             ].map((stat, i) => (
+               <div key={i} className="text-center space-y-2">
+                 <div className="flex items-center justify-center gap-2 text-primary">
+                   <stat.icon size={18} />
+                   <span className="text-3xl font-black tracking-tight">{stat.value}</span>
+                 </div>
+                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                </div>
-            </div>
+             ))}
+           </div>
+         </section>
 
-            {/* Decorative Floating Badges */}
-            <div className="absolute -top-6 -right-6 p-5 bg-white shadow-2xl rounded-[2rem] border border-slate-100 animate-bounce duration-[4000ms]">
-               <CheckCircle2 className="text-emerald-500" size={32} />
-            </div>
-            <div className="absolute top-1/2 -left-12 p-5 bg-white shadow-2xl rounded-[2rem] border border-slate-100 animate-bounce duration-[5000ms] delay-1000">
-               <Zap className="text-primary" size={32} />
-            </div>
-          </div>
-        </section>
+         {/* Data Summary Section */}
+         <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
+            <DashboardCharts title="Statistik Partisipasi Publik" />
+         </section>
+       </div>
 
-        {/* Re-implementing simplified Stats/Trust below */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 border-y border-slate-100 py-12">
-            {[
-              { label: "Dewan Aktif", value: "120+", icon: ShieldCheck },
-              { label: "Sesi Diskusi", value: "5.4k+", icon: Video },
-              { label: "Umpan Balik", value: "98%", icon: Heart },
-              { label: "Warga Jabar", value: "10k+", icon: Users },
-            ].map((stat, i) => (
-              <div key={i} className="text-center space-y-2">
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <stat.icon size={18} />
-                  <span className="text-3xl font-black tracking-tight">{stat.value}</span>
-                </div>
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+       {/* Philosophy Section */}
+       <section className="bg-slate-50 py-32">
+         <div className="max-w-7xl mx-auto px-6">
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+             <div className="space-y-6">
+               <h2 className="text-4xl font-black tracking-tighter">Filosofi <span className="text-primary">HUDANG</span></h2>
+               <p className="text-muted-foreground leading-relaxed">Semangat membangun Jawa Barat melalui partisipasi digital yang inklusif.</p>
+               <div className="w-12 h-1.5 bg-primary rounded-full"></div>
+             </div>
+             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+               {[
+                 { char: "H-U", title: "Hadirkeun Usulan", desc: "Membangkitkan ide inovatif dari warga." },
+                 { char: "D-A", title: "Dangukeun Aspirasi", desc: "Suara didengar langsung oleh dewan." },
+                 { char: "N-G", title: "Nyatakeun Gagasan", desc: "Mewujudkan kebijakan yang nyata." },
+               ].map((h, i) => (
+                 <div key={i} className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow">
+                   <div className="text-[10px] font-black text-primary/40 mb-4 tracking-widest">{h.char}</div>
+                   <h3 className="font-bold text-lg mb-2">{h.title}</h3>
+                   <p className="text-xs text-muted-foreground leading-relaxed">{h.desc}</p>
+                 </div>
+               ))}
+             </div>
+           </div>
+         </div>
+       </section>
 
-      {/* Philosophy Section */}
-      <section className="bg-slate-50 py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-            <div className="space-y-6">
-              <h2 className="text-4xl font-black tracking-tighter">Filosofi <span className="text-primary">HUDANG</span></h2>
-              <p className="text-muted-foreground leading-relaxed">Semangat membangun Jawa Barat melalui partisipasi digital yang inklusif.</p>
-              <div className="w-12 h-1.5 bg-primary rounded-full"></div>
-            </div>
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { char: "H-U", title: "Hadirkeun Usulan", desc: "Membangkitkan ide inovatif dari warga." },
-                { char: "D-A", title: "Dangukeun Aspirasi", desc: "Suara didengar langsung oleh dewan." },
-                { char: "N-G", title: "Nyatakeun Gagasan", desc: "Mewujudkan kebijakan yang nyata." },
-              ].map((h, i) => (
-                <div key={i} className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl transition-shadow">
-                  <div className="text-[10px] font-black text-primary/40 mb-4 tracking-widest">{h.char}</div>
-                  <h3 className="font-bold text-lg mb-2">{h.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{h.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-100">
-        <div className="flex items-center gap-2">
-          <Image src="/images/logo-1.png" alt="DPRD HUDANG Logo" width={150} height={38} className="h-8 w-auto object-contain dark:hidden" />
-          <Image src="/images/logo-2.png" alt="DPRD HUDANG Logo" width={150} height={38} className="h-8 w-auto object-contain hidden dark:block" />
-        </div>
+       {/* Footer */}
+       <footer className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-100">
+         <div className="flex items-center gap-2">
+           <Image src="/images/dprd-logo.png" alt="Sekretariat DPRD Jabar Logo" width={200} height={60} className="h-12 w-auto object-contain" />
+         </div>
         <p className="text-[11px] text-muted-foreground font-medium italic">© 2026 Sekretariat DPRD Provinsi Jawa Barat.</p>
         <div className="flex gap-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
           <a href="#" className="hover:text-primary transition-colors">Privacy</a>

@@ -6,7 +6,9 @@ import {
   MessageSquare, RefreshCw, ChevronDown, ChevronUp, Search,
   Download, BarChart2, Filter, Database, Trash2, Edit, Check, X, Calendar
 } from "lucide-react";
+import DashboardCharts from "@/components/DashboardCharts";
 import ProtectedRoute from "@/components/ProtectedRoute";
+
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -314,6 +316,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Analytics Summary */}
+          <div className="mb-12 bg-white rounded-[2.5rem] border border-border p-8 shadow-sm">
+             <DashboardCharts title="Analitik Sistem & Partisipasi" />
           </div>
 
           {/* Tabs */}
