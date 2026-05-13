@@ -27,6 +27,7 @@ services:
     restart: always
     volumes:
       - ./backend/src:/app/src
+      - ./recordings:/app/recordings
     environment:
       DATABASE_URL: postgresql://${DB_USER:-meetdewan_user}:${DB_PASSWORD:-meetdewan_pass}@db:5432/${DB_NAME:-meetdewan_db}?schema=public
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
@@ -37,11 +38,13 @@ services:
       CENTRE_PULL_SECRET: ${CENTRE_PULL_SECRET:-centre-pull-secret-dprd-2025}
       CENTRE_HUB_URL: http://dprd_centre_backend:8000/api/v1/members
       CENTRE_API_KEY: c1547650-291c-4ce7-a78d-e889a4f9b767
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
-      - "5001:5000"
+      - "5000:5000"
     depends_on:
       db:
         condition: service_healthy
+    command: sh -c "npx prisma generate && npm_config_cache=/tmp/npm npx --yes tsx watch src/server.ts"
     networks:
       - meetdewan_net
 
@@ -50,12 +53,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5001}
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5000}
         NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
     container_name: meetdewan_frontend
     restart: always
     environment:
-      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5001}
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5000}
       NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
       PORT: 3000
     ports:
@@ -95,11 +98,13 @@ services:
   egress:
     image: livekit/egress:latest
     container_name: meetdewan_egress
+    shm_size: '2gb'
     restart: always
     environment:
       - EGRESS_CONFIG_FILE=/etc/egress.yaml
     volumes:
       - ./livekit/egress.yaml:/etc/egress.yaml:ro
+      - ./recordings:/recordings
     depends_on:
       - livekit
       - redis

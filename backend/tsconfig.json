@@ -17,6 +17,10 @@
     "fix_db.ts",
     "src/fix_db.ts",
     "src/debug_upsert.js",
-    "src/fix_db.js"
+    "src/fix_db.js",
+    "check-room.ts",
+    "test-stream.ts",
+    "scratch/**/*",
+    "src/services/__tests__/**/*"
   ]
 }

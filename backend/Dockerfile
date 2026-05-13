@@ -19,7 +19,16 @@ RUN npm run build
 # Production stage
 FROM node:20
 
+# Install ffmpeg for audio extraction
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
+
+# Copy necessary files
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
 
 # Create a non-root user (Debian style)
 RUN groupadd -r nodejs && useradd -r -g nodejs nextjs

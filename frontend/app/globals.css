@@ -156,9 +156,11 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.25rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 20;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Main Content (video + chat side by side) ── */
@@ -181,7 +183,48 @@ h1, h2, h3, h4, h5, h6 {
 .room-video-grid {
   width: 100% !important;
   height: 100% !important;
-  gap: 0.5rem !important;
+  gap: 1rem !important;
+  padding: 0.5rem !important;
+}
+
+/* ── Speaker View (Presenter View) ── */
+.room-speaker-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 1rem;
+}
+
+.room-speaker-main {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0a0a0f;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.room-speaker-strip {
+  flex-shrink: 0;
+  height: 160px;
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+}
+
+.room-speaker-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.room-speaker-strip .lk-participant-tile {
+  width: 240px !important;
+  height: 100% !important;
+  flex-shrink: 0;
 }
 
 /* ── Chat Sidebar ── */

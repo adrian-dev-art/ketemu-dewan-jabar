@@ -39,9 +39,9 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
       backgroundColor: [
         'rgba(16, 185, 129, 0.8)', 
         'rgba(59, 130, 246, 0.8)', 
-        'rgba(99, 102, 241, 0.8)', 
+        'rgba(239, 68, 68, 0.8)', 
         'rgba(245, 158, 11, 0.8)', 
-        'rgba(239, 68, 68, 0.8)'
+        'rgba(100, 116, 139, 0.8)'
       ],
       borderColor: '#fff',
       borderWidth: 2,
@@ -73,7 +73,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
     datasets: [{
       label: 'Sesi Selesai',
       data: [15, 12, 10, 8, 7],
-      backgroundColor: 'rgba(99, 102, 241, 0.8)',
+      backgroundColor: 'rgba(239, 68, 68, 0.8)',
       borderRadius: 8,
     }]
   };
@@ -173,7 +173,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
         {[
           { label: 'Total Aspirasi', value: '1,284', grow: '+12.5%', icon: MessageSquare, color: 'text-blue-600 bg-blue-50' },
           { label: 'Sesi Aktif', value: '42', grow: '+8.2%', icon: TrendingUp, color: 'text-amber-600 bg-amber-50' },
-          { label: 'Tingkat Kepuasan', value: '98.2%', grow: '+2.4%', icon: Award, color: 'text-indigo-600 bg-indigo-50' },
+          { label: 'Tingkat Kepuasan', value: '98.2%', grow: '+2.4%', icon: Award, color: 'text-red-600 bg-red-50' },
           { label: 'Warga Terlibat', value: '10.4k', grow: '+15.7%', icon: Users, color: 'text-emerald-600 bg-emerald-50' },
         ].map((card, i) => (
           <div key={i} className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
@@ -229,7 +229,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
         {/* Ranking Komisi */}
         <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
+            <div className="p-2.5 bg-red-50 rounded-xl text-red-600">
               <Award size={18} />
             </div>
             <h3 className="font-bold text-sm">Ranking Komisi Aktif</h3>
@@ -255,7 +255,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
         {/* Ranking Anggota */}
         <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600">
+            <div className="p-2.5 bg-red-50 rounded-xl text-red-600">
               <Users size={18} />
             </div>
             <h3 className="font-bold text-sm">Ranking Anggota Teraktif</h3>

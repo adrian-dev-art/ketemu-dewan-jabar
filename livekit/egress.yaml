@@ -1,5 +1,5 @@
-api_key: "devkey"
-api_secret: "secretkey"
+api_key: "APIFpMEuSWpPbJs"
+api_secret: "DzdhKv9Xnk3RGv7naIsZi66RfKyeGTz2KxKP7QP8FBQ"
 ws_url: "ws://livekit:7880"
 redis:
   address: "redis:6379"

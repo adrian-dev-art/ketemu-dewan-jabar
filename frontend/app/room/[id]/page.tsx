@@ -13,6 +13,8 @@ import {
   useParticipants,
   useRoomInfo,
   TrackToggle,
+  FocusLayout,
+  useLocalParticipant,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
@@ -30,6 +32,11 @@ import {
   LogOut,
   VideoOff,
   MicOff,
+  LayoutGrid,
+  UserSquare2,
+  Circle,
+  Square,
+  StopCircle,
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
@@ -67,7 +74,7 @@ function ParticipantCount() {
 }
 
 // ─── Video Stage ─────────────────────────────────────────────
-function VideoStage() {
+function VideoStage({ layout }: { layout: 'grid' | 'speaker' }) {
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -75,6 +82,35 @@ function VideoStage() {
     ],
     { onlySubscribed: false }
   );
+
+  if (layout === 'speaker') {
+    // Find active speaker or fallback to first participant
+    const activeTracks = tracks.filter(t => t.participant.isSpeaking);
+    const mainTrack = activeTracks.length > 0 ? activeTracks[0] : tracks[0];
+    const otherTracks = tracks.filter(t => t !== mainTrack);
+
+    return (
+      <div className="room-speaker-view">
+        <div className="room-speaker-main">
+          {mainTrack ? (
+             <ParticipantTile trackRef={mainTrack} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-white/20">
+              <Users size={48} />
+            </div>
+          )}
+        </div>
+        {otherTracks.length > 0 && (
+          <div className="room-speaker-strip">
+            {otherTracks.map(t => (
+              <ParticipantTile key={`${t.participant.identity}-${t.source}`} trackRef={t} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <GridLayout tracks={tracks} className="room-video-grid">
       <ParticipantTile />
@@ -86,6 +122,8 @@ function VideoStage() {
 function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: string; meetingId: string; meetingDetails: any; onLeave: () => void }) {
   const { user } = useAuth();
   const [chatOpen, setChatOpen] = useState(true);
+  const [layout, setLayout] = useState<'grid' | 'speaker'>('grid');
+  const [isRecording, setIsRecording] = useState(meetingDetails?.isRecording || false);
 
   return (
     <div className="room-container">
@@ -162,7 +200,61 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
               </button>
             )
           )}
+          <div className="flex items-center bg-white/[0.05] rounded-full p-1 border border-white/[0.1]">
+            <button
+              onClick={() => setLayout('grid')}
+              className={`p-1.5 rounded-full transition-all ${layout === 'grid' ? 'bg-emerald-500 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
+              title="Grid View"
+            >
+              <LayoutGrid size={14} />
+            </button>
+            <button
+              onClick={() => setLayout('speaker')}
+              className={`p-1.5 rounded-full transition-all ${layout === 'speaker' ? 'bg-emerald-500 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
+              title="Speaker View"
+            >
+              <UserSquare2 size={14} />
+            </button>
+          </div>
+
           <ParticipantCount />
+          
+          {user?.role === 'admin' && (
+             <button
+                onClick={async () => {
+                  try {
+                    const endpoint = isRecording ? 'stop' : 'start';
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/record/${endpoint}`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                      },
+                      body: JSON.stringify({ scheduleId: meetingId, roomName: roomId })
+                    });
+                    
+                    if (res.ok) {
+                      setIsRecording(!isRecording);
+                    } else {
+                      const data = await res.json();
+                      alert("Gagal mengelola rekaman: " + data.error);
+                    }
+                  } catch (err) {
+                    console.error("Recording error:", err);
+                    alert("Terjadi kesalahan koneksi saat mencoba merekam.");
+                  }
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all border ${
+                  isRecording 
+                  ? "bg-red-500/20 border-red-500/40 text-red-400" 
+                  : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
+                }`}
+             >
+                {isRecording ? <StopCircle size={12} className="animate-pulse" /> : <Circle size={12} />}
+                <span className="text-[10px] font-bold uppercase tracking-wider">{isRecording ? "Stop Rec" : "Record"}</span>
+             </button>
+          )}
+
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
             <Shield size={12} className="text-emerald-400" />
             <span className="text-[10px] font-medium text-emerald-300">Terenkripsi</span>
@@ -174,7 +266,7 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
       <div className="room-main">
         {/* Video Stage */}
         <div className="room-video-area">
-          <VideoStage />
+          <VideoStage layout={layout} />
         </div>
 
         {/* Chat Sidebar */}
@@ -351,6 +443,15 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         serverUrl={liveKitUrl}
         onDisconnected={handleDisconnected}
         className="room-livekit-root"
+        options={{
+          publishDefaults: {
+            simulcast: true,
+            videoCodec: 'vp8',
+          },
+          videoCaptureDefaults: {
+            resolution: { width: 1280, height: 720, frameRate: 30 }
+          }
+        }}
       >
         <ActiveRoom roomId={roomId} meetingId={roomId} meetingDetails={meetingDetails} onLeave={handleDisconnected} />
         <RoomAudioRenderer />

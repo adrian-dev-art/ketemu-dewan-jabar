@@ -2,14 +2,18 @@ import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { AccessToken, EgressClient, EncodedFileOutput, EncodedFileType, StreamOutput, EncodingOptionsPreset } from 'livekit-server-sdk';
+import { transcribeVideo } from './services/transcriptionService';
+import * as fs from 'fs';
+import * as path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import { rateLimit } from 'express-rate-limit';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { syncHubData } from './services/hubSync';
+import { startQueueDaemon } from './services/queueService';
 
 dotenv.config();
 
@@ -42,40 +46,55 @@ const egressClient = new EgressClient(
 // Trust proxy for accurate rate limiting (Nginx)
 app.set('trust proxy', 1);
 
+// 1. Custom CORS Middleware (MUST BE FIRST)
+app.use((req, res, next) => {
+    const origin = req.headers.origin as string;
+    const allowedOrigins = process.env.FRONTEND_URL 
+        ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) 
+        : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'];
+    
+    if (origin && (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production')) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else if (!origin && process.env.NODE_ENV !== 'production') {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100,
+    limit: 1000, // Increased for development
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
 
-app.use(limiter);
-
-// Stricter rate limiting for auth endpoints
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 10, // Max 10 attempts per IP per 15 mins
+    windowMs: 15 * 60 * 1000,
+    limit: 50, // Increased for development
     message: { error: "Terlalu banyak percobaan login. Silakan coba lagi nanti." },
     standardHeaders: 'draft-7',
     legacyHeaders: false,
 });
 
-app.use(helmet());
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = process.env.FRONTEND_URL 
-            ? process.env.FRONTEND_URL.split(',').map(o => o.trim()).map(o => o.trim()) 
-            : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+app.use(helmet({
+    crossOriginResourcePolicy: false, // Memudahkan akses resource dari frontend
+    hsts: process.env.NODE_ENV === 'production', // Jangan paksa HTTPS di localhost
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : {
+        directives: {
+            upgradeInsecureRequests: null // Jangan upgrade ke HTTPS di localhost
         }
-    },
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true
+    }
 }));
 app.use(express.json());
+app.use('/recordings', express.static('/app/recordings'));
 
 const server = http.createServer(app);
 
@@ -395,7 +414,7 @@ app.post('/api/admin/sync-centre', authenticateToken, authorizeRole(['admin']), 
 });
 
 // 7. Submit Multi-Aspect Rating (Masyarakat only)
-app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat']), async (req, res) => {
+app.post('/api/ratings', authenticateToken, authorizeRole(['masyarakat', 'admin', 'dewan']), async (req, res) => {
     const { schedule_id, dewan_id, speaking_score, context_score, time_score, responsiveness_score, solution_score, comment } = req.body;
     try {
         const result = await prisma.rating.create({
@@ -503,13 +522,19 @@ app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (
 // 15. Admin - Update User (Admin only)
 app.patch('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     const id = parseInt(req.params.id);
-    const data = req.body;
+    const { password, ...otherData } = req.body;
     try {
+        const updateData: any = { ...otherData };
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.passwordHash = await bcrypt.hash(password, salt);
+        }
+        
         const updated = await prisma.user.update({
             where: { id },
-            data
+            data: updateData
         });
-        res.json({ message: "Pengguna berhasil diperbarui", user: updated });
+        res.json({ message: "Pengguna berhasil diperbarui", user: { id: updated.id, email: updated.email } });
     } catch (err) {
         console.error("Error updating user:", err);
         res.status(500).json({ error: "Gagal memperbarui pengguna" });
@@ -940,6 +965,7 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
             }
         );
 
+
         at.addGrant({ roomJoin: true, room: roomName });
         const token = await at.toJwt();
 
@@ -958,7 +984,7 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
                             console.log(`[STREAM API] Starting auto-egress for room: ${roomName} to ${url.value}`);
                             const info = await egressClient.startRoomCompositeEgress(roomName, {
                                 stream: { urls: [fullStreamUrl] },
-                                options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                                options: { preset: EncodingOptionsPreset.H264_1080P_30 }
                             } as any);
                             
                             await prisma.schedule.update({
@@ -978,6 +1004,86 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
     } catch (error) {
         console.error("Error generating LiveKit token:", error);
         res.status(500).json({ error: "Failed to generate token" });
+    }
+});
+
+// Recording Endpoints
+app.post('/api/livekit/record/start', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId, roomName } = req.body;
+    try {
+        console.log(`[RECORD API] Record start requested for room: ${roomName}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        if (schedule && !schedule.isRecording) {
+            const timestamp = new Date().getTime();
+            const fileName = `recording_${parsedScheduleId}_${timestamp}.mp4`;
+            const filePath = `/recordings/${fileName}`; 
+            const recordingUrl = `/recordings/${fileName}`;
+
+            const info = await egressClient.startRoomCompositeEgress(roomName, {
+                file: { filepath: filePath },
+                options: { preset: EncodingOptionsPreset.H264_1080P_30 }
+            } as any);
+
+            await prisma.schedule.update({
+                where: { id: parsedScheduleId },
+                data: { isRecording: true, egressId: info.egressId, recordingUrl }
+            });
+            
+            console.log(`[RECORD API] Recording started. egressId: ${info.egressId}`);
+            res.json({ message: "Rekaman dimulai", egressId: info.egressId });
+        } else {
+            res.status(400).json({ error: "Sesi sudah merekam atau tidak ditemukan" });
+        }
+    } catch (err) {
+        console.error("[RECORD API] Error starting recording:", err);
+        res.status(500).json({ error: "Gagal memulai rekaman" });
+    }
+});
+
+app.post('/api/livekit/record/stop', authenticateToken, authorizeRole(['admin', 'dewan']), async (req, res) => {
+    const { scheduleId } = req.body;
+    try {
+        console.log(`[RECORD API] Record stop requested for scheduleId: ${scheduleId}`);
+        const parsedScheduleId = Number(scheduleId);
+        if (isNaN(parsedScheduleId)) {
+            return res.status(400).json({ error: "ID Jadwal tidak valid" });
+        }
+        
+        const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
+        if (schedule?.egressId && schedule.isRecording) {
+            try {
+                await egressClient.stopEgress(schedule.egressId);
+            } catch (egressErr: any) {
+                // If egress is already stopped/aborted, LiveKit returns 412. 
+                // We still want to clear our DB state in this case.
+                console.warn(`[RECORD API] LiveKit stopEgress warned: ${egressErr.message}`);
+                if (egressErr.status !== 412 && !egressErr.message?.includes("cannot be stopped")) {
+                    throw egressErr; // Re-throw if it's a real connection error
+                }
+            }
+            
+            await prisma.schedule.update({
+                where: { id: parsedScheduleId },
+                data: { 
+                    isRecording: false, 
+                    egressId: null,
+                }
+            });
+            
+            console.log(`[RECORD API] Recording stopped successfully for scheduleId: ${parsedScheduleId}`);
+            res.json({ message: "Rekaman dihentikan" });
+        } else {
+            console.warn(`[RECORD API] No active recording found for scheduleId: ${parsedScheduleId}`);
+            res.status(404).json({ error: "Tidak ada sesi rekaman aktif" });
+        }
+    } catch (err: any) {
+        console.error("[RECORD API] Error stopping recording:", err);
+        res.status(500).json({ error: "Gagal menghentikan rekaman: " + (err.message || "Unknown error") });
     }
 });
 
@@ -1002,7 +1108,7 @@ app.post('/api/livekit/egress/start', authenticateToken, authorizeRole(['admin',
                 
                 const info = await egressClient.startRoomCompositeEgress(roomName, {
                     stream: { urls: [fullStreamUrl] },
-                    options: { preset: EncodingOptionsPreset.H264_720P_30 }
+                    options: { preset: EncodingOptionsPreset.H264_1080P_30 }
                 } as any);
                 
                 await prisma.schedule.update({
@@ -1022,6 +1128,71 @@ app.post('/api/livekit/egress/start', authenticateToken, authorizeRole(['admin',
     } catch (err) {
         console.error("[STREAM API] Error starting egress manually:", err);
         res.status(500).json({ error: "Gagal memulai streaming" });
+    }
+});
+
+// Admin: Transcribe Recording
+app.post('/api/admin/schedules/:id/transcribe', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        const schedule = await prisma.schedule.findUnique({ where: { id } });
+        if (!schedule || !schedule.recordingUrl) {
+            return res.status(404).json({ error: "Rekaman tidak ditemukan untuk jadwal ini" });
+        }
+
+        if (schedule.isTranscribing) {
+            return res.status(400).json({ error: "Transkripsi sedang berjalan" });
+        }
+
+        // Resolve video path: handle both Docker (/app) and local development paths
+        const path = require('path');
+        const fs = require('fs');
+        let videoPath = path.join(process.cwd(), '..', schedule.recordingUrl);
+        
+        // If not found, try various path combinations
+        if (!fs.existsSync(videoPath)) {
+            videoPath = path.join(process.cwd(), schedule.recordingUrl);
+        }
+
+        // If STILL not found and in Docker environment, use /app
+        if (!fs.existsSync(videoPath) && fs.existsSync('/app')) {
+            videoPath = `/app${schedule.recordingUrl}`;
+        }
+
+        // SMART SEARCH: If still not found, look for any file starting with recording_{id}_
+        if (!fs.existsSync(videoPath)) {
+            const recordingsDir = path.join(process.cwd(), '..', 'recordings');
+            if (fs.existsSync(recordingsDir)) {
+                const files = fs.readdirSync(recordingsDir);
+                const matchingFile = files.find((f: string) => f.startsWith(`recording_${id}_`) && f.endsWith('.mp4'));
+                if (matchingFile) {
+                    videoPath = path.join(recordingsDir, matchingFile);
+                    console.log(`[PIPELINE] Found matching file via smart search: ${videoPath}`);
+                }
+            }
+        }
+
+        if (!fs.existsSync(videoPath)) {
+            console.error(`[PIPELINE] File not found for schedule ${id}: ${videoPath}`);
+            return res.status(404).json({ error: "File rekaman tidak ditemukan di server. Pastikan rekaman sudah selesai diunggah." });
+        }
+        
+        // Reset status agar diambil oleh Queue Daemon
+        await prisma.schedule.update({
+            where: { id },
+            data: { 
+                isTranscribing: false,
+                isAnalyzing: false,
+                transcriptionStatus: null,
+                transcriptionProgress: 0
+            }
+        });
+
+        console.log(`[PIPELINE] Jadwal ${id} dimasukkan kembali ke antrean transkripsi.`);
+        res.json({ message: "Transkripsi telah dimasukkan ke dalam antrean otomatis." });
+    } catch (err: any) {
+        console.error("Error starting transcription:", err);
+        res.status(500).json({ error: "Gagal memasukkan ke antrean: " + (err.message || "Internal Error") });
     }
 });
 
@@ -1076,4 +1247,7 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server berjalan di port ${PORT}`);
+    startQueueDaemon(); // Jalankan antrean otomatis
+});

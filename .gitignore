@@ -30,3 +30,8 @@ Thumbs.db
 
 # Prisma
 /backend/prisma/migrations/
+
+# Recordings and Logs
+recordings/
+*.log
+backend/scratch/

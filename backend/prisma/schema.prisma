@@ -60,7 +60,15 @@ model Schedule {
   masyarakatId Int
   ratings      Rating[]
   isStreaming  Boolean               @default(false)
+  isRecording  Boolean               @default(false)
   egressId     String?
+  recordingUrl String?
+  transcription String?
+  isTranscribing Boolean               @default(false)
+  transcriptionProgress Int           @default(0)
+  transcriptionStatus String?
+  analysis      Json?
+  isAnalyzing   Boolean               @default(false)
   masyarakat   User                  @relation("MasyarakatSchedules", fields: [masyarakatId], references: [id])
   participants ScheduleParticipant[]
 }
