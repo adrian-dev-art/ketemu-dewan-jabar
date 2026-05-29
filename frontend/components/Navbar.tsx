@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { LogIn, LogOut, Home, Users, UserCog, ShieldCheck } from "lucide-react";
+import { LogIn, LogOut, Home, Users, UserCog, ShieldCheck, Map } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
@@ -48,6 +48,11 @@ export default function Navbar() {
               <span className="hidden sm:inline">Admin</span>
             </Link>
           )}
+
+          <Link href="/gis" className={linkClass("/gis")}>
+            <Map size={14} />
+            <span className="hidden sm:inline">Peta Aspirasi</span>
+          </Link>
 
           <Link href="/profile" className={linkClass("/profile")}>
             <UserCog size={14} />

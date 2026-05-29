@@ -289,7 +289,7 @@ export default function AdminDashboard() {
       const matchesSearch = (s.title || "").toLowerCase().includes(scheduleSearch.toLowerCase()) || 
                            (s.masyarakat?.name || "").toLowerCase().includes(scheduleSearch.toLowerCase()) ||
                            dewanNames.includes(scheduleSearch.toLowerCase());
-      const matchesStatus = scheduleStatusFilter === "all" || s.status === scheduleStatusFilter;
+      const matchesStatus = scheduleStatusFilter === "all" || (s.status || "").toLowerCase() === scheduleStatusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });
   }, [schedulesList, scheduleSearch, scheduleStatusFilter]);
@@ -586,7 +586,7 @@ export default function AdminDashboard() {
                 >
                   <option value="all">Semua Status</option>
                   <option value="pending">Menunggu</option>
-                  <option value="accepted">Disetujui</option>
+                  <option value="confirmed">Disetujui</option>
                   <option value="completed">Selesai</option>
                   <option value="cancelled">Dibatalkan</option>
                 </select>
@@ -630,9 +630,9 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4">
                             <div className="flex justify-center">
                               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                s.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                s.status === 'accepted' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                                s.status === 'cancelled' ? 'bg-red-50 text-red-600 border border-red-100' :
+                                s.status === 'completed' || s.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                s.status === 'confirmed' || s.status === 'CONFIRMED' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                s.status === 'cancelled' || s.status === 'CANCELLED' ? 'bg-red-50 text-red-600 border border-red-100' :
                                 'bg-amber-50 text-amber-600 border border-amber-100'
                               }`}>
                                 {s.status}
@@ -653,7 +653,7 @@ export default function AdminDashboard() {
                                 </a>
                               )}
 
-                              {(s.status === 'accepted' || s.status === 'CONFIRMED' || s.status === 'confirmed') && (
+                              {(s.status === 'confirmed' || s.status === 'CONFIRMED') && (
                                 <button
                                   onClick={() => router.push(`/room/${s.id}`)}
                                   className="p-1.5 hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"
@@ -794,7 +794,7 @@ export default function AdminDashboard() {
                       onChange={(e) => setEditingSchedule({ ...editingSchedule, status: e.target.value })}
                     >
                       <option value="pending">Pending</option>
-                      <option value="accepted">Accepted</option>
+                      <option value="confirmed">Confirmed</option>
                       <option value="completed">Completed</option>
                       <option value="cancelled">Cancelled</option>
                     </select>

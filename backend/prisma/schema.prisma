@@ -21,6 +21,10 @@ model User {
   dapil                 String?
   noKtp                 String?
   instansi              String?
+  kabupaten             String?
+  kecamatan             String?
+  alamat                String?
+  provinsi              String?
   isSync                Boolean        @default(false)
   availabilities        Availability[] @relation("DewanAvailability")
   ratingsAsDewan        Rating[]              @relation("DewanRatings")
