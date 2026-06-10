@@ -761,6 +761,26 @@ app.get('/api/gis/recap', authenticateToken, async (req: AuthRequest, res) => {
     }
 });
 
+app.get('/api/gis/kunjungan', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+        const response = await fetch('http://dprd-backend:5000/api/perjalanan-dinas/stats/tujuan', {
+            headers: {
+                'x-api-key': 'dprd-centre-secret-key-2026-integration'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch travel stats: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (err: any) {
+        console.error("Error fetching travel GIS recap:", err);
+        res.status(500).json({ error: "Gagal memproses data GIS Kunjungan Kerja" });
+    }
+});
+
 
 // 14. Admin - All Users (Admin only)
 app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
