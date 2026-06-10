@@ -129,9 +129,22 @@ export default function AdminDashboard() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState("all");
   const [transcribingId, setTranscribingId] = useState<number | null>(null);
-  const [viewingTranscription, setViewingTranscription] = useState<string | null>(null);
-  const [viewingAnalysis, setViewingAnalysis] = useState<any | null>(null);
+  const [viewingScheduleId, setViewingScheduleId] = useState<number | null>(null);
   const [analysisTitle, setAnalysisTitle] = useState<string>("");
+
+  const viewingSchedule = useMemo(() => {
+    return schedulesList.find(s => s.id === viewingScheduleId);
+  }, [schedulesList, viewingScheduleId]);
+
+  const viewingAnalysis = useMemo(() => {
+    if (!viewingSchedule) return null;
+    return viewingSchedule.analysis || { pending: true };
+  }, [viewingSchedule]);
+
+  const viewingTranscription = useMemo(() => {
+    if (!viewingSchedule) return null;
+    return viewingSchedule.transcription || "";
+  }, [viewingSchedule]);
 
   const fetchData = async () => {
     if (!token) return;
@@ -666,8 +679,7 @@ export default function AdminDashboard() {
                               {s.recordingUrl && s.status === 'completed' && (
                                 <button
                                   onClick={() => {
-                                    setViewingAnalysis(s.analysis || { pending: true });
-                                    setViewingTranscription(s.transcription || "");
+                                    setViewingScheduleId(s.id);
                                     setAnalysisTitle(s.title || "Diskusi Aspirasi");
                                   }}
                                   className="p-1.5 hover:bg-purple-500/10 rounded-lg text-purple-500 transition-colors"
@@ -843,10 +855,9 @@ export default function AdminDashboard() {
 
         {/* Analysis & Transcription Modal */}
         <AnalysisModal 
-          isOpen={!!viewingAnalysis} 
+          isOpen={!!viewingScheduleId} 
           onClose={() => {
-            setViewingAnalysis(null);
-            setViewingTranscription(null);
+            setViewingScheduleId(null);
           }} 
           data={viewingAnalysis}
           transcription={viewingTranscription}

@@ -408,9 +408,20 @@ export default function RoomPage({ params }: { params: { id: string } }) {
   }
 
   const handleDisconnected = () => {
+    if (user?.role === 'admin') {
+      router.push("/admin");
+      return;
+    }
+    if (user?.role === 'dewan') {
+      router.push("/dewan");
+      return;
+    }
+
     if (meetingDetails) {
+      // Find the first dewan participant to rate
+      const dewanId = meetingDetails.participants?.[0]?.dewanId;
       router.push(
-        `/masyarakat?ratedMeetingId=${roomId}&dewanId=${meetingDetails.dewanId || meetingDetails.dewan_id}`
+        `/masyarakat?ratedMeetingId=${roomId}&dewanId=${dewanId || ""}`
       );
     } else {
       router.push("/masyarakat");

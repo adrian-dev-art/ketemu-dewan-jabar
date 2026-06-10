@@ -21,8 +21,8 @@ export async function processTranscriptionQueue() {
                     { transcriptionStatus: { equals: null } },
                     { transcriptionStatus: { notIn: ['Selesai', 'Gagal', 'Gagal: File Video Hilang'] } }
                 ],
-                isTranscribing: false
-
+                isTranscribing: false,
+                isRecording: false
             },
             orderBy: { id: 'asc' } // Kerjakan yang paling lama antre
         });

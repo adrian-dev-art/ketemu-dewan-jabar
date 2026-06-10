@@ -52,29 +52,39 @@ export async function processMeetingAudio(scheduleId: number, audioPath: string)
         });
 
         // 3. Generate Transcription + Analysis
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-flash-latest",
+            generationConfig: {
+                temperature: 0,
+                responseMimeType: "application/json"
+            }
+        });
         
         const prompt = `
-        Anda adalah asisten cerdas untuk DPRD Jawa Barat. Dengarkan audio rekaman pertemuan ini.
+        Anda adalah asisten cerdas untuk DPRD Jawa Barat. Dengarkan audio rekaman pertemuan ini dengan sangat teliti.
+        
         Tugas Anda:
-        1. Berikan transkripsi lengkap (verbatim) dalam Bahasa Indonesia.
-           Gunakan format percakapan yang sangat rapi:
-           [Nama Pembicara]: [Isi Pembicaraan]
-           
-           Jika nama tidak diketahui secara pasti, gunakan "Pembicara 1", "Pembicara 2", dst. 
-           Jika nama atau peran disebutkan dalam percakapan, gunakan identitas tersebut (misal: [Dewan Ratih], [Warga Joko]).
-           Tambahkan label waktu kasar di awal setiap paragraf jika memungkinkan (misal [00:15]).
+        1. Berikan transkripsi lengkap yang **SANGAT VERBATIM** (kata demi kata) sesuai dengan apa yang **AKTUAL** terdengar di dalam audio.
+           * **PERINGATAN KERAS**: JANGAN PERNAH berimprovisasi, menebak, mengasumsikan, atau menambahkan dialog, kalimat, kata, atau pembicara yang tidak benar-benar terdengar di dalam rekaman audio.
+           * Jika audio selesai atau berhenti, hentikan transkripsi Anda seketika itu juga. Jangan pernah memperpanjang atau melengkapi percakapan secara kreatif.
+           * Jika audio hanya berisi satu kalimat pendek, maka hasil transkripsi Anda harus berupa **satu kalimat pendek itu saja**.
+           * Gunakan format percakapan yang rapi:
+             [Nama/Peran Pembicara]: [Isi Pembicaraan]
+             
+             Jika nama tidak diketahui secara pasti, gunakan "Pembicara 1", "Pembicara 2", dst.
+             Jika nama/peran disebutkan dalam percakapan, gunakan identitas tersebut (misal: [Dewan Ratih], [Warga Joko]).
+             Tambahkan label waktu kasar di awal setiap paragraf jika memungkinkan (misal [00:15]).
 
-        2. Analisis kualitas diskusi dan berikan ringkasan.
+        2. Analisis kualitas diskusi secara objektif dan berikan ringkasan yang sesuai dengan konten riil yang dibahas. Jika audio sangat pendek atau tidak memiliki diskusi yang substantif, berikan analisis minimalis yang jujur apa adanya.
         
         Berikan respons dalam format JSON murni:
         {
-            "transcription": "Teks transkripsi dengan format percakapan...",
+            "transcription": "Teks transkripsi verbatim riil...",
             "analysis": {
-                "summary": "Ringkasan singkat pertemuan dalam 2-3 kalimat",
+                "summary": "Ringkasan singkat riil pertemuan dalam 1-3 kalimat",
                 "sentiment": "Positif/Netral/Negatif",
-                "topics": ["Topik 1", "Topik 2"],
-                "actionItems": ["Tindakan 1", "Tindakan 2"],
+                "topics": ["Topik riil 1", "Topik riil 2"],
+                "actionItems": ["Tindakan riil 1", "Tindakan riil 2"],
                 "citizenSatisfaction": 1-10,
                 "dewanResponsiveness": 1-10,
                 "discussionQuality": 1-10,
@@ -131,14 +141,22 @@ export async function processMeetingAudio(scheduleId: number, audioPath: string)
 			}
 		});
 
-		// Extract JSON
-		const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			console.error("[AI-PIPELINE] Raw AI Response:", fullText);
-			throw new Error("Failed to parse AI response: No JSON found");
+		console.log("[AI-PIPELINE] Raw AI Response:\n", fullText);
+
+		// Extract JSON safely
+		let parsedData;
+		try {
+			parsedData = JSON.parse(fullText.trim());
+		} catch (e) {
+			console.log("[AI-PIPELINE] Direct JSON.parse failed, attempting regex fallback...");
+			const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+			if (!jsonMatch) {
+				throw new Error("Failed to parse AI response: No JSON found in output");
+			}
+			parsedData = JSON.parse(jsonMatch[0]);
 		}
 		
-		const data = JSON.parse(jsonMatch[0]);
+		const data = parsedData;
 
 		// 4. Update Database
 		await prisma.schedule.update({

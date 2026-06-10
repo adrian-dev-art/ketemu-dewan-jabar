@@ -387,6 +387,16 @@ app.patch('/api/schedules/:id', authenticateToken, authorizeRole(['dewan', 'admi
     }
 
     try {
+        // Jika admin, dan dewan_id tidak dikirim, coba cari partisipan dewan pertama di jadwal ini
+        if (req.user!.role === 'admin' && !dewan_id) {
+            const participant = await prisma.scheduleParticipant.findFirst({
+                where: { scheduleId: Number(id) }
+            });
+            if (participant) {
+                targetDewanId = participant.dewanId;
+            }
+        }
+
         const result = await prisma.scheduleParticipant.update({
             where: {
                 scheduleId_dewanId: {
@@ -1247,7 +1257,11 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`Server berjalan di port ${PORT}`);
-    startQueueDaemon(); // Jalankan antrean otomatis
-});
+if (process.env.NODE_ENV !== 'test') {
+    server.listen(PORT, () => {
+        console.log(`Server berjalan di port ${PORT}`);
+        startQueueDaemon(); // Jalankan antrean otomatis
+    });
+}
+
+export { app };

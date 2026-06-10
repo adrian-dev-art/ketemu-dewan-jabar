@@ -3,3 +3,9 @@ api_secret: "DzdhKv9Xnk3RGv7naIsZi66RfKyeGTz2KxKP7QP8FBQ"
 ws_url: "ws://livekit:7880"
 redis:
   address: "redis:6379"
+
+cpu_cost:
+  room_composite_cpu_cost: 2.0
+  web_cpu_cost: 2.0
+  track_composite_cpu_cost: 1.0
+  track_cpu_cost: 0.5
