@@ -22,7 +22,7 @@ async function main() {
 
         // Add columns to User table
         const userColumns = [
-            'bio', 'centreId', 'nip', 'fraksi', 'jabatan', 'dapil'
+            'bio', 'centreId', 'nip', 'fraksi', 'jabatan', 'dapil', 'kabupaten', 'kecamatan'
         ];
         
         for (const col of userColumns) {

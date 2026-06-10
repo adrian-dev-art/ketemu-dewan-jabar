@@ -4,10 +4,31 @@ import { useState, useEffect } from "react";
 import { User, Mail, Shield, Save, Loader2, CheckCircle2, AlertCircle, Info, ChevronRight, Briefcase, MapPin, Building, CreditCard, FileText } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { getBackendUrl } from "@/context/utils";
+
+const KABUPATEN_JABAR = [
+  "Kota Bandung", "Kabupaten Bandung", "Kabupaten Bandung Barat", "Kota Cimahi", 
+  "Kabupaten Bogor", "Kota Bogor", "Kabupaten Karawang", "Kota Bekasi", "Kabupaten Bekasi",
+  "Kota Depok", "Kabupaten Sukabumi", "Kota Sukabumi", "Kabupaten Cianjur",
+  "Kabupaten Purwakarta", "Kabupaten Subang", "Kabupaten Sumedang", "Kabupaten Garut",
+  "Kabupaten Tasikmalaya", "Kota Tasikmalaya", "Kabupaten Ciamis", "Kota Banjar",
+  "Kabupaten Pangandaran", "Kabupaten Indramayu", "Kabupaten Cirebon", "Kota Cirebon",
+  "Kabupaten Majalengka", "Kabupaten Kuningan"
+];
+
+const KECAMATAN_MOCK: Record<string, string[]> = {
+  "Kota Bandung": ["Cibiru", "Antapani", "Cicendo", "Ujungberung", "Buah Batu", "Lengkong", "Coblong", "Sukajadi", "Sumur Bandung", "Kiaracondong"],
+  "Kabupaten Karawang": ["Telukjambe Timur", "Telukjambe Barat", "Karawang Barat", "Karawang Timur", "Klari", "Cikampek", "Rengasdengklok"],
+  "Kabupaten Bogor": ["Cibinong", "Babakan Madang", "Ciawi", "Cisarua", "Ciampea", "Parung", "Gunung Putri"],
+  "Kota Bekasi": ["Bekasi Selatan", "Bekasi Barat", "Bekasi Timur", "Bekasi Utara", "Pondok Gede", "Jatiasih"],
+  "Kabupaten Bandung": ["Soreang", "Baleendah", "Cileunyi", "Rancaekek", "Margahayu", "Pangalengan", "Ciwidey"],
+  "Kabupaten Bandung Barat": ["Ngamprah", "Lembang", "Padalarang", "Cisarua", "Cikalongwetan"],
+  "Kota Cimahi": ["Cimahi Utara", "Cimahi Tengah", "Cimahi Selatan"],
+};
 
 export default function ProfilePage() {
   const { token, user: authUser } = useAuth();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = getBackendUrl();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,6 +45,8 @@ export default function ProfilePage() {
     dapil: "",
     noKtp: "",
     instansi: "",
+    kabupaten: "",
+    kecamatan: "",
   });
 
   useEffect(() => {
@@ -258,6 +281,42 @@ export default function ProfilePage() {
                           onChange={(e) => setProfile({ ...profile, instansi: e.target.value })}
                           className="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
                         />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-muted-foreground ml-1">Kabupaten / Kota</label>
+                        <select
+                          value={profile.kabupaten || ""}
+                          onChange={(e) => setProfile({ ...profile, kabupaten: e.target.value, kecamatan: "" })}
+                          className="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
+                        >
+                          <option value="">-- Pilih Kabupaten / Kota --</option>
+                          {KABUPATEN_JABAR.map((kab) => (
+                            <option key={kab} value={kab}>{kab}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-muted-foreground ml-1">Kecamatan</label>
+                        {profile.kabupaten && KECAMATAN_MOCK[profile.kabupaten] ? (
+                          <select
+                            value={profile.kecamatan || ""}
+                            onChange={(e) => setProfile({ ...profile, kecamatan: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
+                          >
+                            <option value="">-- Pilih Kecamatan --</option>
+                            {KECAMATAN_MOCK[profile.kabupaten].map((kec) => (
+                              <option key={kec} value={kec}>{kec}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="Ketik Kecamatan Anda..."
+                            value={profile.kecamatan || ""}
+                            onChange={(e) => setProfile({ ...profile, kecamatan: e.target.value })}
+                            className="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
+                          />
+                        )}
                       </div>
                     </>
                   )}

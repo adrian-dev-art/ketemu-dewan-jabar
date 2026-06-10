@@ -44,25 +44,27 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npx prisma generate && npm_config_cache=/tmp/npm npx --yes tsx watch src/server.ts"
+    command: sh -c "npx prisma generate && npx tsx watch src/server.ts"
     networks:
       - meetdewan_net
+      - keuangan_net
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5001}
-        NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+    image: node:20-alpine
     container_name: meetdewan_frontend
     restart: always
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     environment:
       NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5001}
       NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
       PORT: 3000
     ports:
       - "3001:3000"
+    command: sh -c "npm install && npm run dev"
     depends_on:
       - backend
       - livekit
@@ -123,6 +125,9 @@ services:
 networks:
   meetdewan_net:
     driver: bridge
+  keuangan_net:
+    name: backend-dprd-keungan_default
+    external: true
 
 volumes:
   postgres_data:

@@ -49,20 +49,20 @@ app.set('trust proxy', 1);
 // 1. Custom CORS Middleware (MUST BE FIRST)
 app.use((req, res, next) => {
     const origin = req.headers.origin as string;
-    const allowedOrigins = process.env.FRONTEND_URL 
-        ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) 
+    const allowedOrigins = process.env.FRONTEND_URL
+        ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
         : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'];
-    
-    if (origin && (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production')) {
+
+    if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
-    } else if (!origin && process.env.NODE_ENV !== 'production') {
+    } else {
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
 
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
+
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
@@ -182,19 +182,23 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
 // Simple Register for demo
 app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password, noKtp, instansi } = req.body;
+    const { name, email, password, noKtp, instansi, kabupaten, kecamatan, alamat, provinsi } = req.body;
     try {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
-        
+
         const user = await prisma.user.create({
-            data: { 
-                name, 
-                email, 
-                passwordHash, 
+            data: {
+                name,
+                email,
+                passwordHash,
                 role: 'masyarakat', // Enforce role to be masyarakat
                 noKtp,
-                instansi
+                instansi,
+                kabupaten,
+                kecamatan,
+                alamat,
+                provinsi
             }
         });
 
@@ -224,7 +228,7 @@ app.get('/api/dewan', async (req, res) => {
         const dewanWithDetails = result.map((d: any) => {
             let avg = 4.5;
             if (d.ratingsAsDewan.length > 0) {
-                const totalScores = d.ratingsAsDewan.reduce((acc: number, r: any) => 
+                const totalScores = d.ratingsAsDewan.reduce((acc: number, r: any) =>
                     acc + (r.speakingScore + r.contextScore + r.timeScore) / 3, 0);
                 avg = totalScores / d.ratingsAsDewan.length;
             }
@@ -273,7 +277,7 @@ app.get('/api/dewan', async (req, res) => {
 app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin']), async (req: AuthRequest, res) => {
     const { start_time, end_time } = req.body;
     let dewan_id = req.user!.id;
-    
+
     // If admin is doing it, they must provide dewan_id
     if (req.user!.role === 'admin') {
         if (!req.body.dewan_id) {
@@ -284,7 +288,7 @@ app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin'
         // According to new rules, dewan can't add availability anymore
         return res.status(403).json({ error: "Hanya Admin yang dapat mengelola jadwal ketersediaan saat ini." });
     }
-    
+
     try {
         const result = await prisma.availability.create({
             data: {
@@ -303,9 +307,9 @@ app.post('/api/availability', authenticateToken, authorizeRole(['dewan', 'admin'
 // 3. Schedule a meeting (Protected)
 app.post('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
     const { dewan_ids, start_time, title } = req.body;
-    const masyarakat_id = req.user!.id; 
+    const masyarakat_id = req.user!.id;
     const requestedTime = new Date(start_time);
-    
+
     if (!dewan_ids || !Array.isArray(dewan_ids) || dewan_ids.length === 0) {
         return res.status(400).json({ error: "Harus memilih minimal satu Anggota Dewan" });
     }
@@ -357,16 +361,16 @@ app.get('/api/schedules', authenticateToken, async (req: AuthRequest, res) => {
             // Find specific user's status if role is dewan. Otherwise overall status
             let myStatus = 'pending';
             if (role === 'dewan') {
-                const myParticipant = s.participants.find((p:any) => p.dewanId === Number(userId));
+                const myParticipant = s.participants.find((p: any) => p.dewanId === Number(userId));
                 if (myParticipant) myStatus = myParticipant.status;
             } else {
                 // If any confirmed, mark overall as confirmed for UI simplistic rendering
-                myStatus = s.participants.some((p:any) => p.status === 'confirmed') ? 'confirmed' : s.participants.every((p:any) => p.status === 'rejected') ? 'rejected' : 'pending';
+                myStatus = s.participants.some((p: any) => p.status === 'confirmed') ? 'confirmed' : s.participants.every((p: any) => p.status === 'rejected') ? 'rejected' : 'pending';
             }
 
             return {
                 ...s,
-                status: myStatus, 
+                status: myStatus,
             };
         });
 
@@ -511,6 +515,283 @@ app.get('/api/admin/ratings', authenticateToken, authorizeRole(['admin']), async
 });
 
 
+app.get('/api/gis/recap', authenticateToken, async (req: AuthRequest, res) => {
+    const { topic, dewanId } = req.query;
+    try {
+        const schedules = await prisma.schedule.findMany({
+            include: {
+                masyarakat: {
+                    select: {
+                        id: true,
+                        name: true,
+                        kabupaten: true,
+                        kecamatan: true
+                    }
+                },
+                ratings: true,
+                participants: {
+                    include: {
+                        dewan: {
+                            select: {
+                                id: true,
+                                name: true,
+                                dapil: true,
+                                fraksi: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const aggregated: Record<string, {
+            kabupaten: string;
+            meetingsCount: number;
+            ratingsCount: number;
+            speakingSum: number;
+            contextSum: number;
+            timeSum: number;
+            responsivenessSum: number;
+            solutionSum: number;
+            
+            citizenSatisfactionSum: number;
+            citizenSatisfactionCount: number;
+            dewanResponsivenessSum: number;
+            dewanResponsivenessCount: number;
+            discussionQualitySum: number;
+            discussionQualityCount: number;
+            problemSolvingSum: number;
+            problemSolvingCount: number;
+
+            sentiments: { Positif: number; Netral: number; Negatif: number };
+            topicsMap: Record<string, number>;
+            kecamatanData: Record<string, {
+                kecamatan: string;
+                meetingsCount: number;
+                ratingsCount: number;
+                speakingSum: number;
+                contextSum: number;
+                timeSum: number;
+                responsivenessSum: number;
+                solutionSum: number;
+                sentiments: { Positif: number; Netral: number; Negatif: number };
+                topicsMap: Record<string, number>;
+            }>;
+            meetings: any[];
+        }> = {};
+
+        for (const s of schedules) {
+            const kab = s.masyarakat?.kabupaten || "Tidak Diketahui";
+            const kec = s.masyarakat?.kecamatan || "Tidak Diketahui";
+
+            let aiAnalysis: any = null;
+            if (s.analysis) {
+                try {
+                    aiAnalysis = typeof s.analysis === 'string' ? JSON.parse(s.analysis) : s.analysis;
+                } catch (e) {
+                    aiAnalysis = s.analysis;
+                }
+            }
+
+            const activeTopics = aiAnalysis?.topics || [];
+            
+            if (topic) {
+                const searchTopic = String(topic).toLowerCase();
+                const titleMatch = s.title.toLowerCase().includes(searchTopic);
+                const topicMatch = activeTopics.some((t: string) => t.toLowerCase().includes(searchTopic));
+                if (!titleMatch && !topicMatch) {
+                    continue;
+                }
+            }
+
+            if (dewanId) {
+                const targetDewanId = Number(dewanId);
+                const hasDewan = s.participants.some(p => p.dewanId === targetDewanId);
+                if (!hasDewan) {
+                    continue;
+                }
+            }
+
+            if (!aggregated[kab]) {
+                aggregated[kab] = {
+                    kabupaten: kab,
+                    meetingsCount: 0,
+                    ratingsCount: 0,
+                    speakingSum: 0,
+                    contextSum: 0,
+                    timeSum: 0,
+                    responsivenessSum: 0,
+                    solutionSum: 0,
+                    citizenSatisfactionSum: 0,
+                    citizenSatisfactionCount: 0,
+                    dewanResponsivenessSum: 0,
+                    dewanResponsivenessCount: 0,
+                    discussionQualitySum: 0,
+                    discussionQualityCount: 0,
+                    problemSolvingSum: 0,
+                    problemSolvingCount: 0,
+                    sentiments: { Positif: 0, Netral: 0, Negatif: 0 },
+                    topicsMap: {},
+                    kecamatanData: {},
+                    meetings: []
+                };
+            }
+
+            const kabObj = aggregated[kab];
+            kabObj.meetingsCount++;
+
+            if (!kabObj.kecamatanData[kec]) {
+                kabObj.kecamatanData[kec] = {
+                    kecamatan: kec,
+                    meetingsCount: 0,
+                    ratingsCount: 0,
+                    speakingSum: 0,
+                    contextSum: 0,
+                    timeSum: 0,
+                    responsivenessSum: 0,
+                    solutionSum: 0,
+                    sentiments: { Positif: 0, Netral: 0, Negatif: 0 },
+                    topicsMap: {}
+                };
+            }
+
+            const kecObj = kabObj.kecamatanData[kec];
+            kecObj.meetingsCount++;
+
+            for (const r of s.ratings) {
+                kabObj.ratingsCount++;
+                kabObj.speakingSum += r.speakingScore;
+                kabObj.contextSum += r.contextScore;
+                kabObj.timeSum += r.timeScore;
+                kabObj.responsivenessSum += r.responsivenessScore;
+                kabObj.solutionSum += r.solutionScore;
+
+                kecObj.ratingsCount++;
+                kecObj.speakingSum += r.speakingScore;
+                kecObj.contextSum += r.contextScore;
+                kecObj.timeSum += r.timeScore;
+                kecObj.responsivenessSum += r.responsivenessScore;
+                kecObj.solutionSum += r.solutionScore;
+            }
+
+            if (aiAnalysis) {
+                const sent = aiAnalysis.sentiment || "Netral";
+                const sentimentKey = (sent === "Positif" || sent === "Positive") ? "Positif" :
+                                     (sent === "Negatif" || sent === "Negative") ? "Negatif" : "Netral";
+                kabObj.sentiments[sentimentKey]++;
+                kecObj.sentiments[sentimentKey]++;
+
+                for (const t of activeTopics) {
+                    kabObj.topicsMap[t] = (kabObj.topicsMap[t] || 0) + 1;
+                    kecObj.topicsMap[t] = (kecObj.topicsMap[t] || 0) + 1;
+                }
+
+                if (typeof aiAnalysis.citizenSatisfaction === 'number') {
+                    kabObj.citizenSatisfactionSum += aiAnalysis.citizenSatisfaction;
+                    kabObj.citizenSatisfactionCount++;
+                }
+                if (typeof aiAnalysis.dewanResponsiveness === 'number') {
+                    kabObj.dewanResponsivenessSum += aiAnalysis.dewanResponsiveness;
+                    kabObj.dewanResponsivenessCount++;
+                }
+                if (typeof aiAnalysis.discussionQuality === 'number') {
+                    kabObj.discussionQualitySum += aiAnalysis.discussionQuality;
+                    kabObj.discussionQualityCount++;
+                }
+                if (typeof aiAnalysis.problemSolving === 'number') {
+                    kabObj.problemSolvingSum += aiAnalysis.problemSolving;
+                    kabObj.problemSolvingCount++;
+                }
+            }
+
+            kabObj.meetings.push({
+                id: s.id,
+                title: s.title,
+                startTime: s.startTime,
+                citizenName: s.masyarakat?.name || "Masyarakat",
+                dewanParticipants: s.participants.map(p => p.dewan?.name).filter(Boolean),
+                topics: activeTopics,
+                sentiment: aiAnalysis?.sentiment || "Netral",
+                averageRating: s.ratings.length > 0 ? (s.ratings.reduce((sum, r) => sum + (r.speakingScore + r.contextScore + r.timeScore + r.responsivenessScore + r.solutionScore) / 5, 0) / s.ratings.length) : null,
+                kecamatan: kec
+            });
+        }
+
+        const result = Object.values(aggregated).map(kab => {
+            const rCount = kab.ratingsCount || 1;
+            
+            const kecamatanList = Object.values(kab.kecamatanData).map(kec => {
+                const kecRCount = kec.ratingsCount || 1;
+                return {
+                    kecamatan: kec.kecamatan,
+                    meetingsCount: kec.meetingsCount,
+                    ratingsCount: kec.ratingsCount,
+                    aspects: {
+                        speaking: kec.ratingsCount > 0 ? Number((kec.speakingSum / kecRCount).toFixed(2)) : 0,
+                        context: kec.ratingsCount > 0 ? Number((kec.contextSum / kecRCount).toFixed(2)) : 0,
+                        time: kec.ratingsCount > 0 ? Number((kec.timeSum / kecRCount).toFixed(2)) : 0,
+                        responsiveness: kec.ratingsCount > 0 ? Number((kec.responsivenessSum / kecRCount).toFixed(2)) : 0,
+                        solution: kec.ratingsCount > 0 ? Number((kec.solutionSum / kecRCount).toFixed(2)) : 0,
+                        average: kec.ratingsCount > 0 ? Number(((kec.speakingSum + kec.contextSum + kec.timeSum + kec.responsivenessSum + kec.solutionSum) / (5 * kecRCount)).toFixed(2)) : 0
+                    },
+                    sentiments: kec.sentiments,
+                    topics: Object.entries(kec.topicsMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
+                };
+            });
+
+            return {
+                kabupaten: kab.kabupaten,
+                meetingsCount: kab.meetingsCount,
+                ratingsCount: kab.ratingsCount,
+                aspects: {
+                    speaking: kab.ratingsCount > 0 ? Number((kab.speakingSum / rCount).toFixed(2)) : 0,
+                    context: kab.ratingsCount > 0 ? Number((kab.contextSum / rCount).toFixed(2)) : 0,
+                    time: kab.ratingsCount > 0 ? Number((kab.timeSum / rCount).toFixed(2)) : 0,
+                    responsiveness: kab.ratingsCount > 0 ? Number((kab.responsivenessSum / rCount).toFixed(2)) : 0,
+                    solution: kab.ratingsCount > 0 ? Number((kab.solutionSum / rCount).toFixed(2)) : 0,
+                    average: kab.ratingsCount > 0 ? Number(((kab.speakingSum + kab.contextSum + kab.timeSum + kab.responsivenessSum + kab.solutionSum) / (5 * rCount)).toFixed(2)) : 0
+                },
+                aiAspects: {
+                    citizenSatisfaction: kab.citizenSatisfactionCount > 0 ? Number((kab.citizenSatisfactionSum / kab.citizenSatisfactionCount).toFixed(2)) : 0,
+                    dewanResponsiveness: kab.dewanResponsivenessCount > 0 ? Number((kab.dewanResponsivenessSum / kab.dewanResponsivenessCount).toFixed(2)) : 0,
+                    discussionQuality: kab.discussionQualityCount > 0 ? Number((kab.discussionQualitySum / kab.discussionQualityCount).toFixed(2)) : 0,
+                    problemSolving: kab.problemSolvingCount > 0 ? Number((kab.problemSolvingSum / kab.problemSolvingCount).toFixed(2)) : 0,
+                },
+                sentiments: kab.sentiments,
+                topics: Object.entries(kab.topicsMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+                kecamatanList,
+                meetings: kab.meetings.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+            };
+        });
+
+        res.json(result);
+    } catch (err) {
+        console.error("Error generating GIS recap:", err);
+        res.status(500).json({ error: "Gagal memproses data GIS" });
+    }
+});
+
+app.get('/api/gis/kunjungan', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+        const response = await fetch('http://dprd-backend:5000/api/perjalanan-dinas/stats/tujuan', {
+            headers: {
+                'x-api-key': 'dprd-centre-secret-key-2026-integration'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch travel stats: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (err: any) {
+        console.error("Error fetching travel GIS recap:", err);
+        res.status(500).json({ error: "Gagal memproses data GIS Kunjungan Kerja" });
+    }
+});
+
+
 // 14. Admin - All Users (Admin only)
 app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     try {
@@ -539,7 +820,7 @@ app.patch('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), a
             const salt = await bcrypt.genSalt(10);
             updateData.passwordHash = await bcrypt.hash(password, salt);
         }
-        
+
         const updated = await prisma.user.update({
             where: { id },
             data: updateData
@@ -578,13 +859,13 @@ app.get('/api/admin/schedules', authenticateToken, authorizeRole(['admin']), asy
                 }
             }
         });
-        
+
         // Flatten status for easier consumption (assumes one main status for the session)
         const formatted = schedules.map(s => ({
             ...s,
             status: s.participants[0]?.status || 'pending'
         }));
-        
+
         res.json(formatted);
     } catch (err) {
         console.error("Error fetching admin schedules:", err);
@@ -599,19 +880,19 @@ app.patch('/api/admin/schedules/:id', authenticateToken, authorizeRole(['admin']
     try {
         const updatedSchedule = await prisma.schedule.update({
             where: { id },
-            data: { 
-                title, 
-                startTime: startTime ? new Date(startTime) : undefined 
+            data: {
+                title,
+                startTime: startTime ? new Date(startTime) : undefined
             }
         });
-        
+
         if (status) {
             await prisma.scheduleParticipant.updateMany({
                 where: { scheduleId: id },
                 data: { status }
             });
         }
-        
+
         res.json({ message: "Jadwal berhasil diperbarui", schedule: updatedSchedule });
     } catch (err) {
         console.error("Error updating schedule:", err);
@@ -657,7 +938,7 @@ app.get('/api/user/profile', authenticateToken, async (req: AuthRequest, res) =>
             select: {
                 id: true, name: true, email: true, role: true, bio: true,
                 nip: true, fraksi: true, jabatan: true, dapil: true,
-                noKtp: true, instansi: true
+                noKtp: true, instansi: true, kabupaten: true, kecamatan: true
             }
         });
         res.json(user);
@@ -668,11 +949,11 @@ app.get('/api/user/profile', authenticateToken, async (req: AuthRequest, res) =>
 
 // 13. Update User Profile
 app.patch('/api/user/profile', authenticateToken, async (req: AuthRequest, res) => {
-    const { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi } = req.body;
+    const { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi, kabupaten, kecamatan } = req.body;
     try {
         const updated = await prisma.user.update({
             where: { id: req.user!.id },
-            data: { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi }
+            data: { name, bio, nip, fraksi, jabatan, dapil, noKtp, instansi, kabupaten, kecamatan }
         });
         res.json({ message: "Profil berhasil diperbarui", user: { id: updated.id, name: updated.name } });
     } catch (err) {
@@ -807,13 +1088,13 @@ app.get('/api/admin/settings/streaming', authenticateToken, authorizeRole(['admi
                 key: { in: ['stream_url', 'stream_key', 'is_auto_stream'] }
             }
         });
-        
+
         const result = {
             stream_url: settings.find(s => s.key === 'stream_url')?.value || '',
             stream_key: settings.find(s => s.key === 'stream_key')?.value || '',
             is_auto_stream: settings.find(s => s.key === 'is_auto_stream')?.value === 'true'
         };
-        
+
         res.json(result);
     } catch (err) {
         console.error("Error fetching stream settings:", err);
@@ -868,7 +1149,7 @@ app.get('/api/admin/settings', authenticateToken, authorizeRole(['admin']), asyn
 app.post('/api/admin/settings', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     const settings = req.body; // Expecting { key: value, ... }
     try {
-        const operations = Object.entries(settings).map(([key, value]) => 
+        const operations = Object.entries(settings).map(([key, value]) =>
             prisma.systemSetting.upsert({
                 where: { key },
                 update: { value: String(value) },
@@ -892,7 +1173,7 @@ app.get('/api/admin/management/export', authenticateToken, authorizeRole(['admin
             prisma.rating.findMany(),
             prisma.systemSetting.findMany()
         ]);
-        
+
         const exportData = {
             exportedAt: new Date().toISOString(),
             users,
@@ -900,7 +1181,7 @@ app.get('/api/admin/management/export', authenticateToken, authorizeRole(['admin
             ratings,
             settings
         };
-        
+
         res.setHeader('Content-disposition', 'attachment; filename=meetdewan_export.json');
         res.setHeader('Content-type', 'application/json');
         res.status(200).send(JSON.stringify(exportData, null, 2));
@@ -928,7 +1209,7 @@ app.post('/api/admin/management/cleanup', authenticateToken, authorizeRole(['adm
             });
             deletedCount += result.count;
         }
-        
+
         res.json({ message: `Cleanup berhasil. ${deletedCount} item dihapus.`, deletedCount });
     } catch (err) {
         console.error("Error during cleanup:", err);
@@ -987,7 +1268,7 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
                 if (schedule && !schedule.isStreaming) {
                     const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
                     const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
-                    
+
                     if (url?.value && key?.value) {
                         const fullStreamUrl = `${url.value}/${key.value}`;
                         try {
@@ -996,7 +1277,7 @@ app.post('/api/livekit/token', authenticateToken, async (req: AuthRequest, res) 
                                 stream: { urls: [fullStreamUrl] },
                                 options: { preset: EncodingOptionsPreset.H264_1080P_30 }
                             } as any);
-                            
+
                             await prisma.schedule.update({
                                 where: { id: parsedScheduleId },
                                 data: { isStreaming: true, egressId: info.egressId }
@@ -1026,12 +1307,12 @@ app.post('/api/livekit/record/start', authenticateToken, authorizeRole(['admin',
         if (isNaN(parsedScheduleId)) {
             return res.status(400).json({ error: "ID Jadwal tidak valid" });
         }
-        
+
         const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
         if (schedule && !schedule.isRecording) {
             const timestamp = new Date().getTime();
             const fileName = `recording_${parsedScheduleId}_${timestamp}.mp4`;
-            const filePath = `/recordings/${fileName}`; 
+            const filePath = `/recordings/${fileName}`;
             const recordingUrl = `/recordings/${fileName}`;
 
             const info = await egressClient.startRoomCompositeEgress(roomName, {
@@ -1043,7 +1324,7 @@ app.post('/api/livekit/record/start', authenticateToken, authorizeRole(['admin',
                 where: { id: parsedScheduleId },
                 data: { isRecording: true, egressId: info.egressId, recordingUrl }
             });
-            
+
             console.log(`[RECORD API] Recording started. egressId: ${info.egressId}`);
             res.json({ message: "Rekaman dimulai", egressId: info.egressId });
         } else {
@@ -1063,7 +1344,7 @@ app.post('/api/livekit/record/stop', authenticateToken, authorizeRole(['admin', 
         if (isNaN(parsedScheduleId)) {
             return res.status(400).json({ error: "ID Jadwal tidak valid" });
         }
-        
+
         const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
         if (schedule?.egressId && schedule.isRecording) {
             try {
@@ -1076,15 +1357,15 @@ app.post('/api/livekit/record/stop', authenticateToken, authorizeRole(['admin', 
                     throw egressErr; // Re-throw if it's a real connection error
                 }
             }
-            
+
             await prisma.schedule.update({
                 where: { id: parsedScheduleId },
-                data: { 
-                    isRecording: false, 
+                data: {
+                    isRecording: false,
                     egressId: null,
                 }
             });
-            
+
             console.log(`[RECORD API] Recording stopped successfully for scheduleId: ${parsedScheduleId}`);
             res.json({ message: "Rekaman dihentikan" });
         } else {
@@ -1111,16 +1392,16 @@ app.post('/api/livekit/egress/start', authenticateToken, authorizeRole(['admin',
         if (schedule && !schedule.isStreaming) {
             const url = await prisma.systemSetting.findUnique({ where: { key: 'stream_url' } });
             const key = await prisma.systemSetting.findUnique({ where: { key: 'stream_key' } });
-            
+
             if (url?.value && key?.value) {
                 const fullStreamUrl = `${url.value}/${key.value}`;
                 console.log(`[STREAM API] Streaming destination: ${url.value}`);
-                
+
                 const info = await egressClient.startRoomCompositeEgress(roomName, {
                     stream: { urls: [fullStreamUrl] },
                     options: { preset: EncodingOptionsPreset.H264_1080P_30 }
                 } as any);
-                
+
                 await prisma.schedule.update({
                     where: { id: parsedScheduleId },
                     data: { isStreaming: true, egressId: info.egressId }
@@ -1158,7 +1439,7 @@ app.post('/api/admin/schedules/:id/transcribe', authenticateToken, authorizeRole
         const path = require('path');
         const fs = require('fs');
         let videoPath = path.join(process.cwd(), '..', schedule.recordingUrl);
-        
+
         // If not found, try various path combinations
         if (!fs.existsSync(videoPath)) {
             videoPath = path.join(process.cwd(), schedule.recordingUrl);
@@ -1186,11 +1467,11 @@ app.post('/api/admin/schedules/:id/transcribe', authenticateToken, authorizeRole
             console.error(`[PIPELINE] File not found for schedule ${id}: ${videoPath}`);
             return res.status(404).json({ error: "File rekaman tidak ditemukan di server. Pastikan rekaman sudah selesai diunggah." });
         }
-        
+
         // Reset status agar diambil oleh Queue Daemon
         await prisma.schedule.update({
             where: { id },
-            data: { 
+            data: {
                 isTranscribing: false,
                 isAnalyzing: false,
                 transcriptionStatus: null,
@@ -1216,7 +1497,7 @@ app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 
             return res.status(400).json({ error: "ID Jadwal tidak valid" });
         }
         const schedule = await prisma.schedule.findUnique({ where: { id: parsedScheduleId } });
-        
+
         if (schedule?.egressId) {
             try {
                 await egressClient.stopEgress(schedule.egressId);
@@ -1245,9 +1526,9 @@ app.post('/api/livekit/egress/stop', authenticateToken, authorizeRole(['admin', 
 
 // --- SOCKET.IO (Removed legacy WebRTC signaling) ---
 const io = new Server(server, {
-    cors: { 
-        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'], 
-        methods: ['GET', 'POST'] 
+    cors: {
+        origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(o => o.trim()) : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'],
+        methods: ['GET', 'POST']
     }
 });
 

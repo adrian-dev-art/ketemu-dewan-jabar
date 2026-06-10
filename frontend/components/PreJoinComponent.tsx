@@ -13,12 +13,14 @@ export default function PreJoinComponent({ onJoin, onBack }: PreJoinProps) {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     async function setupMedia() {
       if (!videoEnabled) {
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
           setStream(null);
         }
         return;
@@ -29,6 +31,7 @@ export default function PreJoinComponent({ onJoin, onBack }: PreJoinProps) {
           video: true,
           audio: false,
         });
+        streamRef.current = newStream;
         setStream(newStream);
       } catch (err) {
         console.error("Error accessing camera:", err);
@@ -39,8 +42,9 @@ export default function PreJoinComponent({ onJoin, onBack }: PreJoinProps) {
     setupMedia();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
       }
     };
   }, [videoEnabled]);

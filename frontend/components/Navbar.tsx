@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { LogIn, LogOut, Home, Users, UserCog, ShieldCheck } from "lucide-react";
+import { LogIn, LogOut, Home, Users, UserCog, ShieldCheck, Map, Globe } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth();
@@ -24,7 +24,7 @@ export default function Navbar() {
     <div className="flex items-center gap-1">
       <Link href="/" className={linkClass("/")}>
         <Home size={14} />
-        <span className="hidden sm:inline">Beranda</span>
+        <span className="hidden lg:inline">Beranda</span>
       </Link>
 
       {user ? (
@@ -32,26 +32,36 @@ export default function Navbar() {
           {(user.role === "masyarakat" || user.role === "admin") && (
             <Link href="/masyarakat" className={linkClass("/masyarakat")}>
               <Users size={14} />
-              <span className="hidden sm:inline">Aspirasi</span>
+              <span className="hidden md:inline">Aspirasi</span>
             </Link>
           )}
           {(user.role === "dewan" || user.role === "admin") && (
             <Link href="/dewan" className={linkClass("/dewan")}>
               <UserCog size={14} />
-              <span className="hidden sm:inline">Dewan</span>
+              <span className="hidden md:inline">Dewan</span>
             </Link>
           )}
 
           {user.role === "admin" && (
             <Link href="/admin" className={linkClass("/admin")}>
               <ShieldCheck size={14} />
-              <span className="hidden sm:inline">Admin</span>
+              <span className="hidden lg:inline">Admin</span>
             </Link>
           )}
 
+          <Link href="/gis" className={linkClass("/gis")}>
+            <Map size={14} />
+            <span className="hidden xl:inline">Peta Aspirasi</span>
+          </Link>
+
+          <Link href="/gis-kunjungan" className={linkClass("/gis-kunjungan")}>
+            <Globe size={14} />
+            <span className="hidden xl:inline">Peta Kunjungan</span>
+          </Link>
+
           <Link href="/profile" className={linkClass("/profile")}>
             <UserCog size={14} />
-            <span className="hidden sm:inline">Profil</span>
+            <span className="hidden lg:inline">Profil</span>
           </Link>
 
           <div className="w-px h-5 bg-border mx-1 hidden sm:block" />

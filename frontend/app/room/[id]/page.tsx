@@ -337,6 +337,50 @@ export default function RoomPage({ params }: { params: { id: string } }) {
 
   const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
 
+  // ─── Failsafe to track & stop all media streams on page unmount ───
+  useEffect(() => {
+    const activeStreams = new Set<MediaStream>();
+    const originalGetUserMedia = navigator.mediaDevices?.getUserMedia;
+    const originalGetDisplayMedia = navigator.mediaDevices?.getDisplayMedia;
+
+    if (originalGetUserMedia) {
+      navigator.mediaDevices.getUserMedia = async function (constraints) {
+        const stream = await originalGetUserMedia.call(navigator.mediaDevices, constraints);
+        activeStreams.add(stream);
+        return stream;
+      };
+    }
+
+    if (originalGetDisplayMedia) {
+      navigator.mediaDevices.getDisplayMedia = async function (constraints) {
+        const stream = await originalGetDisplayMedia.call(navigator.mediaDevices, constraints);
+        activeStreams.add(stream);
+        return stream;
+      };
+    }
+
+    return () => {
+      // Restore originals
+      if (originalGetUserMedia) {
+        navigator.mediaDevices.getUserMedia = originalGetUserMedia;
+      }
+      if (originalGetDisplayMedia) {
+        navigator.mediaDevices.getDisplayMedia = originalGetDisplayMedia;
+      }
+      // Forcefully stop all active tracks from streams captured on this page
+      activeStreams.forEach((stream) => {
+        stream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch (err) {
+            console.error("Failsafe failed to stop track:", err);
+          }
+        });
+      });
+      activeStreams.clear();
+    };
+  }, []);
+
   useEffect(() => {
     const initRoom = async () => {
       if (!authToken || !user) return;
