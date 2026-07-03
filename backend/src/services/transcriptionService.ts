@@ -80,11 +80,15 @@ export async function transcribeVideo(scheduleId: number, videoPath: string) {
         });
 
         console.log(`[PIPELINE] Fully completed for schedule: ${scheduleId}`);
-    } catch (err) {
+    } catch (err: any) {
         console.error(`[PIPELINE] Error for schedule ${scheduleId}:`, err);
         await prisma.schedule.update({
             where: { id: scheduleId },
-            data: { isTranscribing: false, isAnalyzing: false }
+            data: { 
+                isTranscribing: false, 
+                isAnalyzing: false,
+                transcriptionStatus: `Gagal: ${err.message || 'Terjadi kesalahan internal'}`
+            }
         });
     }
 }

@@ -187,6 +187,8 @@ async function main() {
     // ── Menunggu Konfirmasi (pending) ──
     await makeSchedule('Rekomendasi Penyaluran Pupuk Subsidi', masyarakat.id, dewan1.id, h(25), 'pending');
     await makeSchedule('Bantuan Modal UMKM Terdampak Banjir', wulan.id, dewan3.id, h(36), 'pending');
+    await makeSchedule('Permohonan Pembangunan Jembatan Desa', mamat.id, dewan1.id, h(48), 'pending');
+    await makeSchedule('Permohonan Audiensi Kelompok Tani', joko.id, dewan1.id, h(50), 'pending');
 
     // ── Selesai + Penilaian Spasial Terdistribusi Indah (Rainbow colors!) ──
 

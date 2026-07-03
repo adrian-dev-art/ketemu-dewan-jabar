@@ -126,7 +126,7 @@ networks:
   meetdewan_net:
     driver: bridge
   keuangan_net:
-    name: backend-dprd-keungan_default
+    name: bag-keuangan_default
     external: true
 
 volumes:

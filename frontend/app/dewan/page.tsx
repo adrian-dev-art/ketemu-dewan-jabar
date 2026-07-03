@@ -131,7 +131,12 @@ export default function DewanDashboard() {
                       </div>
 
                       <div className="flex gap-2">
-                        {s.status === 'pending' ? (
+                        {s.ratings && s.ratings.length > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
+                            <CheckCircle size={12} />
+                            Sudah Dinilai Masyarakat
+                          </span>
+                        ) : s.status === 'pending' ? (
                           <>
                             <button
                               onClick={() => updateStatus(s.id, 'rejected')}
@@ -155,7 +160,7 @@ export default function DewanDashboard() {
                           </span>
                         )}
                         
-                        {s.status === 'confirmed' && (
+                        {s.status === 'confirmed' && !(s.ratings && s.ratings.length > 0) && (
                           <button 
                             onClick={() => router.push(`/room/${s.id}`)}
                             className="px-3 py-1.5 bg-foreground text-background font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 text-xs"

@@ -47,11 +47,22 @@ export async function processTranscriptionQueue() {
                 // Jalankan proses secara langsung (native), tidak pakai spawn worker baru
                 await transcribeVideo(pendingJob.id, videoPath);
             } else {
-                console.error(`[QUEUE] File video hilang untuk ID #${pendingJob.id}: ${videoPath}`);
-                await prisma.schedule.update({
-                    where: { id: pendingJob.id },
-                    data: { isTranscribing: false, transcriptionStatus: 'Gagal: File Video Hilang' }
-                });
+                const match = fileName.match(/_(\d+)\.mp4$/);
+                const fileAge = match ? Date.now() - parseInt(match[1]) : 5 * 60 * 1000; // Default to 5 mins if no timestamp found
+
+                if (fileAge < 5 * 60 * 1000) {
+                    console.warn(`[QUEUE] File video belum ada untuk ID #${pendingJob.id}: ${videoPath}. Menunggu Egress (umur: ${Math.round(fileAge/1000)}s)...`);
+                    await prisma.schedule.update({
+                        where: { id: pendingJob.id },
+                        data: { isTranscribing: false, transcriptionStatus: 'Menunggu file video...' }
+                    });
+                } else {
+                    console.error(`[QUEUE] File video hilang untuk ID #${pendingJob.id}: ${videoPath} (sudah melebihi waktu tunggu)`);
+                    await prisma.schedule.update({
+                        where: { id: pendingJob.id },
+                        data: { isTranscribing: false, transcriptionStatus: 'Gagal: File Video Hilang' }
+                    });
+                }
             }
         }
     } catch (error) {
