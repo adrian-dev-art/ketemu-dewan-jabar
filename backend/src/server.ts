@@ -94,7 +94,39 @@ app.use(helmet({
     }
 }));
 app.use(express.json());
+
+// --- API KEY MIDDLEWARE ---
+const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    // Only protect /api routes
+    if (!req.path.startsWith('/api')) {
+        return next();
+    }
+    
+    const validKey = process.env.MOBILE_API_KEY;
+    if (!validKey) {
+        return next(); // Pass through if not configured
+    }
+
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey === validKey) {
+        return next();
+    }
+
+    return res.status(403).json({ error: "Forbidden: Invalid API Key" });
+};
+app.use(apiKeyMiddleware);
+
 app.use('/recordings', express.static('/app/recordings'));
+
+// HTTP Request Logger
+app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const ms = Date.now() - start;
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} ${res.statusCode} (${ms}ms) - origin: ${req.headers.origin || req.headers['user-agent']?.substring(0, 50) || 'unknown'}`);
+    });
+    next();
+});
 
 const server = http.createServer(app);
 
@@ -212,7 +244,7 @@ app.post('/api/auth/register', async (req, res) => {
 // --- API ROUTES ---
 
 // 1. List all Dewan with Availability (Public)
-app.get('/api/dewan', async (req, res) => {
+app.get(['/api/dewan', '/api/users/dewan'], async (req, res) => {
     try {
         const result = await prisma.user.findMany({
             where: { role: 'dewan' },
