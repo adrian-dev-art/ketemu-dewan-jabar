@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { authApi } from '@/services/api';
+import { authApi, setEnvironment } from '@/services/api';
 import { Colors, FontSize, Radius, Spacing, Shadow } from '@/constants/theme';
 
 export default function LoginScreen() {
@@ -21,6 +21,12 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [environment, setEnvState] = useState<'local' | 'production'>('production');
+
+  const handleToggleEnv = (env: 'local' | 'production') => {
+    setEnvState(env);
+    setEnvironment(env);
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -34,8 +40,13 @@ export default function LoginScreen() {
       const { token, user } = response.data;
       await login(token, user);
     } catch (error: any) {
+      console.error('🔥 Login Error Detail:', error);
       const msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
-      Alert.alert('Login Gagal', msg);
+      if (Platform.OS === 'web') {
+        window.alert('Login Gagal: ' + msg);
+      } else {
+        Alert.alert('Login Gagal', msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +75,22 @@ export default function LoginScreen() {
           <Text style={styles.cardSubtitle}>
             Gunakan kredensial yang telah diberikan oleh Sekretariat.
           </Text>
+
+          {/* Environment Toggle */}
+          <View style={styles.envToggleContainer}>
+            <TouchableOpacity
+              style={[styles.envToggleButton, environment === 'local' && styles.envToggleActive]}
+              onPress={() => handleToggleEnv('local')}
+            >
+              <Text style={[styles.envToggleText, environment === 'local' && styles.envToggleTextActive]}>Local</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.envToggleButton, environment === 'production' && styles.envToggleActive]}
+              onPress={() => handleToggleEnv('production')}
+            >
+              <Text style={[styles.envToggleText, environment === 'production' && styles.envToggleTextActive]}>Production</Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Alamat Email</Text>
@@ -258,5 +285,30 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     fontWeight: '600',
+  },
+  envToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.muted,
+    borderRadius: Radius.md,
+    padding: 4,
+    marginBottom: Spacing.lg,
+  },
+  envToggleButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: Radius.sm,
+  },
+  envToggleActive: {
+    backgroundColor: Colors.primary,
+    ...Shadow.sm,
+  },
+  envToggleText: {
+    fontSize: FontSize.xs,
+    fontWeight: '600',
+    color: Colors.mutedForeground,
+  },
+  envToggleTextActive: {
+    color: Colors.black,
   },
 });

@@ -1,21 +1,63 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY || '';
+const LOCAL_URL = Platform.OS === 'web' ? 'http://localhost:5001' : 'http://111.111.111.171:5001';
+const PROD_URL = 'https://ketemudewan.perdinkeuangan.online';
+const PROD_API_KEY = '23985e35b6e9f9445c448b8eb8868edbc7fb5e5822d0c53d1ddff079f88e3ab1';
+
+// Default to production or env var if available
+let currentBaseUrl = process.env.EXPO_PUBLIC_BACKEND_URL || PROD_URL;
+let currentApiKey = process.env.EXPO_PUBLIC_API_KEY || PROD_API_KEY;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: currentBaseUrl,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-    ...(API_KEY ? { 'x-api-key': API_KEY } : {}),
+    ...(currentApiKey ? { 'x-api-key': currentApiKey } : {}),
   },
 });
 
+export const setEnvironment = (env: 'local' | 'production') => {
+  if (env === 'local') {
+    currentBaseUrl = LOCAL_URL;
+    currentApiKey = ''; // Local doesn't enforce API key by default
+  } else {
+    currentBaseUrl = PROD_URL;
+    currentApiKey = PROD_API_KEY;
+  }
+  
+  api.defaults.baseURL = currentBaseUrl;
+  if (currentApiKey) {
+    api.defaults.headers.common['x-api-key'] = currentApiKey;
+  } else {
+    delete api.defaults.headers.common['x-api-key'];
+  }
+  
+  console.log(`[API] Switched to ${env} environment:`, currentBaseUrl);
+};
+
+import { Platform } from 'react-native';
+
+const getStorageItemAsync = async (key: string) => {
+  if (Platform.OS === 'web') {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  } else {
+    return await SecureStore.getItemAsync(key);
+  }
+};
+
+const deleteStorageItemAsync = async (key: string) => {
+  if (Platform.OS === 'web') {
+    try { localStorage.removeItem(key); } catch (e) {}
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+};
+
 // Request interceptor: tambahkan token JWT ke setiap request
 api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('auth_token');
+  const token = await getStorageItemAsync('auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -28,8 +70,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
       // Token tidak valid atau expired — bersihkan storage
-      SecureStore.deleteItemAsync('auth_token');
-      SecureStore.deleteItemAsync('auth_user');
+      deleteStorageItemAsync('auth_token');
+      deleteStorageItemAsync('auth_user');
     }
     return Promise.reject(error);
   }

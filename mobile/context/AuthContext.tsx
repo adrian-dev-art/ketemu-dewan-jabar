@@ -1,6 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+// Helper for Web support since SecureStore throws on Web
+const setStorageItemAsync = async (key: string, value: string) => {
+  if (Platform.OS === 'web') {
+    try { localStorage.setItem(key, value); } catch (e) {}
+  } else {
+    await SecureStore.setItemAsync(key, value);
+  }
+};
+
+const getStorageItemAsync = async (key: string) => {
+  if (Platform.OS === 'web') {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  } else {
+    return await SecureStore.getItemAsync(key);
+  }
+};
+
+const deleteStorageItemAsync = async (key: string) => {
+  if (Platform.OS === 'web') {
+    try { localStorage.removeItem(key); } catch (e) {}
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+};
 
 export interface User {
   id: number;
@@ -27,15 +53,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const storedToken = await SecureStore.getItemAsync('auth_token');
-        const storedUser = await SecureStore.getItemAsync('auth_user');
+        const storedToken = await getStorageItemAsync('auth_token');
+        const storedUser = await getStorageItemAsync('auth_user');
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
         }
       } catch (e) {
-        await SecureStore.deleteItemAsync('auth_token');
-        await SecureStore.deleteItemAsync('auth_user');
+        await deleteStorageItemAsync('auth_token');
+        await deleteStorageItemAsync('auth_user');
       } finally {
         setIsLoading(false);
       }
@@ -47,8 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
-    await SecureStore.setItemAsync('auth_token', newToken);
-    await SecureStore.setItemAsync('auth_user', JSON.stringify(newUser));
+    await setStorageItemAsync('auth_token', newToken);
+    await setStorageItemAsync('auth_user', JSON.stringify(newUser));
 
     // Redirect berdasarkan role
     if (newUser.role === 'admin') {
@@ -63,8 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setToken(null);
     setUser(null);
-    await SecureStore.deleteItemAsync('auth_token');
-    await SecureStore.deleteItemAsync('auth_user');
+    await deleteStorageItemAsync('auth_token');
+    await deleteStorageItemAsync('auth_user');
     router.replace('/(auth)/login');
   };
 
