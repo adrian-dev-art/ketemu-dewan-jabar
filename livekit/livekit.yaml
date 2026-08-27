@@ -6,7 +6,7 @@ rtc:
   port_range_start: 50000
   port_range_end: 50050
   use_external_ip: false
-  node_ip: 111.111.111.245
+  node_ip: 31.97.71.134
 
 keys:
   APIFpMEuSWpPbJs: DzdhKv9Xnk3RGv7naIsZi66RfKyeGTz2KxKP7QP8FBQ

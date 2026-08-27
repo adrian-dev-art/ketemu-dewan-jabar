@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  Users, Video, Star, Settings, ShieldCheck, TrendingUp, MessageSquare, 
+  Users, User, Video, Star, Settings, ShieldCheck, TrendingUp, MessageSquare, 
   RefreshCw, ChevronDown, ChevronUp, Search, Download, BarChart2, 
   Filter, Database, Trash2, Edit, Check, X, Calendar, Languages, 
-  FileText, Loader2, ExternalLink
+  FileText, Loader2, ExternalLink, ArrowUpDown, ChevronLeft, ChevronRight,
+  ChevronsLeft, ChevronsRight, RotateCcw, SlidersHorizontal, CalendarDays,
+  MapPin, Layers
 } from "lucide-react";
 import DashboardCharts from "@/components/DashboardCharts";
 import AnalysisModal from "@/components/AnalysisModal";
@@ -20,6 +22,16 @@ const ASPECT_LABELS: Record<string, string> = {
   responsivenessScore: "Daya Tanggap",
   solutionScore: "Orientasi Solusi",
 };
+
+const JABAR_KAB_KOTA = [
+  "Kota Bandung", "Kabupaten Bandung", "Kabupaten Bandung Barat", "Kota Cimahi",
+  "Kabupaten Bogor", "Kota Bogor", "Kota Depok", "Kota Bekasi", "Kabupaten Bekasi",
+  "Kabupaten Karawang", "Kabupaten Subang", "Kabupaten Purwakarta", "Kabupaten Cianjur",
+  "Kabupaten Sukabumi", "Kota Sukabumi", "Kabupaten Sumedang", "Kabupaten Garut",
+  "Kabupaten Indramayu", "Kabupaten Majalengka", "Kabupaten Cirebon", "Kota Cirebon",
+  "Kabupaten Kuningan", "Kabupaten Tasikmalaya", "Kota Tasikmalaya", "Kabupaten Ciamis",
+  "Kota Banjar", "Kabupaten Pangandaran"
+];
 
 function StarBar({ value }: { value: number }) {
   return (
@@ -125,9 +137,20 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
   const [userSearch, setUserSearch] = useState("");
-  const [scheduleSearch, setScheduleSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+
+  // --- Advanced Schedule States ---
+  const [scheduleSearch, setScheduleSearch] = useState("");
   const [scheduleStatusFilter, setScheduleStatusFilter] = useState("all");
+  const [scheduleCategoryFilter, setScheduleCategoryFilter] = useState("all");
+  const [scheduleRegencyFilter, setScheduleRegencyFilter] = useState("all");
+  const [scheduleStartDate, setScheduleStartDate] = useState("");
+  const [scheduleEndDate, setScheduleEndDate] = useState("");
+  const [scheduleSortBy, setScheduleSortBy] = useState<"startTime" | "id" | "title" | "status">("startTime");
+  const [scheduleSortDir, setScheduleSortDir] = useState<"desc" | "asc">("desc");
+  const [schedulePage, setSchedulePage] = useState(1);
+  const [schedulePageSize, setSchedulePageSize] = useState(15);
+
   const [transcribingId, setTranscribingId] = useState<number | null>(null);
   const [viewingScheduleId, setViewingScheduleId] = useState<number | null>(null);
   const [analysisTitle, setAnalysisTitle] = useState<string>("");
@@ -145,6 +168,136 @@ export default function AdminDashboard() {
     if (!viewingSchedule) return null;
     return viewingSchedule.transcription || "";
   }, [viewingSchedule]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setSchedulePage(1);
+  }, [scheduleSearch, scheduleStatusFilter, scheduleCategoryFilter, scheduleRegencyFilter, scheduleStartDate, scheduleEndDate, schedulePageSize]);
+
+  const toggleScheduleSort = (field: "startTime" | "id" | "title" | "status") => {
+    if (scheduleSortBy === field) {
+      setScheduleSortDir(scheduleSortDir === "asc" ? "desc" : "asc");
+    } else {
+      setScheduleSortBy(field);
+      setScheduleSortDir(field === "title" ? "asc" : "desc");
+    }
+  };
+
+  const applyDatePreset = (preset: "all" | "7d" | "30d" | "this_month" | "this_year") => {
+    const now = new Date();
+    const formatDate = (d: Date) => d.toISOString().slice(0, 10);
+    
+    if (preset === "all") {
+      setScheduleStartDate("");
+      setScheduleEndDate("");
+    } else if (preset === "7d") {
+      const past = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      setScheduleStartDate(formatDate(past));
+      setScheduleEndDate(formatDate(now));
+    } else if (preset === "30d") {
+      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      setScheduleStartDate(formatDate(past));
+      setScheduleEndDate(formatDate(now));
+    } else if (preset === "this_month") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      setScheduleStartDate(formatDate(startOfMonth));
+      setScheduleEndDate(formatDate(now));
+    } else if (preset === "this_year") {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      setScheduleStartDate(formatDate(startOfYear));
+      setScheduleEndDate(formatDate(now));
+    }
+  };
+
+  const resetScheduleFilters = () => {
+    setScheduleSearch("");
+    setScheduleStatusFilter("all");
+    setScheduleCategoryFilter("all");
+    setScheduleRegencyFilter("all");
+    setScheduleStartDate("");
+    setScheduleEndDate("");
+    setScheduleSortBy("startTime");
+    setScheduleSortDir("desc");
+    setSchedulePage(1);
+  };
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (scheduleSearch) count++;
+    if (scheduleStatusFilter !== "all") count++;
+    if (scheduleCategoryFilter !== "all") count++;
+    if (scheduleRegencyFilter !== "all") count++;
+    if (scheduleStartDate || scheduleEndDate) count++;
+    return count;
+  }, [scheduleSearch, scheduleStatusFilter, scheduleCategoryFilter, scheduleRegencyFilter, scheduleStartDate, scheduleEndDate]);
+
+  const filteredAndSortedSchedules = useMemo(() => {
+    const filtered = schedulesList.filter((s) => {
+      const dewanNames = (s.participants || []).map((p: any) => p.dewan?.name || "").join(" ").toLowerCase();
+      const titleStr = (s.title || "").toLowerCase();
+      const citizenStr = (s.masyarakat?.name || "").toLowerCase();
+      const kabStr = (s.masyarakat?.kabupaten || "").toLowerCase();
+      const kecStr = (s.masyarakat?.kecamatan || "").toLowerCase();
+      const searchLower = scheduleSearch.toLowerCase();
+
+      const matchesSearch = !scheduleSearch || 
+        titleStr.includes(searchLower) || 
+        citizenStr.includes(searchLower) ||
+        dewanNames.includes(searchLower) ||
+        kabStr.includes(searchLower) ||
+        kecStr.includes(searchLower);
+
+      const matchesStatus = scheduleStatusFilter === "all" || (s.status || "").toLowerCase() === scheduleStatusFilter.toLowerCase();
+
+      const matchesRegency = scheduleRegencyFilter === "all" || 
+        kabStr.includes(scheduleRegencyFilter.toLowerCase()) || 
+        titleStr.includes(scheduleRegencyFilter.toLowerCase());
+
+      const matchesCategory = scheduleCategoryFilter === "all" || (() => {
+        if (scheduleCategoryFilter === "kunker") return titleStr.includes("kunjungan kerja") || titleStr.includes("kunker");
+        if (scheduleCategoryFilter === "reses") return titleStr.includes("reses");
+        if (scheduleCategoryFilter === "aspirasi") return titleStr.includes("aspirasi") || titleStr.includes("audiensi");
+        return true;
+      })();
+
+      const matchesDate = (() => {
+        if (!scheduleStartDate && !scheduleEndDate) return true;
+        const sTime = new Date(s.startTime).getTime();
+        if (scheduleStartDate) {
+          const start = new Date(scheduleStartDate).setHours(0, 0, 0, 0);
+          if (sTime < start) return false;
+        }
+        if (scheduleEndDate) {
+          const end = new Date(scheduleEndDate).setHours(23, 59, 59, 999);
+          if (sTime > end) return false;
+        }
+        return true;
+      })();
+
+      return matchesSearch && matchesStatus && matchesRegency && matchesCategory && matchesDate;
+    });
+
+    return filtered.sort((a, b) => {
+      let comp = 0;
+      if (scheduleSortBy === "startTime") {
+        comp = new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      } else if (scheduleSortBy === "id") {
+        comp = a.id - b.id;
+      } else if (scheduleSortBy === "title") {
+        comp = (a.title || "").localeCompare(b.title || "");
+      } else if (scheduleSortBy === "status") {
+        comp = (a.status || "").localeCompare(b.status || "");
+      }
+      return scheduleSortDir === "asc" ? comp : -comp;
+    });
+  }, [schedulesList, scheduleSearch, scheduleStatusFilter, scheduleRegencyFilter, scheduleCategoryFilter, scheduleStartDate, scheduleEndDate, scheduleSortBy, scheduleSortDir]);
+
+  const totalScheduleItems = filteredAndSortedSchedules.length;
+  const totalSchedulePages = Math.max(1, Math.ceil(totalScheduleItems / schedulePageSize));
+  const paginatedSchedules = useMemo(() => {
+    const startIdx = (schedulePage - 1) * schedulePageSize;
+    return filteredAndSortedSchedules.slice(startIdx, startIdx + schedulePageSize);
+  }, [filteredAndSortedSchedules, schedulePage, schedulePageSize]);
 
   const fetchData = async () => {
     if (!token) return;
@@ -528,7 +681,7 @@ export default function AdminDashboard() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-muted/30 border-b border-border">
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">ID</th>
+                        <th className="px-5 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-center w-14">No.</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Nama</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Email</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-center">Peran</th>
@@ -536,9 +689,9 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
-                      {filteredUsers.map((u) => (
+                      {filteredUsers.map((u, idx) => (
                         <tr key={u.id} className="hover:bg-muted/20 transition-colors group">
-                          <td className="px-6 py-4 text-xs font-bold text-muted-foreground tabular-nums">#{u.id}</td>
+                          <td className="px-5 py-4 text-xs font-bold text-muted-foreground tabular-nums text-center">{idx + 1}</td>
                           <td className="px-6 py-4">
                             <div className="font-bold text-sm text-foreground">{u.name}</div>
                           </td>
@@ -581,135 +734,476 @@ export default function AdminDashboard() {
 
           {activeTab === "schedules" && (
             <section className="space-y-6 animate-in fade-in duration-500">
-               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl shadow-sm">
-                <div className="relative flex-grow max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input
-                    type="text"
-                    placeholder="Cari topik atau partisipan..."
-                    className="w-full pl-10 pr-4 py-2 bg-muted/50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    value={scheduleSearch}
-                    onChange={(e) => setScheduleSearch(e.target.value)}
-                  />
+              {/* --- ADVANCED FILTER & CONTROL BAR --- */}
+              <div className="bg-card border border-border p-5 rounded-[2rem] shadow-sm space-y-4">
+                {/* Row 1: Search & Primary Dropdowns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* Search */}
+                  <div className="relative flex-grow">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
+                    <input
+                      type="text"
+                      placeholder="Cari topik, dewan, warga, wilayah..."
+                      className="w-full pl-10 pr-9 py-2.5 bg-muted/50 border border-border/50 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      value={scheduleSearch}
+                      onChange={(e) => setScheduleSearch(e.target.value)}
+                    />
+                    {scheduleSearch && (
+                      <button
+                        onClick={() => setScheduleSearch("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="relative">
+                    <select
+                      className="w-full px-3.5 py-2.5 bg-muted/50 border border-border/50 rounded-2xl text-xs font-semibold outline-none cursor-pointer hover:bg-muted transition-colors"
+                      value={scheduleStatusFilter}
+                      onChange={(e) => setScheduleStatusFilter(e.target.value)}
+                    >
+                      <option value="all">Semua Status</option>
+                      <option value="completed">Selesai (Completed)</option>
+                      <option value="confirmed">Disetujui (Confirmed)</option>
+                      <option value="pending">Menunggu (Pending)</option>
+                      <option value="cancelled">Dibatalkan (Cancelled)</option>
+                    </select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="relative">
+                    <select
+                      className="w-full px-3.5 py-2.5 bg-muted/50 border border-border/50 rounded-2xl text-xs font-semibold outline-none cursor-pointer hover:bg-muted transition-colors"
+                      value={scheduleCategoryFilter}
+                      onChange={(e) => setScheduleCategoryFilter(e.target.value)}
+                    >
+                      <option value="all">Semua Kategori</option>
+                      <option value="kunker">🏛️ Kunjungan Kerja</option>
+                      <option value="reses">📢 Reses Masa Sidang</option>
+                      <option value="aspirasi">🤝 Audiensi & Aspirasi</option>
+                    </select>
+                  </div>
+
+                  {/* Regency Filter */}
+                  <div className="relative">
+                    <select
+                      className="w-full px-3.5 py-2.5 bg-muted/50 border border-border/50 rounded-2xl text-xs font-semibold outline-none cursor-pointer hover:bg-muted transition-colors"
+                      value={scheduleRegencyFilter}
+                      onChange={(e) => setScheduleRegencyFilter(e.target.value)}
+                    >
+                      <option value="all">Semua 27 Kab/Kota Jabar</option>
+                      {JABAR_KAB_KOTA.map((kab) => (
+                        <option key={kab} value={kab}>{kab}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <select 
-                  className="px-4 py-2 bg-muted/50 border-none rounded-2xl text-xs font-bold outline-none"
-                  value={scheduleStatusFilter}
-                  onChange={(e) => setScheduleStatusFilter(e.target.value)}
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="pending">Menunggu</option>
-                  <option value="confirmed">Disetujui</option>
-                  <option value="completed">Selesai</option>
-                  <option value="cancelled">Dibatalkan</option>
-                </select>
+
+                {/* Row 2: Date Filters, Presets & Reset */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs">
+                  {/* Date Range Inputs */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1">
+                      <CalendarDays size={13} />
+                      Rentang Tanggal:
+                    </span>
+                    <input
+                      type="date"
+                      className="px-2.5 py-1.5 bg-muted/50 border border-border/50 rounded-xl text-xs outline-none focus:ring-1 focus:ring-primary/30"
+                      value={scheduleStartDate}
+                      onChange={(e) => setScheduleStartDate(e.target.value)}
+                      title="Tanggal Mulai"
+                    />
+                    <span className="text-muted-foreground font-bold">-</span>
+                    <input
+                      type="date"
+                      className="px-2.5 py-1.5 bg-muted/50 border border-border/50 rounded-xl text-xs outline-none focus:ring-1 focus:ring-primary/30"
+                      value={scheduleEndDate}
+                      onChange={(e) => setScheduleEndDate(e.target.value)}
+                      title="Tanggal Selesai"
+                    />
+
+                    {/* Quick Presets */}
+                    <div className="flex items-center gap-1 ml-1">
+                      {[
+                        { label: "Semua", val: "all" },
+                        { label: "7 Hari", val: "7d" },
+                        { label: "30 Hari", val: "30d" },
+                        { label: "Bulan Ini", val: "this_month" },
+                        { label: "Tahun Ini", val: "this_year" },
+                      ].map((p) => (
+                        <button
+                          key={p.val}
+                          onClick={() => applyDatePreset(p.val as any)}
+                          className="px-2 py-1 text-[10px] font-bold rounded-lg border border-border/60 hover:bg-muted hover:border-primary/40 transition-all text-muted-foreground hover:text-foreground"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reset & Stats Badge */}
+                  <div className="flex items-center gap-2.5 ml-auto">
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      Menampilkan <strong className="text-foreground">{paginatedSchedules.length}</strong> dari <strong className="text-foreground">{totalScheduleItems}</strong> sesi
+                    </span>
+                    {activeFiltersCount > 0 && (
+                      <button
+                        onClick={resetScheduleFilters}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-xl text-[11px] font-bold transition-all"
+                        title="Reset semua filter"
+                      >
+                        <RotateCcw size={11} />
+                        Reset ({activeFiltersCount})
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
+              {/* --- TABLE CONTAINER --- */}
               <div className="bg-card border border-border rounded-[2.5rem] shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-muted/30 border-b border-border">
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">ID</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Detail Pertemuan</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Partisipan</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-center">Status</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-right">Aksi</th>
+                      <tr className="bg-muted/40 border-b border-border select-none">
+                        {/* No Column */}
+                        <th className="px-5 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-center w-14">
+                          <span>No.</span>
+                        </th>
+
+                        {/* Sortable Title */}
+                        <th
+                          onClick={() => toggleScheduleSort("title")}
+                          className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest cursor-pointer hover:bg-muted/60 transition-colors"
+                        >
+                          <div className="flex items-center gap-1">
+                            <span>Detail Pertemuan & Agenda</span>
+                            {scheduleSortBy === "title" ? (
+                              scheduleSortDir === "asc" ? <ChevronUp size={12} className="text-primary" /> : <ChevronDown size={12} className="text-primary" />
+                            ) : (
+                              <ArrowUpDown size={11} className="text-muted-foreground/40" />
+                            )}
+                          </div>
+                        </th>
+
+                        {/* Participants */}
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                          Partisipan (Dewan & Warga)
+                        </th>
+
+                        {/* Sortable Date */}
+                        <th
+                          onClick={() => toggleScheduleSort("startTime")}
+                          className="px-5 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest cursor-pointer hover:bg-muted/60 transition-colors"
+                        >
+                          <div className="flex items-center gap-1">
+                            <span>Waktu Pelaksanaan</span>
+                            {scheduleSortBy === "startTime" ? (
+                              scheduleSortDir === "asc" ? <ChevronUp size={12} className="text-primary" /> : <ChevronDown size={12} className="text-primary" />
+                            ) : (
+                              <ArrowUpDown size={11} className="text-muted-foreground/40" />
+                            )}
+                          </div>
+                        </th>
+
+                        {/* Sortable Status */}
+                        <th
+                          onClick={() => toggleScheduleSort("status")}
+                          className="px-5 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-center cursor-pointer hover:bg-muted/60 transition-colors"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <span>Status</span>
+                            {scheduleSortBy === "status" ? (
+                              scheduleSortDir === "asc" ? <ChevronUp size={12} className="text-primary" /> : <ChevronDown size={12} className="text-primary" />
+                            ) : (
+                              <ArrowUpDown size={11} className="text-muted-foreground/40" />
+                            )}
+                          </div>
+                        </th>
+
+                        {/* Actions */}
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-muted-foreground tracking-widest text-right">
+                          Aksi & Laporan
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
-                      {filteredSchedules.map((s) => (
-                        <tr key={s.id} className="hover:bg-muted/20 transition-colors group">
-                          <td className="px-6 py-4 text-xs font-bold text-muted-foreground tabular-nums">#{s.id}</td>
-                          <td className="px-6 py-4">
-                            <div className="font-bold text-sm text-foreground">{s.title || "Tanpa Judul"}</div>
-                            <div className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-1">
-                              <Calendar size={10} />
-                              {new Date(s.startTime).toLocaleString("id-ID", { dateStyle: 'medium', timeStyle: 'short' })}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-[11px] font-semibold text-foreground">
-                              {s.masyarakat?.name} (Warga)
-                            </div>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {s.participants.map((p: any) => (
-                                <span key={p.dewan.id} className="text-[9px] px-1.5 py-0.5 bg-muted rounded border border-border text-muted-foreground font-medium">
-                                  {p.dewan.name}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex justify-center">
-                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                s.status === 'completed' || s.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                s.status === 'confirmed' || s.status === 'CONFIRMED' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                                s.status === 'cancelled' || s.status === 'CANCELLED' ? 'bg-red-50 text-red-600 border border-red-100' :
-                                'bg-amber-50 text-amber-600 border border-amber-100'
-                              }`}>
-                                {s.status}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {s.recordingUrl && (
-                                <a
-                                  href={s.recordingUrl.startsWith('http') ? s.recordingUrl : `${backendUrl}${s.recordingUrl}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-1.5 hover:bg-emerald-500/10 rounded-lg text-emerald-500 transition-colors"
-                                  title="Tonton Rekaman"
-                                >
-                                  <Video size={14} />
-                                </a>
-                              )}
-
-                              {(s.status === 'confirmed' || s.status === 'CONFIRMED') && (
+                      {paginatedSchedules.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-14 text-center">
+                            <div className="max-w-xs mx-auto space-y-2">
+                              <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto text-muted-foreground">
+                                <Search size={22} />
+                              </div>
+                              <h4 className="font-bold text-sm text-foreground">Tidak Ada Jadwal Ditemukan</h4>
+                              <p className="text-xs text-muted-foreground">
+                                Coba ubah kata kunci pencarian, rentang tanggal, atau reset filter Anda.
+                              </p>
+                              {activeFiltersCount > 0 && (
                                 <button
-                                  onClick={() => router.push(`/room/${s.id}`)}
-                                  className="p-1.5 hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"
-                                  title="Gabung Ruangan"
+                                  onClick={resetScheduleFilters}
+                                  className="mt-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-xl text-xs font-bold shadow-sm"
                                 >
-                                  <ExternalLink size={14} />
+                                  Reset Semua Filter
                                 </button>
                               )}
-
-                              {s.recordingUrl && s.status === 'completed' && (
-                                <button
-                                  onClick={() => {
-                                    setViewingScheduleId(s.id);
-                                    setAnalysisTitle(s.title || "Diskusi Aspirasi");
-                                  }}
-                                  className="p-1.5 hover:bg-purple-500/10 rounded-lg text-purple-500 transition-colors"
-                                  title="Lihat Laporan AI & Transkrip"
-                                >
-                                  <BarChart2 size={14} />
-                                </button>
-                              )}
-
-                              <button
-                                onClick={() => setEditingSchedule({ ...s, startTime: new Date(s.startTime).toISOString().slice(0, 16) })}
-                                className="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-colors"
-                                title="Edit"
-                              >
-                                <Edit size={14} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteSchedule(s.id)}
-                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
-                                title="Hapus"
-                              >
-                                <Trash2 size={14} />
-                              </button>
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        paginatedSchedules.map((s, idx) => {
+                          const rowNumber = ((schedulePage - 1) * schedulePageSize) + idx + 1;
+                          const isKunker = (s.title || "").toLowerCase().includes("kunjungan kerja") || (s.title || "").toLowerCase().includes("kunker");
+                          const isReses = (s.title || "").toLowerCase().includes("reses");
+
+                          return (
+                            <tr key={s.id} className="hover:bg-muted/20 transition-colors group">
+                              {/* No. */}
+                              <td className="px-5 py-4 text-xs font-bold text-muted-foreground tabular-nums text-center">
+                                {rowNumber}
+                              </td>
+
+                              {/* Detail Title */}
+                              <td className="px-6 py-4 max-w-md">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  {isKunker && (
+                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 border border-blue-200/50">
+                                      Kunjungan Kerja
+                                    </span>
+                                  )}
+                                  {isReses && (
+                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase bg-emerald-500/10 text-emerald-600 border border-emerald-200/50">
+                                      Reses Dapil
+                                    </span>
+                                  )}
+                                  {!isKunker && !isReses && (
+                                    <span className="px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase bg-purple-500/10 text-purple-600 border border-purple-200/50">
+                                      Aspirasi
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-bold text-sm text-foreground line-clamp-2" title={s.title}>
+                                  {s.title || "Tanpa Judul"}
+                                </div>
+                                {s.masyarakat?.kabupaten && (
+                                  <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
+                                    <MapPin size={11} className="text-primary/70" />
+                                    <span>{s.masyarakat.kabupaten} {s.masyarakat.kecamatan ? `• Kec. ${s.masyarakat.kecamatan}` : ''}</span>
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Participants */}
+                              <td className="px-6 py-4">
+                                <div className="text-[11px] font-semibold text-foreground flex items-center gap-1">
+                                  <User size={11} className="text-muted-foreground" />
+                                  <span>{s.masyarakat?.name || "Masyarakat Jabar"}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {(s.participants || []).map((p: any) => (
+                                    <span
+                                      key={p.dewan?.id || Math.random()}
+                                      className="text-[10px] px-2 py-0.5 bg-muted/80 rounded-lg border border-border text-foreground font-semibold flex items-center gap-1"
+                                      title={p.dewan?.fraksi ? `Fraksi: ${p.dewan.fraksi}` : undefined}
+                                    >
+                                      <ShieldCheck size={10} className="text-primary" />
+                                      {p.dewan?.name || "Anggota Dewan"}
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+
+                              {/* Date */}
+                              <td className="px-5 py-4 whitespace-nowrap">
+                                <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                  <Calendar size={12} className="text-muted-foreground" />
+                                  {new Date(s.startTime).toLocaleDateString("id-ID", {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                  })}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground mt-0.5 ml-4 font-mono">
+                                  {new Date(s.startTime).toLocaleTimeString("id-ID", {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })} WIB
+                                </div>
+                              </td>
+
+                              {/* Status */}
+                              <td className="px-5 py-4">
+                                <div className="flex justify-center">
+                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                    s.status === 'completed' || s.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                    s.status === 'confirmed' || s.status === 'CONFIRMED' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                    s.status === 'cancelled' || s.status === 'CANCELLED' ? 'bg-red-50 text-red-600 border border-red-100' :
+                                    'bg-amber-50 text-amber-600 border border-amber-100'
+                                  }`}>
+                                    {s.status}
+                                  </span>
+                                </div>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {s.recordingUrl && (
+                                    <a
+                                      href={s.recordingUrl.startsWith('http') ? s.recordingUrl : `${backendUrl}${s.recordingUrl}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 hover:bg-emerald-500/10 rounded-xl text-emerald-600 border border-emerald-200/40 transition-colors"
+                                      title="Tonton Rekaman"
+                                    >
+                                      <Video size={14} />
+                                    </a>
+                                  )}
+
+                                  {(s.status === 'confirmed' || s.status === 'CONFIRMED') && (
+                                    <button
+                                      onClick={() => router.push(`/room/${s.id}`)}
+                                      className="p-2 hover:bg-blue-500/10 rounded-xl text-blue-600 border border-blue-200/40 transition-colors"
+                                      title="Gabung Ruangan"
+                                    >
+                                      <ExternalLink size={14} />
+                                    </button>
+                                  )}
+
+                                  {(s.analysis || s.transcription || s.recordingUrl) && (
+                                    <button
+                                      onClick={() => {
+                                        setViewingScheduleId(s.id);
+                                        setAnalysisTitle(s.title || "Diskusi Aspirasi");
+                                      }}
+                                      className="p-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl transition-all shadow-xs"
+                                      title="Buka Laporan AI & Transkrip"
+                                    >
+                                      <BarChart2 size={14} />
+                                    </button>
+                                  )}
+
+                                  <button
+                                    onClick={() => setEditingSchedule({ ...s, startTime: new Date(s.startTime).toISOString().slice(0, 16) })}
+                                    className="p-2 hover:bg-muted rounded-xl text-muted-foreground hover:text-foreground border border-transparent hover:border-border transition-colors"
+                                    title="Edit Jadwal"
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSchedule(s.id)}
+                                    className="p-2 hover:bg-red-500/10 rounded-xl text-red-500 transition-colors"
+                                    title="Hapus Jadwal"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
+
+                {/* --- PAGINATION & ROWS FOOTER --- */}
+                {totalScheduleItems > 0 && (
+                  <div className="px-6 py-4 bg-muted/30 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+                    {/* Rows per page selector */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground font-medium">Baris per halaman:</span>
+                      <select
+                        className="px-2.5 py-1 bg-card border border-border rounded-xl font-bold outline-none cursor-pointer"
+                        value={schedulePageSize}
+                        onChange={(e) => setSchedulePageSize(Number(e.target.value))}
+                      >
+                        <option value={10}>10</option>
+                        <option value={15}>15</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                      <span className="text-muted-foreground ml-2">
+                        {((schedulePage - 1) * schedulePageSize) + 1} - {Math.min(schedulePage * schedulePageSize, totalScheduleItems)} dari {totalScheduleItems}
+                      </span>
+                    </div>
+
+                    {/* Pagination Navigation */}
+                    <div className="flex items-center gap-1.5">
+                      {/* First Page */}
+                      <button
+                        onClick={() => setSchedulePage(1)}
+                        disabled={schedulePage === 1}
+                        className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        title="Halaman Pertama"
+                      >
+                        <ChevronsLeft size={14} />
+                      </button>
+
+                      {/* Prev Page */}
+                      <button
+                        onClick={() => setSchedulePage(prev => Math.max(1, prev - 1))}
+                        disabled={schedulePage === 1}
+                        className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        title="Halaman Sebelumnya"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+
+                      {/* Page Numbers */}
+                      <div className="flex items-center gap-1 px-1">
+                        {Array.from({ length: totalSchedulePages }, (_, i) => i + 1)
+                          .filter(p => p === 1 || p === totalSchedulePages || Math.abs(p - schedulePage) <= 1)
+                          .map((p, idx, arr) => {
+                            const prevP = arr[idx - 1];
+                            return (
+                              <React.Fragment key={p}>
+                                {prevP && p - prevP > 1 && (
+                                  <span className="px-1 text-muted-foreground">...</span>
+                                )}
+                                <button
+                                  onClick={() => setSchedulePage(p)}
+                                  className={`w-7 h-7 rounded-lg font-bold text-xs transition-all ${
+                                    schedulePage === p
+                                      ? 'bg-primary text-primary-foreground shadow-xs'
+                                      : 'bg-card border border-border hover:bg-muted text-muted-foreground hover:text-foreground'
+                                  }`}
+                                >
+                                  {p}
+                                </button>
+                              </React.Fragment>
+                            );
+                          })}
+                      </div>
+
+                      {/* Next Page */}
+                      <button
+                        onClick={() => setSchedulePage(prev => Math.min(totalSchedulePages, prev + 1))}
+                        disabled={schedulePage === totalSchedulePages}
+                        className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        title="Halaman Berikutnya"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+
+                      {/* Last Page */}
+                      <button
+                        onClick={() => setSchedulePage(totalSchedulePages)}
+                        disabled={schedulePage === totalSchedulePages}
+                        className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        title="Halaman Terakhir"
+                      >
+                        <ChevronsRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           )}
@@ -821,37 +1315,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Transcription View Modal */}
-        {viewingTranscription && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-card border border-border w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
-                <h3 className="font-bold text-lg">Hasil Transkripsi</h3>
-                <button onClick={() => setViewingTranscription(null)} className="p-2 hover:bg-muted rounded-full transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="p-6 overflow-y-auto max-h-[60vh] text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                {viewingTranscription}
-              </div>
-              <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-end">
-                <button 
-                  onClick={() => {
-                    const blob = new Blob([viewingTranscription], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `transkripsi.txt`;
-                    a.click();
-                  }}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
-                >
-                  Unduh (.txt)
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Analysis & Transcription Modal */}
         <AnalysisModal 

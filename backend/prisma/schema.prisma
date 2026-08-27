@@ -109,3 +109,18 @@ model Rating {
 
   @@unique([scheduleId, dewanId])
 }
+
+model PerjalananDinas {
+  id               Int       @id @default(autoincrement())
+  code             String?
+  judul            String
+  kategori         String    @default("Kunjungan Kerja")
+  komisi           String?
+  lokasi           String?
+  tanggalPublikasi DateTime?
+  sumber           String?
+  url              String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
