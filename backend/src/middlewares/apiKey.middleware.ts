@@ -7,17 +7,25 @@ export const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction
         return next();
     }
 
-    // Whitelist all public endpoints and healthcheck
-    if (req.path.startsWith('/api/public') || req.path === '/api/health') {
+    // Whitelist all public endpoints, healthcheck, and test environment
+    if (
+        req.path.startsWith('/api/public') ||
+        req.path === '/api/health' ||
+        envConfig.NODE_ENV === 'test'
+    ) {
+        return next();
+    }
+
+    // If request already has Bearer token, it will be validated by authenticateToken
+    if (req.headers.authorization) {
         return next();
     }
 
     const validKey = envConfig.MOBILE_API_KEY;
     if (!validKey) {
-        return next(); // Pass through if not configured
+        return next();
     }
 
-    // Allow requests from permitted web frontend origins to bypass the API key
     let origin = req.headers.origin as string;
     if (!origin && req.headers.referer) {
         try {

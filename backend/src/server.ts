@@ -125,16 +125,17 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // Database Connection Check & Server Listen
 const connectDB = async () => {
     try {
-        await prisma.$connect();
-        console.log("Database PostgreSQL berhasil terhubung.");
+        if (prisma && typeof prisma.$connect === 'function') {
+            await prisma.$connect();
+            console.log("Database PostgreSQL berhasil terhubung.");
+        }
     } catch (err) {
         console.error("Gagal menghubungkan ke database PostgreSQL:", err);
     }
 };
 
-connectDB();
-
 if (envConfig.NODE_ENV !== 'test') {
+    connectDB();
     server.listen(envConfig.PORT, () => {
         console.log(`Server DPRD HUDANG berjalan di port ${envConfig.PORT}`);
         startQueueDaemon();
