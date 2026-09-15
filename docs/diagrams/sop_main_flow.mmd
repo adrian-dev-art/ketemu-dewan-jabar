@@ -1,0 +1,112 @@
+flowchart TD
+    %% DEFINISI PEMANGKU KEPENTINGAN DENGAN SUBGRAPH
+    subgraph S1 ["1. MASYARAKAT / KONSTITUEN"]
+        A1["1.1 Akses Portal Web / App HUDANG"] --> A2["1.2 Registrasi NIK & Validasi OTP WA"]
+        A2 --> A3["1.3 Pengisian Formulir Aspirasi & Upload Berkas"]
+        A3 --> A4["1.4 Terima Nomor Pelacak (Tracking Number)"]
+        A4 -.-> A5["1.5 Hadiri Sesi E-Audiensi Virtual"]
+        A5 -.-> A6["1.6 Isi Survei Kepuasan Konstituen (Rating 1-5 Bintang)"]
+    end
+
+    subgraph S2 ["2. SISTEM PLATFORM & GATEWAY TIK"]
+        B1["2.1 Enkripsi Identitas & Hashing SHA-256"]
+        B2["2.2 Generate Tracking Number & Notifikasi Otomatis"]
+        B3["2.3 Orkestrasi Media SFU LiveKit & Token JWT"]
+        B4["2.4 Auto-Trigger Rekaman Egress & Job Queue"]
+        B5["2.5 Audit Trail & Hitung Mundur SLA Disposisi"]
+        B6["2.6 Publikasi Statistik ke Portal Transparansi Publik"]
+    end
+
+    subgraph S3 ["3. MESIN AI HUDANG (GEMINI FLASH)"]
+        C1["3.1 Ekstraksi Entitas & Topik NLP (<30 Detik)"]
+        C2["3.2 Deteksi Duplikasi Semantik Vektor (>85%)"]
+        C3["3.3 Rekomendasi Klasifikasi Komisi I-V"]
+        C4["3.4 Transkripsi Audio Verbatim & Diarization (<15 Menit)"]
+        C5["3.5 Ekstraksi Ringkasan Eksekutif & Butir Rekomendasi"]
+    end
+
+    subgraph S4 ["4. VERIFIKATOR ASN SEKRETARIAT DPRD"]
+        D1["4.1 Penelitian Administrasi Berkas & Uji Kewenangan (<=1x24 Jam)"]
+        D2{"4.2 Putusan Uji Kelayakan"}
+        D3["4.3 Kirim Catatan Perbaikan ke Warga (Batas 3x24 Jam)"]
+        D4["4.4 Terbitkan Surat Pelimpahan Kewenangan (Luar Jabar)"]
+        D5["4.5 Penerbitan Surat Disposisi Resmi DPRD (<=2x24 Jam)"]
+        D6["4.6 Verifikasi Laporan Akhir & Tutup Tiket (Case Closed)"]
+    end
+
+    subgraph S5 ["5. PIMPINAN & ANGGOTA DEWAN (AKD)"]
+        E1["5.1 Terima Notifikasi Aspirasi Dapil & Komisi"]
+        E2["5.2 Konfirmasi Jadwal (Availability Manager <=2x24 Jam)"]
+        E3["5.3 Pimpin & Fasilitasi Dialog E-Audiensi (LiveKit WebRTC)"]
+        E4["5.4 Validasi Risalah AI & Tanda Tangan Digital (<=1x24 Jam)"]
+        E5["5.5 Pengawalan Pokok Pikiran (Pokir) ke Banggar / SIPD"]
+    end
+
+    subgraph S6 ["6. PERANGKAT DAERAH (OPD TEKNIS)"]
+        F1["6.1 Konfirmasi Terima & Catat Bukti Baca Disposisi (<=1x24 Jam)"]
+        F2["6.2 Susun & Unggah Surat Tanggapan Komitmen (<=5x24 Jam)"]
+        F3["6.3 Eksekusi Penanganan Teknis Lapangan (<=14 Hari Kerja)"]
+        F4["6.4 Unggah Laporan Hasil Akhir & Dokumentasi 100%"]
+    end
+
+    subgraph S7 ["7. BAPPEDA PROVINSI JAWA BARAT"]
+        G1["7.1 Kurasi Pokir Belanja Modal DPRD"]
+        G2["7.2 Standardisasi Format Kamus Usulan SIPD/RKPD"]
+        G3["7.3 Penyelarasan Dokumen RKPD & Musrenbang Provinsi"]
+    end
+
+    %% ALUR RELASI ANTAR TAHAP
+    A3 --> B1
+    B1 --> B2
+    B2 --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> D1
+    D1 --> D2
+
+    D2 -- "Lengkap & Sah" --> E1
+    D2 -- "Perlu Perbaikan" --> D3
+    D3 -. "Notifikasi Revisi" .-> A3
+    D2 -- "Di Luar Kewenangan" --> D4
+
+    E1 --> E2
+    E2 --> B3
+    B3 --> A5
+    B3 --> E3
+    E3 --> B4
+    B4 --> C4
+    C4 --> C5
+    C5 --> E4
+    E4 --> D5
+
+    D5 --> B5
+    B5 --> F1
+    F1 --> F2
+    F2 --> F3
+    F3 --> F4
+    F4 --> D6
+
+    E4 -. "Skema Anggaran" .-> E5
+    E5 --> G1
+    G1 --> G2
+    G2 --> G3
+
+    D6 --> A6
+    D6 --> B6
+
+    %% PEMBERIAN GAYA WARNA & KELAS
+    classDef masyStyle fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+    classDef sysStyle fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#9A3412;
+    classDef aiStyle fill:#FAF5FF,stroke:#A855F7,stroke-width:2px,color:#6B21A8;
+    classDef asnStyle fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E;
+    classDef dewanStyle fill:#F0FDF4,stroke:#22C55E,stroke-width:2px,color:#14532D;
+    classDef opdStyle fill:#EEF2FF,stroke:#6366F1,stroke-width:2px,color:#312E81;
+    classDef bapStyle fill:#F0FDFA,stroke:#14B8A6,stroke-width:2px,color:#134E4A;
+
+    class A1,A2,A3,A4,A5,A6 masyStyle;
+    class B1,B2,B3,B4,B5,B6 sysStyle;
+    class C1,C2,C3,C4,C5 aiStyle;
+    class D1,D2,D3,D4,D5,D6 asnStyle;
+    class E1,E2,E3,E4,E5 dewanStyle;
+    class F1,F2,F3,F4 opdStyle;
+    class G1,G2,G3 bapStyle;

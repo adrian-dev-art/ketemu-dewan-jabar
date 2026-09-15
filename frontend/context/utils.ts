@@ -6,19 +6,33 @@
  */
 export const getBackendUrl = (): string => {
   if (typeof window === "undefined") {
-    return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
   }
   
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
   
-  // If the browser is visiting a remote production/staging domain (e.g., perdinkeuangan.online)
-  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-    // Return same domain. Requests will go to https://perdinkeuangan.online/api/...
-    // which is proxied by Nginx to the backend container.
-    return `${protocol}//${window.location.host}`;
+  // If accessed locally or via private network / Wi-Fi IP (10.x.x.x, 192.168.x.x, 172.16-31.x.x)
+  const isLocalOrLan = 
+    hostname === "localhost" || 
+    hostname === "127.0.0.1" || 
+    /^10\./.test(hostname) || 
+    /^192\.168\./.test(hostname) || 
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+
+  if (isLocalOrLan) {
+    // In local development or multi-device Wi-Fi testing:
+    const envUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    let backendPort = "5001";
+    if (envUrl) {
+      try {
+        const parsed = new URL(envUrl);
+        if (parsed.port) backendPort = parsed.port;
+      } catch {}
+    }
+    return `${protocol}//${hostname}:${backendPort}`;
   }
   
-  // In local development, fallback to the configured environment variable or localhost:5000
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  // In remote production domain (e.g., perdinkeuangan.online where Nginx reverse proxies /api on port 80/443)
+  return `${protocol}//${window.location.host}`;
 };

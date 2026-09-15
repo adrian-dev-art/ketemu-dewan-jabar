@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    .diagram-container {
+        background: #FFFFFF;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        width: 1160px;
+    }
+    .header-bar {
+        border-bottom: 2px solid #E2E8F0;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .title-main {
+        font-size: 23px;
+        font-weight: 800;
+        color: #000000 !important;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+    .subtitle-main {
+        font-size: 14px;
+        color: #000000 !important;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .badge-doc {
+        background: #0F172A !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #0F172A;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+    .card {
+        background: #FFFFFF;
+        border: 1.5px solid #000000;
+        border-radius: 8px;
+        padding: 14px 16px;
+    }
+    .card-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #000000 !important;
+    }
+    .card-desc {
+        font-size: 13.5px;
+        color: #000000 !important;
+        line-height: 1.5;
+    }
+    .arrow-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 26px;
+    }
+    .arrow-down {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 6px 0;
+    }
+    .stage-badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .code-pill {
+        font-family: 'Consolas', monospace;
+        background: #F1F5F9;
+        border: 1px solid #CBD5E1;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12.5px;
+        color: #000000 !important;
+        font-weight: 700;
+    }
+    .bg-blue { background: #EFF6FF; color: #000000 !important; border: 1.5px solid #93C5FD; font-weight: 800; }
+    .bg-amber { background: #FFFBEB; color: #000000 !important; border: 1.5px solid #FCD34D; font-weight: 800; }
+    .bg-purple { background: #FAF5FF; color: #000000 !important; border: 1.5px solid #D8B4FE; font-weight: 800; }
+    .bg-indigo { background: #EEF2FF; color: #000000 !important; border: 1.5px solid #A5B4FC; font-weight: 800; }
+    .bg-emerald { background: #ECFDF5; color: #000000 !important; border: 1.5px solid #6EE7B7; font-weight: 800; }
+    .bg-slate { background: #F1F5F9; color: #000000 !important; border: 1.5px solid #CBD5E1; font-weight: 800; }
+    .bg-rose { background: #FFF1F2; color: #000000 !important; border: 1.5px solid #FDA4AF; font-weight: 800; }
+    
+    /* Dark background containers -> WHITE text */
+    [style*="background: #1E3A8A"], 
+    [style*="background: #0F172A"],
+    [style*="background: #1E40AF"],
+    [style*="background: #1D4ED8"],
+    [style*="background: #047857"],
+    [style*="background: #B45309"],
+    [style*="background: #6D28D9"] {
+        color: #FFFFFF !important;
+    }
+</style>
+</head>
+<body>
+<div class="diagram-container">
+    <div class="header-bar">
+        <div>
+            <div class="title-main">Diagram Mesin Status Siklus Hidup Tiket Audiensi (Finite State Machine)</div>
+            <div class="subtitle-main">Transisi Status Usulan Aspirasi dan E-Audiensi &bull; Rantai Kendali Mutu Pelayanan</div>
+        </div>
+        <div class="badge-doc">SPEC-FSM-01 &bull; Ticket Lifecycle</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: stretch; margin-bottom: 14px;">
+        <div class="card" style="border-left: 4px solid #3B82F6;">
+            <span class="stage-badge bg-blue">Status: SUBMITTED</span>
+            <div class="card-title" style="color: #1D4ED8;">1. Usulan Diterima</div>
+            <div class="card-desc">Aspirasi didaftarkan pemohon. Nomor tracking terbit. Menunggu telaah ASN.</div>
+        </div>
+
+        <div class="arrow-right">&rarr;</div>
+
+        <div class="card" style="border-left: 4px solid #F59E0B;">
+            <span class="stage-badge bg-amber">Status: IN_REVIEW</span>
+            <div class="card-title" style="color: #B45309;">2. Desk Verifikasi</div>
+            <div class="card-desc">ASN memvalidasi data formil. Dapat beralih ke <b>NEEDS_REVISION</b> atau <b>REJECTED</b>.</div>
+        </div>
+
+        <div class="arrow-right">&rarr;</div>
+
+        <div class="card" style="border-left: 4px solid #8B5CF6;">
+            <span class="stage-badge bg-purple">Status: VERIFIED</span>
+            <div class="card-title" style="color: #6D28D9;">3. Terverifikasi Valid</div>
+            <div class="card-desc">Berkas lolos verifikasi. Diteruskan ke pimpinan Komisi untuk slot waktu audiensi.</div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; padding-right: 180px; margin: -4px 0 6px 0;">
+        <div class="arrow-down" style="font-size: 28px;">&darr;</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: stretch;">
+        <div class="card" style="border-left: 4px solid #059669;">
+            <span class="stage-badge bg-emerald">Status: RESOLVED</span>
+            <div class="card-title" style="color: #047857;">6. Tuntas Paripurna</div>
+            <div class="card-desc">Laporan eksekusi lapangan diterima, verifikasi dokumen 100%, tiket ditutup tuntas.</div>
+        </div>
+
+        <div class="arrow-right">&larr;</div>
+
+        <div class="card" style="border-left: 4px solid #4F46E5;">
+            <span class="stage-badge bg-indigo">Status: DISPOSITIONED</span>
+            <div class="card-title" style="color: #4338CA;">5. Disposisi OPD</div>
+            <div class="card-desc">Surat resmi terbit ke Dinas terkait. Pelaksanaan intervensi fisik lapangan.</div>
+        </div>
+
+        <div class="arrow-right">&larr;</div>
+
+        <div class="card" style="border-left: 4px solid #0284C7;">
+            <span class="stage-badge bg-blue">Status: SCHEDULED</span>
+            <div class="card-title" style="color: #0369A1;">4. Terjadwal & Rapat</div>
+            <div class="card-desc">Waktu audiensi dikonfirmasi Dewan. Berlanjut ke sesi <b>IN_MEETING</b> WebRTC.</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

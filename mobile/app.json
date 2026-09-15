@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Aplikasi memerlukan akses kamera untuk pertemuan video dengan anggota dewan.",
         "NSMicrophoneUsageDescription": "Aplikasi memerlukan akses mikrofon untuk pertemuan audio dengan anggota dewan."
-      }
+      },
+      "bitcode": false
     },
     "android": {
       "package": "id.go.jabar.dprd.meetdewan",
@@ -31,7 +32,9 @@
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "web": {
@@ -55,6 +58,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "66b274dc-b110-4a4f-b995-a32d8618f807"
+      }
     }
   }
 }

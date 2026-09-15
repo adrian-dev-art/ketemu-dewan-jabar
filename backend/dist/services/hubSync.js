@@ -51,7 +51,7 @@ function syncHubData() {
                     console.log("DEBUG: First member to sync:", member.nama, "ID:", member.id);
                 }
                 try {
-                    yield prisma.user.upsert({
+                    const updatedUser = yield prisma.user.upsert({
                         where: { centreId: member.id },
                         update: {
                             name: member.nama,
@@ -74,6 +74,28 @@ function syncHubData() {
                             isSync: true
                         }
                     });
+                    // Sync AKD relationships
+                    yield prisma.aKDMember.deleteMany({ where: { dewanId: updatedUser.id } });
+                    if (member.memberships && Array.isArray(member.memberships)) {
+                        for (const ms of member.memberships) {
+                            if (!ms.akd)
+                                continue;
+                            // Ensure AKD exists
+                            yield prisma.aKD.upsert({
+                                where: { id: ms.akd.id },
+                                update: { nama: ms.akd.nama, tipe: ms.akd.tipe },
+                                create: { id: ms.akd.id, nama: ms.akd.nama, tipe: ms.akd.tipe }
+                            });
+                            // Create relationship
+                            yield prisma.aKDMember.create({
+                                data: {
+                                    akdId: ms.akd.id,
+                                    dewanId: updatedUser.id,
+                                    jabatan: ms.jabatan
+                                }
+                            });
+                        }
+                    }
                     processed++;
                 }
                 catch (err) {

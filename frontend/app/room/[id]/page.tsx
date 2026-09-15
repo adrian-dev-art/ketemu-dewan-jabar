@@ -6,15 +6,13 @@ import {
   LiveKitRoom,
   RoomAudioRenderer,
   Chat,
-  ControlBar,
   GridLayout,
   ParticipantTile,
   useTracks,
   useParticipants,
   useRoomInfo,
-  TrackToggle,
-  FocusLayout,
   useLocalParticipant,
+  useRoomContext,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
@@ -35,8 +33,16 @@ import {
   LayoutGrid,
   UserSquare2,
   Circle,
-  Square,
   StopCircle,
+  PhoneOff,
+  Info,
+  Calendar,
+  Clock,
+  User,
+  Building2,
+  FileText,
+  BadgeCheck,
+  CheckCircle2,
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
@@ -56,9 +62,12 @@ function MeetingTimer() {
   const secs = elapsed % 60;
   const pad = (n: number) => n.toString().padStart(2, "0");
   return (
-    <span className="font-mono text-xs tabular-nums text-white/70">
-      {hrs > 0 ? `${pad(hrs)}:` : ""}{pad(mins)}:{pad(secs)}
-    </span>
+    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow-inner">
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <span className="font-mono text-xs font-semibold tabular-nums text-zinc-200">
+        {hrs > 0 ? `${pad(hrs)}:` : ""}{pad(mins)}:{pad(secs)}
+      </span>
+    </div>
   );
 }
 
@@ -66,9 +75,9 @@ function MeetingTimer() {
 function ParticipantCount() {
   const participants = useParticipants();
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.06]">
-      <Users size={13} className="text-white/60" />
-      <span className="text-xs font-medium text-white/80">{participants.length}</span>
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.08] text-zinc-200">
+      <Users size={13} className="text-zinc-400" />
+      <span className="text-xs font-semibold">{participants.length}</span>
     </div>
   );
 }
@@ -95,8 +104,9 @@ function VideoStage({ layout }: { layout: 'grid' | 'speaker' }) {
           {mainTrack ? (
              <ParticipantTile trackRef={mainTrack} />
           ) : (
-            <div className="flex items-center justify-center h-full text-white/20">
-              <Users size={48} />
+            <div className="flex flex-col items-center justify-center h-full text-zinc-500 gap-3">
+              <Users size={48} className="opacity-40" />
+              <p className="text-xs font-medium">Menunggu peserta berbicara...</p>
             </div>
           )}
         </div>
@@ -118,10 +128,275 @@ function VideoStage({ layout }: { layout: 'grid' | 'speaker' }) {
   );
 }
 
+// ─── Custom Control Dock ──────────────────────────────────────
+function RoomControlsDock({
+  chatOpen,
+  setChatOpen,
+  activeTab,
+  setActiveTab,
+  onLeave,
+}: {
+  chatOpen: boolean;
+  setChatOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+  activeTab: 'chat' | 'info';
+  setActiveTab: (t: 'chat' | 'info') => void;
+  onLeave: () => void;
+}) {
+  const {
+    isMicrophoneEnabled,
+    isCameraEnabled,
+    isScreenShareEnabled,
+    localParticipant,
+  } = useLocalParticipant();
+  const room = useRoomContext();
+
+  const toggleMic = async () => {
+    if (localParticipant) {
+      await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled);
+    }
+  };
+
+  const toggleCamera = async () => {
+    if (localParticipant) {
+      await localParticipant.setCameraEnabled(!isCameraEnabled);
+    }
+  };
+
+  const toggleScreenShare = async () => {
+    if (localParticipant) {
+      try {
+        await localParticipant.setScreenShareEnabled(!isScreenShareEnabled);
+      } catch (err) {
+        console.error("Screen share error:", err);
+      }
+    }
+  };
+
+  const handleLeave = () => {
+    if (confirm("Apakah Anda yakin ingin meninggalkan sesi pertemuan ini?")) {
+      try {
+        room?.disconnect();
+      } catch (e) {
+        console.error(e);
+      }
+      onLeave();
+    }
+  };
+
+  return (
+    <div className="room-controls">
+      <div className="room-controls-inner">
+        {/* Mic Toggle */}
+        <button
+          onClick={toggleMic}
+          className={`custom-control-btn ${
+            isMicrophoneEnabled
+              ? "custom-control-btn--normal"
+              : "custom-control-btn--muted"
+          }`}
+          title={isMicrophoneEnabled ? "Matikan Mikrofon" : "Nyalakan Mikrofon"}
+        >
+          {isMicrophoneEnabled ? <Mic size={19} /> : <MicOff size={19} />}
+        </button>
+
+        {/* Camera Toggle */}
+        <button
+          onClick={toggleCamera}
+          className={`custom-control-btn ${
+            isCameraEnabled
+              ? "custom-control-btn--normal"
+              : "custom-control-btn--muted"
+          }`}
+          title={isCameraEnabled ? "Matikan Kamera" : "Nyalakan Kamera"}
+        >
+          {isCameraEnabled ? <Video size={19} /> : <VideoOff size={19} />}
+        </button>
+
+        {/* Screen Share */}
+        <button
+          onClick={toggleScreenShare}
+          className={`custom-control-btn ${
+            isScreenShareEnabled
+              ? "custom-control-btn--active-blue"
+              : "custom-control-btn--normal"
+          }`}
+          title={isScreenShareEnabled ? "Hentikan Berbagi Layar" : "Bagikan Layar"}
+        >
+          <MonitorUp size={19} />
+        </button>
+
+        {/* Vertical Divider */}
+        <div className="w-[1px] h-6 bg-white/10 mx-0.5" />
+
+        {/* Chat Toggle */}
+        <button
+          onClick={() => {
+            if (!chatOpen) {
+              setChatOpen(true);
+              setActiveTab('chat');
+            } else if (activeTab === 'chat') {
+              setChatOpen(false);
+            } else {
+              setActiveTab('chat');
+            }
+          }}
+          className={`custom-control-btn ${
+            chatOpen && activeTab === 'chat'
+              ? "custom-control-btn--active-emerald"
+              : "custom-control-btn--normal"
+          }`}
+          title="Buka Chat Diskusi"
+        >
+          <MessageSquare size={19} />
+          {chatOpen && activeTab === 'chat' && <span className="room-control-indicator" />}
+        </button>
+
+        {/* Agenda Info Toggle */}
+        <button
+          onClick={() => {
+            if (!chatOpen) {
+              setChatOpen(true);
+              setActiveTab('info');
+            } else if (activeTab === 'info') {
+              setChatOpen(false);
+            } else {
+              setActiveTab('info');
+            }
+          }}
+          className={`custom-control-btn ${
+            chatOpen && activeTab === 'info'
+              ? "custom-control-btn--active-amber"
+              : "custom-control-btn--normal"
+          }`}
+          title="Detail Agenda Aspirasi"
+        >
+          <Info size={19} />
+          {chatOpen && activeTab === 'info' && <span className="room-control-indicator bg-amber-400 shadow-[0_0_6px_#f59e0b]" />}
+        </button>
+
+        {/* Vertical Divider */}
+        <div className="w-[1px] h-6 bg-white/10 mx-0.5" />
+
+        {/* Leave Call */}
+        <button
+          onClick={handleLeave}
+          className="leave-call-btn"
+          title="Keluar Pertemuan"
+        >
+          <PhoneOff size={16} />
+          <span className="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Agenda & Sesi Aspirasi Panel ─────────────────────────────
+function AgendaInfoPanel({ meetingDetails, roomId }: { meetingDetails: any; roomId: string }) {
+  const dewanList = meetingDetails?.participants?.map((p: any) => p.dewan).filter(Boolean) || [];
+
+  return (
+    <div className="p-4 space-y-4 overflow-y-auto h-full text-zinc-300 text-xs">
+      {/* Title & Badge */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-950/30 to-zinc-900/60 border border-emerald-500/20">
+        <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px] mb-1 uppercase tracking-wider">
+          <BadgeCheck size={14} />
+          <span>Sesi Aspirasi Resmi</span>
+        </div>
+        <h4 className="text-sm font-bold text-white leading-snug">
+          {meetingDetails?.title || "Konsultasi Aspirasi Warga Jawa Barat"}
+        </h4>
+        <div className="mt-2 flex items-center gap-2 text-zinc-400 text-[11px]">
+          <span className="px-2 py-0.5 rounded bg-white/10 font-mono text-zinc-200">
+            Ruang #{roomId}
+          </span>
+          <span>•</span>
+          <span className="text-emerald-400 font-medium">Sesi Terverifikasi</span>
+        </div>
+      </div>
+
+      {/* Citizen / Pemohon */}
+      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+        <div className="flex items-center gap-2 text-zinc-400 font-medium">
+          <User size={14} className="text-blue-400" />
+          <span>Pemohon Aspirasi (Masyarakat)</span>
+        </div>
+        <p className="text-sm font-semibold text-white">
+          {meetingDetails?.masyarakat?.name || meetingDetails?.name || "Masyarakat Jawa Barat"}
+        </p>
+        <p className="text-[11px] text-zinc-400">
+          Wilayah: <span className="text-zinc-200">{meetingDetails?.dapil || "Provinsi Jawa Barat"}</span>
+        </p>
+      </div>
+
+      {/* Dewan Ditugaskan */}
+      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+        <div className="flex items-center gap-2 text-zinc-400 font-medium">
+          <Building2 size={14} className="text-amber-400" />
+          <span>Wakil Rakyat Ditugaskan</span>
+        </div>
+        {dewanList.length > 0 ? (
+          <div className="space-y-2 pt-1">
+            {dewanList.map((d: any, idx: number) => (
+              <div key={d.id || idx} className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+                <p className="text-xs font-semibold text-zinc-100">{d.name}</p>
+                <p className="text-[10px] text-zinc-400 mt-0.5">{d.fraksi || "DPRD Jawa Barat"}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-zinc-400 italic">Anggota Dewan Terjadwal</p>
+        )}
+      </div>
+
+      {/* Jadwal Pelaksanaan */}
+      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+        <div className="flex items-center gap-2 text-zinc-400 font-medium">
+          <Calendar size={14} className="text-purple-400" />
+          <span>Jadwal Pelaksanaan</span>
+        </div>
+        <p className="text-xs font-medium text-zinc-200">
+          {meetingDetails?.startTime
+            ? new Date(meetingDetails.startTime).toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : "Sesuai Jadwal"}
+        </p>
+        <p className="text-[11px] text-zinc-400">
+          Waktu:{" "}
+          <span className="text-zinc-200 font-medium">
+            {meetingDetails?.startTime
+              ? new Date(meetingDetails.startTime).toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }) + " WIB"
+              : "-"}
+          </span>
+        </p>
+      </div>
+
+      {/* Official Guidelines */}
+      <div className="p-3 rounded-xl bg-zinc-900/80 border border-white/5 space-y-1.5 text-[11px] text-zinc-400 leading-relaxed">
+        <div className="flex items-center gap-1.5 text-zinc-300 font-semibold">
+          <CheckCircle2 size={13} className="text-emerald-400" />
+          <span>Protokol Audiensi</span>
+        </div>
+        <p>
+          Diskusi berlangsung secara langsung dan terdokumentasi. Poin-poin aspirasi akan dirangkum untuk telaahan telaah teknis dan disposisi resmi OPD terkait.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Active Room UI ──────────────────────────────────────────
 function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: string; meetingId: string; meetingDetails: any; onLeave: () => void }) {
   const { user } = useAuth();
   const [chatOpen, setChatOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'chat' | 'info'>('chat');
   const [layout, setLayout] = useState<'grid' | 'speaker'>('grid');
   const [isRecording, setIsRecording] = useState(meetingDetails?.isRecording || false);
 
@@ -129,25 +404,39 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
     <div className="room-container">
       {/* ── Top Bar ── */}
       <div className="room-top-bar">
-        <div className="flex items-center gap-3">
+        {/* Left section: Identity & Room Info */}
+        <div className="flex items-center gap-2.5 min-w-0">
           {meetingDetails?.isStreaming ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/30">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/35 flex-shrink-0">
               <Radio size={12} className="text-red-400 animate-pulse" />
-              <span className="text-xs font-semibold text-red-300 uppercase tracking-wider">Live Streaming</span>
+              <span className="text-[11px] font-bold text-red-300 uppercase tracking-wider">Live Streaming</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/[0.06]">
-              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-              <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">Internal Meeting</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex-shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Sesi Audiensi</span>
             </div>
           )}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.06]">
-            <span className="text-xs text-white/50">Ruang</span>
-            <span className="text-xs font-medium text-white/80">#{roomId}</span>
+
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] flex-shrink-0">
+            <span className="text-[11px] text-zinc-400 font-medium">Ruang</span>
+            <span className="text-[11px] font-bold text-zinc-100 font-mono">#{roomId}</span>
           </div>
+
+          {meetingDetails?.title && (
+            <div className="hidden md:flex items-center max-w-[260px] lg:max-w-[380px] truncate text-xs text-zinc-300 font-medium px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06]">
+              <span className="truncate">{meetingDetails.title}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Center section: Meeting Clock */}
+        <div className="flex items-center justify-center">
           <MeetingTimer />
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Right section: Controls & Badges */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {user?.role === 'admin' && (
             meetingDetails?.isStreaming ? (
               <button
@@ -167,10 +456,10 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     }
                   }
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors border border-red-500/30"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors border border-red-500/30 text-white"
               >
                 <LogOut size={12} className="rotate-180" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Stop Stream</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Stop Stream</span>
               </button>
             ) : (
               <button
@@ -193,25 +482,27 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     }
                   }
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500/30"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500/30 text-white"
               >
                 <Radio size={12} />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Start Stream</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Start Stream</span>
               </button>
             )
           )}
-          <div className="flex items-center bg-white/[0.05] rounded-full p-1 border border-white/[0.1]">
+
+          {/* Grid vs Speaker Layout Toggle */}
+          <div className="flex items-center bg-white/[0.06] rounded-full p-1 border border-white/[0.1]">
             <button
               onClick={() => setLayout('grid')}
-              className={`p-1.5 rounded-full transition-all ${layout === 'grid' ? 'bg-emerald-500 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
-              title="Grid View"
+              className={`p-1.5 rounded-full transition-all ${layout === 'grid' ? 'bg-emerald-500 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
+              title="Tampilan Grid (Semua Peserta)"
             >
               <LayoutGrid size={14} />
             </button>
             <button
               onClick={() => setLayout('speaker')}
-              className={`p-1.5 rounded-full transition-all ${layout === 'speaker' ? 'bg-emerald-500 text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
-              title="Speaker View"
+              className={`p-1.5 rounded-full transition-all ${layout === 'speaker' ? 'bg-emerald-500 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
+              title="Tampilan Pembicara Utama"
             >
               <UserSquare2 size={14} />
             </button>
@@ -244,7 +535,7 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     alert("Terjadi kesalahan koneksi saat mencoba merekam.");
                   }
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all border ${
                   isRecording 
                   ? "bg-red-500/20 border-red-500/40 text-red-400" 
                   : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
@@ -255,9 +546,9 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
              </button>
           )}
 
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25">
             <Shield size={12} className="text-emerald-400" />
-            <span className="text-[10px] font-medium text-emerald-300">Terenkripsi</span>
+            <span className="text-[10px] font-semibold text-emerald-300">256-bit Terenkripsi</span>
           </div>
         </div>
       </div>
@@ -269,56 +560,64 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
           <VideoStage layout={layout} />
         </div>
 
-        {/* Chat Sidebar */}
+        {/* Chat & Agenda Sidebar */}
         {chatOpen && (
           <div className="room-chat-sidebar">
-            <div className="room-chat-header">
-              <div className="flex items-center gap-2">
-                <MessageSquare size={14} className="text-emerald-400" />
-                <span className="text-sm font-semibold text-white">Diskusi</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/20 text-emerald-300">
-                  Live
-                </span>
+            <div className="room-chat-header flex items-center justify-between px-3 py-2.5 border-b border-white/[0.08] bg-zinc-950/70">
+              <div className="flex items-center gap-1 bg-white/[0.06] p-1 rounded-xl border border-white/[0.08]">
+                <button
+                  onClick={() => setActiveTab('chat')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeTab === 'chat'
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <MessageSquare size={13} />
+                  <span>Diskusi</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeTab === 'chat' ? 'bg-white' : 'bg-emerald-400'} animate-pulse`} />
+                </button>
+                <button
+                  onClick={() => setActiveTab('info')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeTab === 'info'
+                      ? 'bg-amber-500 text-zinc-950 shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Info size={13} />
+                  <span>Agenda</span>
+                </button>
               </div>
+
               <button
                 onClick={() => setChatOpen(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+                title="Tutup Panel"
               >
-                <X size={14} />
+                <X size={15} />
               </button>
             </div>
+
             <div className="room-chat-body">
-              <CustomChat />
+              {activeTab === 'chat' ? (
+                <CustomChat />
+              ) : (
+                <AgendaInfoPanel meetingDetails={meetingDetails} roomId={roomId} />
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Bottom Control Bar ── */}
-      <div className="room-controls">
-        <div className="room-controls-inner">
-          <ControlBar
-            variation="minimal"
-            controls={{
-              microphone: true,
-              camera: true,
-              screenShare: true,
-              leave: true,
-              chat: false,
-              settings: false,
-            }}
-          />
-          {/* Chat toggle */}
-          <button
-            onClick={() => setChatOpen((p) => !p)}
-            className={`room-control-btn ${chatOpen ? "room-control-btn--active" : ""}`}
-            title="Toggle Chat"
-          >
-            <MessageSquare size={18} />
-            {chatOpen && <span className="room-control-indicator" />}
-          </button>
-        </div>
-      </div>
+      {/* ── Custom Bottom Control Dock ── */}
+      <RoomControlsDock
+        chatOpen={chatOpen}
+        setChatOpen={setChatOpen}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLeave={onLeave}
+      />
     </div>
   );
 }

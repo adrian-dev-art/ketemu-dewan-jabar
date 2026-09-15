@@ -1,0 +1,97 @@
+import os, time
+from playwright.sync_api import sync_playwright
+
+def run():
+    os.makedirs('screenshots', exist_ok=True)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, channel="msedge")
+        
+        # 1. Landing Page
+        print("[SCREENSHOT] Capturing Landing Page...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/', wait_until='networkidle')
+        page.wait_for_timeout(2000)
+        page.screenshot(path='screenshots/landing_page.png')
+        page.close()
+        context.close()
+
+        # 2. Login Page
+        print("[SCREENSHOT] Capturing Login Page...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/login', wait_until='networkidle')
+        page.wait_for_timeout(2000)
+        page.screenshot(path='screenshots/login_page.png')
+        page.close()
+        context.close()
+
+        # 3. Register Page
+        print("[SCREENSHOT] Capturing Register Page...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/register', wait_until='networkidle')
+        page.wait_for_timeout(2000)
+        page.screenshot(path='screenshots/register_page.png')
+        page.close()
+        context.close()
+
+        # 4. Masyarakat Dashboard (Logged In)
+        print("[SCREENSHOT] Logging in as Masyarakat (masyarakat@demo.id)...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/login', wait_until='networkidle')
+        page.fill('input[type="email"]', 'masyarakat@demo.id')
+        page.fill('input[type="password"]', 'password')
+        page.click('button[type="submit"]')
+        page.wait_for_timeout(3000)
+        print(f"[SCREENSHOT] Current URL after login: {page.url}")
+        page.goto('http://localhost:3000/masyarakat', wait_until='networkidle')
+        page.wait_for_timeout(3000)
+        page.screenshot(path='screenshots/masyarakat_page.png')
+        page.close()
+        context.close()
+
+        # 5. Dewan Dashboard (Logged In)
+        print("[SCREENSHOT] Logging in as Dewan (ahmad@dewan.id)...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/login', wait_until='networkidle')
+        page.fill('input[type="email"]', 'ahmad@dewan.id')
+        page.fill('input[type="password"]', 'password')
+        page.click('button[type="submit"]')
+        page.wait_for_timeout(3000)
+        print(f"[SCREENSHOT] Current URL after login: {page.url}")
+        page.goto('http://localhost:3000/dewan', wait_until='networkidle')
+        page.wait_for_timeout(3000)
+        page.screenshot(path='screenshots/dewan_page.png')
+        page.close()
+        context.close()
+
+        # 6. Admin Dashboard (Logged In)
+        print("[SCREENSHOT] Logging in as Admin (admin@dewan.id)...")
+        context = browser.new_context(viewport={'width': 1366, 'height': 868})
+        page = context.new_page()
+        page.goto('http://localhost:3000/login', wait_until='networkidle')
+        page.fill('input[type="email"]', 'admin@dewan.id')
+        page.fill('input[type="password"]', 'password')
+        page.click('button[type="submit"]')
+        page.wait_for_timeout(3000)
+        print(f"[SCREENSHOT] Current URL after login: {page.url}")
+        page.goto('http://localhost:3000/admin', wait_until='networkidle')
+        page.wait_for_timeout(3000)
+        page.screenshot(path='screenshots/admin_page.png')
+        
+        # 7. GIS Page (Logged In as Admin)
+        print("[SCREENSHOT] Capturing GIS Page...")
+        page.goto('http://localhost:3000/gis', wait_until='networkidle')
+        page.wait_for_timeout(3000)
+        page.screenshot(path='screenshots/gis_page.png')
+        
+        page.close()
+        context.close()
+        browser.close()
+        print("[SUCCESS] All authenticated screenshots captured successfully!")
+
+if __name__ == "__main__":
+    run()

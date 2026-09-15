@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    .diagram-container {
+        background: #FFFFFF;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        width: 1160px;
+    }
+    .header-bar {
+        border-bottom: 2px solid #E2E8F0;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .title-main {
+        font-size: 23px;
+        font-weight: 800;
+        color: #000000 !important;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+    .subtitle-main {
+        font-size: 14px;
+        color: #000000 !important;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .badge-doc {
+        background: #0F172A !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #0F172A;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+    .card {
+        background: #FFFFFF;
+        border: 1.5px solid #000000;
+        border-radius: 8px;
+        padding: 14px 16px;
+    }
+    .card-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #000000 !important;
+    }
+    .card-desc {
+        font-size: 13.5px;
+        color: #000000 !important;
+        line-height: 1.5;
+    }
+    .arrow-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 26px;
+    }
+    .arrow-down {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 6px 0;
+    }
+    .stage-badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .code-pill {
+        font-family: 'Consolas', monospace;
+        background: #F1F5F9;
+        border: 1px solid #CBD5E1;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12.5px;
+        color: #000000 !important;
+        font-weight: 700;
+    }
+    .bg-blue { background: #EFF6FF; color: #000000 !important; border: 1.5px solid #93C5FD; font-weight: 800; }
+    .bg-amber { background: #FFFBEB; color: #000000 !important; border: 1.5px solid #FCD34D; font-weight: 800; }
+    .bg-purple { background: #FAF5FF; color: #000000 !important; border: 1.5px solid #D8B4FE; font-weight: 800; }
+    .bg-indigo { background: #EEF2FF; color: #000000 !important; border: 1.5px solid #A5B4FC; font-weight: 800; }
+    .bg-emerald { background: #ECFDF5; color: #000000 !important; border: 1.5px solid #6EE7B7; font-weight: 800; }
+    .bg-slate { background: #F1F5F9; color: #000000 !important; border: 1.5px solid #CBD5E1; font-weight: 800; }
+    .bg-rose { background: #FFF1F2; color: #000000 !important; border: 1.5px solid #FDA4AF; font-weight: 800; }
+    
+    /* Dark background containers -> WHITE text */
+    [style*="background: #1E3A8A"], 
+    [style*="background: #0F172A"],
+    [style*="background: #1E40AF"],
+    [style*="background: #1D4ED8"],
+    [style*="background: #047857"],
+    [style*="background: #B45309"],
+    [style*="background: #6D28D9"] {
+        color: #FFFFFF !important;
+    }
+</style>
+</head>
+<body>
+<div class="diagram-container">
+    <div class="header-bar">
+        <div>
+            <div class="title-main">Peta Jalan Iterasi Sprint Agile Platform HUDANG (2026 - 2028)</div>
+            <div class="subtitle-main">Penyelarasan Siklus Rilis Agile Scrum Terhadap Pentahapan Milestone Proyek Perubahan</div>
+        </div>
+        <div class="badge-doc">SPEC-ROADMAP-01 &bull; 2026-2028</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Jangka Pendek -->
+        <div style="padding: 14px 18px; background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 14px; font-weight: 800; color: #1E40AF; text-transform: uppercase;">1. Tahap Jangka Pendek: Fondasi & Piloting 2 Dapil (Sep - Des 2026)</span>
+                <span style="background: #DBEAFE; color: #1E40AF; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">Milestone Inti</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                <div class="card" style="border-left: 4px solid #2563EB;">
+                    <div style="font-size: 12px; font-weight: 800; color: #1E40AF;">Sprint 1 (Minggu 1-2)</div>
+                    <div class="card-desc">Setup Docker Compose, database PostgreSQL, Redis, dan otentikasi NIK Bcrypt.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #2563EB;">
+                    <div style="font-size: 12px; font-weight: 800; color: #1E40AF;">Sprint 2 (Minggu 3-5)</div>
+                    <div class="card-desc">Penyusunan SOP, modul teknis, formulir aspirasi NIK, dan nomor pelacak instan.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #2563EB;">
+                    <div style="font-size: 12px; font-weight: 800; color: #1E40AF;">Sprint 3 (Minggu 6-7)</div>
+                    <div class="card-desc">Integrasi LiveKit SFU WebRTC, perekaman Egress, dan transkripsi verbatim Gemini AI.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #2563EB;">
+                    <div style="font-size: 12px; font-weight: 800; color: #1E40AF;">Sprint 4 (Minggu 8-10)</div>
+                    <div class="card-desc">Penyelesaian Mobile App Expo, modul disposisi OPD 4 tahap, dan uji coba piloting beta.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jangka Menengah -->
+        <div style="padding: 14px 18px; background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 14px; font-weight: 800; color: #065F46; text-transform: uppercase;">2. Tahap Jangka Menengah: Implementasi Penuh 15 Dapil & SIPD (Jan - Jul 2027)</span>
+                <span style="background: #D1FAE5; color: #065F46; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">Milestone Implementasi</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div class="card" style="border-left: 4px solid #059669;">
+                    <div style="font-size: 12px; font-weight: 800; color: #047857;">Sprint 5 - 6 (Jan - Feb 2027)</div>
+                    <div class="card-desc">Peluncuran publik resmi, sosialisasi terbuka, dan pelatihan teknis operator sekretariat di Dapil.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #059669;">
+                    <div style="font-size: 12px; font-weight: 800; color: #047857;">Sprint 7 - 8 (Mar - Apr 2027)</div>
+                    <div class="card-desc">Pembuatan data bridge format kamus usulan SIPD / RKPD Bappeda dan perluasan ke 15 Dapil.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #059669;">
+                    <div style="font-size: 12px; font-weight: 800; color: #047857;">Sprint 9 (Mei - Jul 2027)</div>
+                    <div class="card-desc">Evaluasi target capaian penanganan 70%, audit efisiensi anggaran daerah Rp25M, dan rilis V2.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jangka Panjang -->
+        <div style="padding: 14px 18px; background: #FAF5FF; border: 1.5px solid #E9D5FF; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 14px; font-weight: 800; color: #6B21A8; text-transform: uppercase;">3. Tahap Jangka Panjang: Analitik Prediktif & Keberlanjutan (Agu 2027 - 2028)</span>
+                <span style="background: #F3E8FF; color: #6B21A8; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">Milestone Berkelanjutan</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="card" style="border-left: 4px solid #7C3AED;">
+                    <div style="font-size: 12px; font-weight: 800; color: #6D28D9;">Sprint 10 - 12 (Tahun 2027)</div>
+                    <div class="card-desc">Pengembangan model AI prediktif untuk estimasi isu sektoral per Kabupaten/Kota dan audit BSSN.</div>
+                </div>
+                <div class="card" style="border-left: 4px solid #7C3AED;">
+                    <div style="font-size: 12px; font-weight: 800; color: #6D28D9;">Sprint 13+ (Tahun 2028)</div>
+                    <div class="card-desc">Survei indeks kepuasan dan kepercayaan publik berkala, integrasi penuh SPBE Pemprov Jabar.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

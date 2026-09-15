@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const LOCAL_URL = Platform.OS === 'web' ? 'http://localhost:5001' : 'http://111.111.111.171:5001';
+const LOCAL_URL = Platform.OS === 'web' ? 'http://localhost:5001' : 'http://10.10.8.133:5001';
 const PROD_URL = 'https://ketemudewan.perdinkeuangan.online';
 const PROD_API_KEY = '23985e35b6e9f9445c448b8eb8868edbc7fb5e5822d0c53d1ddff079f88e3ab1';
 

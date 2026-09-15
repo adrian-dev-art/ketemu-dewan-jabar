@@ -1,0 +1,67 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.publicSubmitReportSchema = exports.publicSubmitFeedbackSchema = exports.updateFollowUpSchema = exports.createFollowUpSchema = void 0;
+const zod_1 = require("zod");
+exports.createFollowUpSchema = zod_1.z.object({
+    sharedTo: zod_1.z.string().min(1, "Tujuan disposisi harus diisi"),
+    sharedToEmail: zod_1.z.string().email("Format email tujuan tidak valid").optional().or(zod_1.z.literal('')),
+    shareChannel: zod_1.z.string().optional().default("Disposisi Resmi"),
+    shareNotes: zod_1.z.string().optional(),
+    suratDisposisiNo: zod_1.z.string().optional(),
+    suratDisposisiUrl: zod_1.z.string().optional(),
+    suratDisposisiTgl: zod_1.z.string().optional(),
+});
+exports.updateFollowUpSchema = zod_1.z.object({
+    isShared: zod_1.z.boolean().optional(),
+    sharedTo: zod_1.z.string().optional(),
+    sharedToEmail: zod_1.z.string().optional(),
+    shareChannel: zod_1.z.string().optional(),
+    shareNotes: zod_1.z.string().optional(),
+    suratDisposisiNo: zod_1.z.string().optional(),
+    suratDisposisiUrl: zod_1.z.string().optional(),
+    suratDisposisiTgl: zod_1.z.string().optional(),
+    isViewed: zod_1.z.boolean().optional(),
+    viewedBy: zod_1.z.string().optional(),
+    viewedPosition: zod_1.z.string().optional(),
+    viewedAt: zod_1.z.string().optional(),
+    hasComment: zod_1.z.boolean().optional(),
+    recipientComment: zod_1.z.string().optional(),
+    recipientName: zod_1.z.string().optional(),
+    recipientPosition: zod_1.z.string().optional(),
+    recipientCommentAt: zod_1.z.string().optional(),
+    actionCategory: zod_1.z.string().optional(),
+    suratTanggapanNo: zod_1.z.string().optional(),
+    suratTanggapanUrl: zod_1.z.string().optional(),
+    suratTanggapanTgl: zod_1.z.string().optional(),
+    status: zod_1.z.enum(['pending', 'diproses', 'selesai', 'terkendala']).optional(),
+    isCompleted: zod_1.z.boolean().optional(),
+    actionReport: zod_1.z.string().optional(),
+    actionReportAt: zod_1.z.string().optional(),
+    picName: zod_1.z.string().optional(),
+    picContact: zod_1.z.string().optional(),
+    evidenceUrl: zod_1.z.string().optional(),
+    suratLaporanNo: zod_1.z.string().optional(),
+    suratLaporanUrl: zod_1.z.string().optional(),
+    suratLaporanTgl: zod_1.z.string().optional(),
+    progressPercent: zod_1.z.number().min(0).max(100).optional(),
+});
+exports.publicSubmitFeedbackSchema = zod_1.z.object({
+    recipientComment: zod_1.z.string().min(3, "Tanggapan minimal 3 karakter"),
+    recipientName: zod_1.z.string().min(2, "Nama penanggung jawab harus diisi"),
+    recipientPosition: zod_1.z.string().min(2, "Jabatan harus diisi"),
+    actionCategory: zod_1.z.string().optional(),
+    suratTanggapanNo: zod_1.z.string().optional(),
+    suratTanggapanUrl: zod_1.z.string().optional(),
+    suratTanggapanTgl: zod_1.z.string().optional(),
+});
+exports.publicSubmitReportSchema = zod_1.z.object({
+    actionReport: zod_1.z.string().min(3, "Laporan hasil minimal 3 karakter"),
+    picName: zod_1.z.string().min(2, "Nama PIC harus diisi"),
+    picContact: zod_1.z.string().optional(),
+    status: zod_1.z.enum(['diproses', 'selesai', 'terkendala']).default('selesai'),
+    progressPercent: zod_1.z.number().min(0).max(100).optional(),
+    evidenceUrl: zod_1.z.string().optional(),
+    suratLaporanNo: zod_1.z.string().optional(),
+    suratLaporanUrl: zod_1.z.string().optional(),
+    suratLaporanTgl: zod_1.z.string().optional(),
+});

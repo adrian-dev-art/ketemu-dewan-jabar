@@ -69,6 +69,14 @@ async function main() {
         dewanList.push(u);
     }
 
+    // Seed 120 Dewan Provinsi Jawa Barat
+    try {
+        const { seed120Dewan } = await import('../src/seed_dewan_120');
+        await seed120Dewan();
+    } catch (err) {
+        console.warn('Catatan: Tidak dapat menjalankan seed120Dewan otomatis:', err);
+    }
+
     // ──────────────────────────────────────────────────
     // 3. MASYARAKAT (20 orang tersebar di Jabar)
     // ──────────────────────────────────────────────────

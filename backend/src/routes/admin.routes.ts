@@ -266,7 +266,7 @@ router.delete('/admin/users/:id', async (req: Request, res: Response) => {
 router.get('/admin/schedules', async (req: Request, res: Response) => {
     try {
         const schedules = await prisma.schedule.findMany({
-            orderBy: { startTime: 'desc' },
+            orderBy: { id: 'desc' },
             include: {
                 masyarakat: { select: { id: true, name: true, email: true, kabupaten: true, kecamatan: true } },
                 participants: {

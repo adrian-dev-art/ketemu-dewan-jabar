@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Bagan Alur Utama SOP Platform HUDANG - DPRD Provinsi Jawa Barat</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0F172A;
+    color: #1E293B;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .canvas {
+    background: #FFFFFF;
+    width: 1720px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    border: 1px solid #CBD5E1;
+  }
+
+  @media print {
+    @page {
+      size: 460mm 300mm;
+      margin: 8mm;
+    }
+    body {
+      background: #FFFFFF !important;
+      padding: 0 !important;
+    }
+    .canvas {
+      width: 100% !important;
+      box-shadow: none !important;
+      border-radius: 8px !important;
+    }
+  }
+
+  /* TOP HEADER */
+  .header-bar {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 55%, #1D4ED8 100%);
+    padding: 26px 36px;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #F59E0B;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo-emblem {
+    width: 58px;
+    height: 58px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border: 2px solid #FCD34D;
+  }
+  .title-group h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .title-group h1 .badge-sop {
+    background: #F59E0B;
+    color: #0F172A;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+  }
+  .title-group p {
+    font-size: 13px;
+    color: #93C5FD;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .header-meta {
+    text-align: right;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .header-meta table {
+    font-size: 11.5px;
+    color: #E2E8F0;
+    border-collapse: collapse;
+  }
+  .header-meta td {
+    padding: 2px 6px;
+  }
+  .header-meta td.lbl {
+    color: #94A3B8;
+    text-align: right;
+  }
+  .header-meta td.val {
+    font-weight: 700;
+    color: #F8FAFC;
+    text-align: left;
+  }
+
+  /* PHASE COLUMN HEADER */
+  .grid-header {
+    display: grid;
+    grid-template-columns: 190px repeat(6, 1fr);
+    background: #F8FAFC;
+    border-bottom: 2px solid #E2E8F0;
+  }
+  .grid-header-corner {
+    background: #0F172A;
+    color: #F8FAFC;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    border-right: 2px solid #E2E8F0;
+  }
+  .phase-header-col {
+    padding: 12px 10px;
+    text-align: center;
+    border-right: 1px solid #E2E8F0;
+    position: relative;
+  }
+  .phase-header-col:last-child {
+    border-right: none;
+  }
+  .phase-pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 3px;
+  }
+  .phase-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0F172A;
+  }
+  .phase-sub {
+    font-size: 10px;
+    color: #64748B;
+    font-weight: 500;
+  }
+
+  .p1 .phase-pill { background: #DBEAFE; color: #1D4ED8; }
+  .p2 .phase-pill { background: #FEF3C7; color: #B45309; }
+  .p3 .phase-pill { background: #F3E8FF; color: #7C3AED; }
+  .p4 .phase-pill { background: #DCFCE7; color: #15803D; }
+  .p5 .phase-pill { background: #FFEDD5; color: #C2410C; }
+  .p6 .phase-pill { background: #CCFBF1; color: #0F766E; }
+
+  /* SWIMLANE BODY GRID */
+  .swimlane-body {
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+  }
+
+  .lane-row {
+    display: grid;
+    grid-template-columns: 190px repeat(6, 1fr);
+    min-height: 148px;
+    border-bottom: 1.5px solid #E2E8F0;
+    position: relative;
+  }
+  .lane-row:last-child {
+    border-bottom: none;
+  }
+  .lane-row:nth-child(even) {
+    background: #FBFDFE;
+  }
+
+  /* ACTOR / LANE LABEL */
+  .lane-actor-label {
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-right: 2px solid #E2E8F0;
+    position: relative;
+  }
+  .actor-icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .actor-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .actor-sub {
+    font-size: 9.5px;
+    color: #64748B;
+    margin-top: 3px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  /* ACTOR ACCENTS */
+  .actor-masy { background: #F0F7FF; border-left: 5px solid #2563EB; }
+  .actor-masy .actor-title { color: #1D4ED8; }
+  .actor-sistem { background: #FFFBF5; border-left: 5px solid #EA580C; }
+  .actor-sistem .actor-title { color: #C2410C; }
+  .actor-ai { background: #FAF5FF; border-left: 5px solid #9333EA; }
+  .actor-ai .actor-title { color: #7E22CE; }
+  .actor-asn { background: #FFFDF0; border-left: 5px solid #D97706; }
+  .actor-asn .actor-title { color: #B45309; }
+  .actor-dewan { background: #F0FDF4; border-left: 5px solid #16A34A; }
+  .actor-dewan .actor-title { color: #15803D; }
+  .actor-opd { background: #EEF2FF; border-left: 5px solid #4F46E5; }
+  .actor-opd .actor-title { color: #4338CA; }
+  .actor-bappeda { background: #F0FDFA; border-left: 5px solid #0D9488; }
+  .actor-bappeda .actor-title { color: #0F766E; }
+
+  /* CELL IN GRID */
+  .grid-cell {
+    padding: 12px 10px;
+    border-right: 1px dashed #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+  .grid-cell:last-child {
+    border-right: none;
+  }
+  .grid-cell.empty {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(241, 245, 249, 0.35),
+      rgba(241, 245, 249, 0.35) 6px,
+      rgba(255, 255, 255, 0.7) 6px,
+      rgba(255, 255, 255, 0.7) 12px
+    );
+  }
+
+  /* STEP CARDS */
+  .step-card {
+    background: #FFFFFF;
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-size: 11px;
+    line-height: 1.4;
+    border: 1.5px solid #CBD5E1;
+    width: 100%;
+    max-width: 235px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    transition: all 0.2s ease;
+  }
+  .card-badge {
+    position: absolute;
+    top: -8px;
+    left: 9px;
+    color: #FFFFFF;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1.5px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .card-title {
+    font-weight: 800;
+    font-size: 11px;
+    margin-top: 2px;
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 10px;
+    color: #475569;
+    line-height: 1.35;
+  }
+  .sla-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 5px;
+    letter-spacing: 0.02em;
+  }
+
+  /* COLOR THEMES FOR CARDS */
+  .card-blue { border-color: #93C5FD; background: #F8FAFC; border-left: 4px solid #2563EB; }
+  .card-blue .card-badge { background: #2563EB; }
+  .card-blue .card-title { color: #1E40AF; }
+  .card-blue .sla-pill { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+
+  .card-orange { border-color: #FDBA74; background: #FFFBF7; border-left: 4px solid #EA580C; }
+  .card-orange .card-badge { background: #EA580C; }
+  .card-orange .card-title { color: #9A3412; }
+  .card-orange .sla-pill { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+
+  .card-purple { border-color: #D8B4FE; background: #FAF5FF; border-left: 4px solid #9333EA; }
+  .card-purple .card-badge { background: #9333EA; }
+  .card-purple .card-title { color: #6B21A8; }
+  .card-purple .sla-pill { background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF; }
+
+  .card-amber { border-color: #FCD34D; background: #FFFDF5; border-left: 4px solid #D97706; }
+  .card-amber .card-badge { background: #D97706; }
+  .card-amber .card-title { color: #92400E; }
+  .card-amber .sla-pill { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+
+  .card-green { border-color: #86EFAC; background: #F7FDF9; border-left: 4px solid #16A34A; }
+  .card-green .card-badge { background: #16A34A; }
+  .card-green .card-title { color: #166534; }
+  .card-green .sla-pill { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+
+  .card-indigo { border-color: #A5B4FC; background: #F8FAFF; border-left: 4px solid #4F46E5; }
+  .card-indigo .card-badge { background: #4F46E5; }
+  .card-indigo .card-title { color: #3730A3; }
+  .card-indigo .sla-pill { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+
+  .card-teal { border-color: #99F6E4; background: #F2FBF9; border-left: 4px solid #0D9488; }
+  .card-teal .card-badge { background: #0D9488; }
+  .card-teal .card-title { color: #115E59; }
+  .card-teal .sla-pill { background: #CCFBF1; color: #0F766E; border: 1px solid #99F6E4; }
+
+  /* DECISION GATE / DIAMOND */
+  .decision-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+  }
+  .diamond-shape {
+    width: 96px;
+    height: 96px;
+    background: #FFFBEB;
+    border: 2.5px solid #D97706;
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
+    margin: 8px 0;
+  }
+  .diamond-inner {
+    transform: rotate(-45deg);
+    text-align: center;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #92400E;
+    line-height: 1.25;
+    padding: 4px;
+  }
+  .decision-branches {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .branch-item {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1.2;
+  }
+  .branch-acc { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }
+  .branch-rev { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+  .branch-rej { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+
+  /* FLOW CONNECTORS & ARROWS */
+  .flow-h {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    font-size: 16px;
+    font-weight: 900;
+    margin: 0 2px;
+  }
+  .flow-v {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748B;
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .handoff-tag {
+    font-size: 8.5px;
+    background: #E2E8F0;
+    color: #475569;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.02em;
+    display: inline-block;
+  }
+
+  /* LEGEND & KPI FOOTER */
+  .footer-legend {
+    background: #F8FAFC;
+    padding: 16px 28px;
+    border-top: 2px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .legend-items {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .leg-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #334155;
+    font-weight: 600;
+  }
+  .leg-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  .kpi-strip {
+    background: #0F172A;
+    padding: 16px 36px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 16px;
+    border-top: 3px solid #1D4ED8;
+    color: #FFFFFF;
+  }
+  .kpi-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .kpi-card .val {
+    font-size: 17px;
+    font-weight: 900;
+    color: #60A5FA;
+    letter-spacing: -0.02em;
+  }
+  .kpi-card .label {
+    font-size: 9.5px;
+    color: #94A3B8;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- TOP HEADER -->
+  <div class="header-bar">
+    <div class="header-left">
+      <div class="logo-emblem">🏛️</div>
+      <div class="title-group">
+        <h1>
+          BAGAN ALUR UTAMA OPERASIONAL PLATFORM HUDANG
+          <span class="badge-sop">STANDAR PROSEDUR OPERASIONAL</span>
+        </h1>
+        <p>Arsitektur Alur Kerja Lintas 7 Pemangku Kepentingan · Sekretariat Dewan Perwakilan Rakyat Daerah Provinsi Jawa Barat</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <table>
+        <tr><td class="lbl">No. Registrasi:</td><td class="val">SOP/DPRD-JBR/HUDANG/2026/001</td></tr>
+        <tr><td class="lbl">Klasifikasi:</td><td class="val">Pelayanan Publik & E-Legislasi Terpadu</td></tr>
+        <tr><td class="lbl">Tanggal Berlaku:</td><td class="val">15 September 2026 (Edisi 1.0)</td></tr>
+        <tr><td class="lbl">Penetapan:</td><td class="val">Sekretaris DPRD Provinsi Jawa Barat</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PHASE COLUMN HEADER (6 PHASES) -->
+  <div class="grid-header">
+    <div class="grid-header-corner">LANE AKTOR \ FASE</div>
+    <div class="phase-header-col p1">
+      <div class="phase-pill">FASE 1</div>
+      <div class="phase-title">Registrasi & Pengajuan</div>
+      <div class="phase-sub">Otentikasi Identitas & Input Usulan</div>
+    </div>
+    <div class="phase-header-col p2">
+      <div class="phase-pill">FASE 2</div>
+      <div class="phase-title">Verifikasi & Penapisan</div>
+      <div class="phase-sub">Analisis AI & Uji Kelayakan ASN</div>
+    </div>
+    <div class="phase-header-col p3">
+      <div class="phase-pill">FASE 3</div>
+      <div class="phase-title">Penjadwalan & E-Audiensi</div>
+      <div class="phase-sub">Slot Dewan & Sesi WebRTC LiveKit</div>
+    </div>
+    <div class="phase-header-col p4">
+      <div class="phase-pill">FASE 4</div>
+      <div class="phase-title">Transkripsi & Risalah</div>
+      <div class="phase-sub">Gemini AI NLP & Notulensi Sah</div>
+    </div>
+    <div class="phase-header-col p5">
+      <div class="phase-pill">FASE 5</div>
+      <div class="phase-title">Disposisi & Aksi OPD</div>
+      <div class="phase-sub">Surat Dinas & Eksekusi Lapangan</div>
+    </div>
+    <div class="phase-header-col p6">
+      <div class="phase-pill">FASE 6</div>
+      <div class="phase-title">Resolusi & Integrasi</div>
+      <div class="phase-sub">Sinkronisasi SIPD & Evaluasi Warga</div>
+    </div>
+  </div>
+
+  <!-- SWIMLANE BODY -->
+  <div class="swimlane-body">
+
+    <!-- LANE 1: MASYARAKAT -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-masy">
+        <div class="actor-icon">👥</div>
+        <div class="actor-title">Masyarakat Konstituen</div>
+        <div class="actor-sub">Pemohon Aspirasi / 15 Dapil Jabar</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell">
+        <div class="step-card card-blue">
+          <div class="card-badge">M-01</div>
+          <div class="card-title">Registrasi & Login Akun</div>
+          <div class="card-desc">Input NIK, Nama KTP, email aktif, dan domisili 27 Kab/Kota. Verifikasi aktivasi akun via Email.</div>
+          <div class="sla-pill">⚡ Real-time</div>
+        </div>
+        <div class="flow-v">↓</div>
+        <div class="step-card card-blue">
+          <div class="card-badge">M-02</div>
+          <div class="card-title">Kirim Permohonan E-Audiensi</div>
+          <div class="card-desc">Unggah pokok usulan, opsi jadwal temu, lokasi GIS, dan dokumen dukung PDF/foto fisik.</div>
+          <div class="sla-pill">⏱️ Mandiri</div>
+        </div>
+      </div>
+      <!-- Phase 2 -->
+      <div class="grid-cell">
+        <div class="step-card card-blue">
+          <div class="card-badge">M-03</div>
+          <div class="card-title">Terima Tiket Audiensi</div>
+          <div class="card-desc">Terima Nomor Tiket unik (AUD-202609-XXXXX) & pantau status konfirmasi jadwal di dasbor.</div>
+          <div class="sla-pill">⚡ &lt; 5 Detik</div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell">
+        <div class="step-card card-blue">
+          <div class="card-badge">M-04</div>
+          <div class="card-title">Hadir di Ruang E-Audiensi</div>
+          <div class="card-desc">Klik tautan WebRTC dari undangan. Lolos pre-join camera/mic check & dialog resmi.</div>
+          <div class="sla-pill">📅 Sesuai Jadwal</div>
+        </div>
+      </div>
+      <!-- Phase 4 (Empty for citizen) -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Menunggu Risalah Selesai</span>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-blue">
+          <div class="card-badge">M-05</div>
+          <div class="card-title">Pantau Status Disposisi</div>
+          <div class="card-desc">Terima notifikasi WA saat OPD konfirmasi surat dan unggah komitmen rencana aksi.</div>
+          <div class="sla-pill">🔔 Notifikasi Aktif</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-blue">
+          <div class="card-badge">M-06</div>
+          <div class="card-title">Isi Rating Kepuasan</div>
+          <div class="card-desc">Beri evaluasi 1-5 bintang pada 5 dimensi layanan (komunikasi, respons, solusi, waktu, tindak lanjut).</div>
+          <div class="sla-pill">⭐ Wajib Evaluasi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 2: MESIN AI HUDANG -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-ai">
+        <div class="actor-icon">🤖</div>
+        <div class="actor-title">Mesin AI Cerdas</div>
+        <div class="actor-sub">Gemini Flash & NLP Analytics</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Standby Pipeline</span>
+      </div>
+      <!-- Phase 2 -->
+      <div class="grid-cell">
+        <div class="step-card card-purple">
+          <div class="card-badge">AI-01</div>
+          <div class="card-title">Ekstraksi & Cek Duplikasi</div>
+          <div class="card-desc">Ekstraksi entitas NLP, scoring kemiripan semantik (&gt;85%), & rekomendasi Komisi I-V.</div>
+          <div class="sla-pill">⚡ &lt; 30 Detik</div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Perekaman Egress Aktif</span>
+      </div>
+      <!-- Phase 4 -->
+      <div class="grid-cell">
+        <div class="step-card card-purple">
+          <div class="card-badge">AI-02</div>
+          <div class="card-title">Transkripsi Verbatim Gemini</div>
+          <div class="card-desc">Konversi audio rapat ke teks verbatim, diarization penutur, dan ringkasan eksekutif risalah.</div>
+          <div class="sla-pill">⏱️ &lt; 15 Menit</div>
+        </div>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Pemantauan Batas SLA</span>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-purple">
+          <div class="card-badge">AI-03</div>
+          <div class="card-title">Analisis Sentimen & Kinerja</div>
+          <div class="card-desc">Kompilasi tren sentimen konstituen dan indeks penyelesaian masalah per sektor.</div>
+          <div class="sla-pill">📊 Otomatis Harian</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 3: VERIFIKATOR ASN -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-asn">
+        <div class="actor-icon">🏛️</div>
+        <div class="actor-title">Verifikator ASN</div>
+        <div class="actor-sub">Sekretariat DPRD Jawa Barat</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Menunggu Berkas Masuk</span>
+      </div>
+      <!-- Phase 2: DECISION GATE -->
+      <div class="grid-cell">
+        <div class="step-card card-amber">
+          <div class="card-badge">ASN-01</div>
+          <div class="card-title">Uji Kelayakan Formal Berkas</div>
+          <div class="card-desc">Validasi identitas, cek batas kewenangan provinsi, dan konfirmasi hasil analisis awal AI.</div>
+          <div class="sla-pill">🕒 ≤ 1×24 Jam</div>
+        </div>
+        <div class="decision-box">
+          <div class="diamond-shape">
+            <div class="diamond-inner">Berkas Lengkap & Sah?</div>
+          </div>
+          <div class="decision-branches">
+            <div class="branch-item branch-acc"><span>🟢 Diterima</span><span>➜ Teruskan AKD</span></div>
+            <div class="branch-item branch-rev"><span>🟡 Perbaikan</span><span>➜ Revisi 3 Hari</span></div>
+            <div class="branch-item branch-rej"><span>🔴 Pelimpahan</span><span>➜ Surat Dinas Luar</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell">
+        <div class="step-card card-amber">
+          <div class="card-badge">ASN-02</div>
+          <div class="card-title">Fasilitasi Ruang & Notulen</div>
+          <div class="card-desc">Dampingi teknis jalannya e-audiensi, verifikasi presensi peserta dewan dan warga.</div>
+          <div class="sla-pill">⏱️ Sesi Berlangsung</div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="grid-cell">
+        <div class="step-card card-amber">
+          <div class="card-badge">ASN-03</div>
+          <div class="card-title">Legalisasi Risalah Rapat</div>
+          <div class="card-desc">Kompilasi transkrip AI dengan catatan pimpinan sidang, generate berkas risalah PDF.</div>
+          <div class="sla-pill">🕒 ≤ 1×24 Jam</div>
+        </div>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-amber">
+          <div class="card-badge">ASN-04</div>
+          <div class="card-title">Terbitkan Disposisi Resmi</div>
+          <div class="card-desc">Kirim Surat Disposisi bernomor dinas & bertanda tangan elektronik ke instansi OPD tertuju.</div>
+          <div class="sla-pill">🕒 ≤ 2×24 Jam</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-amber">
+          <div class="card-badge">ASN-05</div>
+          <div class="card-title">Arsip & Validasi Tuntas</div>
+          <div class="card-desc">Cek bukti tuntas OPD 100%, verifikasi kelayakan penutupan tiket (Case Closed).</div>
+          <div class="sla-pill">🏁 Penutupan Berkas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 4: ANGGOTA DPRD -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-dewan">
+        <div class="actor-icon">🎖️</div>
+        <div class="actor-title">Pimpinan & Anggota Dewan</div>
+        <div class="actor-sub">120 Legislator / Komisi I-V / Fraksi</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Monitoring Dapil</span>
+      </div>
+      <!-- Phase 2 -->
+      <div class="grid-cell">
+        <div class="step-card card-green">
+          <div class="card-badge">D-01</div>
+          <div class="card-title">Terima Notifikasi Usulan</div>
+          <div class="card-desc">Dashboard dewan memuat daftar aspirasi terverifikasi per Dapil & Komisi kerja.</div>
+          <div class="sla-pill">⚡ Real-time Alert</div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell">
+        <div class="step-card card-green">
+          <div class="card-badge">D-02</div>
+          <div class="card-title">Konfirmasi Ketersediaan Jadwal</div>
+          <div class="card-desc">Atur slot kalender audiensi melalui panel Availability Manager terpadu.</div>
+          <div class="sla-pill">🕒 ≤ 2×24 Jam</div>
+        </div>
+        <div class="flow-v">↓</div>
+        <div class="step-card card-green">
+          <div class="card-badge">D-03</div>
+          <div class="card-title">Pimpin Sesi E-Audiensi</div>
+          <div class="card-desc">Dialog interaktif tatap muka virtual via LiveKit, dengar usulan, beri arahan kebijakan.</div>
+          <div class="sla-pill">🎙️ 45-60 Menit</div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="grid-cell">
+        <div class="step-card card-green">
+          <div class="card-badge">D-04</div>
+          <div class="card-title">Sahkan Rekomendasi Dewan</div>
+          <div class="card-desc">Review transkrip verbatim, bubuhkan Tanda Tangan Digital & tetapkan rumusan disposisi.</div>
+          <div class="sla-pill">🕒 ≤ 1×24 Jam</div>
+        </div>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-green">
+          <div class="card-badge">D-05</div>
+          <div class="card-title">Kawal Tanggapan Dinas</div>
+          <div class="card-desc">Pantau surat komitmen dinas dan tegur bila OPD terlambat merespons disposisi dewan.</div>
+          <div class="sla-pill">🛡️ Fungsi Pengawasan</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-green">
+          <div class="card-badge">D-06</div>
+          <div class="card-title">Ajukan Pokir ke Anggaran</div>
+          <div class="card-desc">Usulan skala prioritas dimasukkan ke Pokok Pikiran (Pokir) APBD / Perubahan Jabar.</div>
+          <div class="sla-pill">🏛️ Masa Sidang APBD</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 5: SISTEM OTOMASI & GATEWAY -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-sistem">
+        <div class="actor-icon">⚙️</div>
+        <div class="actor-title">Platform & Gateway TIK</div>
+        <div class="actor-sub">Backend, Redis, LiveKit SFU, Nginx</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-01</div>
+          <div class="card-title">Hashing NIK & Email Verification</div>
+          <div class="card-desc">Enkripsi SHA-256 data kependudukan (kepatuhan UU PDP) & aktivasi akun via Email gateway.</div>
+          <div class="sla-pill">⚡ &lt; 2 Detik</div>
+        </div>
+      </div>
+      <!-- Phase 2 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-02</div>
+          <div class="card-title">Routing Otomatis AKD</div>
+          <div class="card-desc">Arahkan tiket ke inbox komisi yang sesuai dan blast notifikasi push ke staf ASN terkait.</div>
+          <div class="sla-pill">⚡ Instan</div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-03</div>
+          <div class="card-title">Orkestrasi SFU & Egress</div>
+          <div class="card-desc">Alokasi token JWT WebRTC, kontrol bitrate adaptif, dan simpan rekaman video ke storage.</div>
+          <div class="sla-pill">📶 Latensi &lt; 200ms</div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-04</div>
+          <div class="card-title">Queue Worker Dispatcher</div>
+          <div class="card-desc">Kelola antrean asinkron pemrosesan rekaman audio dan injeksi prompt ke Google Gemini API.</div>
+          <div class="sla-pill">🔄 BullMQ Redis</div>
+        </div>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-05</div>
+          <div class="card-title">Audit Trail & Countdown SLA</div>
+          <div class="card-desc">Catat timestamp pembacaan surat dinas, hitung mundur SLA 5 hari, blast reminder otomatis.</div>
+          <div class="sla-pill">⏱️ Auto Escalation</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-orange">
+          <div class="card-badge">SYS-06</div>
+          <div class="card-title">Update Portal Transparansi</div>
+          <div class="card-desc">Sinkronisasi status tuntas dan statistik agregat aspirasi ke dashboard publik real-time.</div>
+          <div class="sla-pill">🌐 Publikasi Terbuka</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 6: PERANGKAT DAERAH (OPD) -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-opd">
+        <div class="actor-icon">🏢</div>
+        <div class="actor-title">Perangkat Daerah (OPD)</div>
+        <div class="actor-sub">Dinas Teknis Pemprov Jawa Barat</div>
+      </div>
+      <!-- Phase 1 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Belum Terlibat</span>
+      </div>
+      <!-- Phase 2 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Proses Verifikasi Internal DPRD</span>
+      </div>
+      <!-- Phase 3 -->
+      <div class="grid-cell">
+        <div class="step-card card-indigo">
+          <div class="card-badge">OPD-01</div>
+          <div class="card-title">Hadir Sebagai Saksi Teknis</div>
+          <div class="card-desc">Pejabat penghubung dinas hadir via tautan undangan bila materi memerlukan konfirmasi langsung.</div>
+          <div class="sla-pill">👥 Tentatif Sesi</div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="grid-cell empty">
+        <span class="handoff-tag">Menunggu Surat Disposisi</span>
+      </div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-indigo">
+          <div class="card-badge">OPD-02</div>
+          <div class="card-title">Konfirmasi Baca Disposisi</div>
+          <div class="card-desc">Unduh berkas disposisi dewan & sistem mencatat waktu penerimaan secara otomatis.</div>
+          <div class="sla-pill">🕒 ≤ 1×24 Jam</div>
+        </div>
+        <div class="flow-v">↓</div>
+        <div class="step-card card-indigo">
+          <div class="card-badge">OPD-03</div>
+          <div class="card-title">Unggah Surat Tanggapan</div>
+          <div class="card-desc">Kirim surat komitmen resmi bernomor dinas + rencana mitigasi dan jadwal tim pelaksana.</div>
+          <div class="sla-pill">🕒 ≤ 5×24 Jam</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-indigo">
+          <div class="card-badge">OPD-04</div>
+          <div class="card-title">Unggah Bukti Lapangan 100%</div>
+          <div class="card-desc">Kirim laporan akhir penyelesaian masalah dilengkapi foto dokumentasi fisik lapangan.</div>
+          <div class="sla-pill">🏁 ≤ 14 Hari Kerja</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANE 7: BAPPEDA JABAR -->
+    <div class="lane-row">
+      <div class="lane-actor-label actor-bappeda">
+        <div class="actor-icon">📋</div>
+        <div class="actor-title">Bappeda Jabar / SIPD</div>
+        <div class="actor-sub">Perencanaan & Penganggaran Daerah</div>
+      </div>
+      <!-- Phase 1-4 Empty -->
+      <div class="grid-cell empty"><span class="handoff-tag">-</span></div>
+      <div class="grid-cell empty"><span class="handoff-tag">-</span></div>
+      <div class="grid-cell empty"><span class="handoff-tag">-</span></div>
+      <div class="grid-cell empty"><span class="handoff-tag">-</span></div>
+      <!-- Phase 5 -->
+      <div class="grid-cell">
+        <div class="step-card card-teal">
+          <div class="card-badge">BAP-01</div>
+          <div class="card-title">Identifikasi Kebutuhan Anggaran</div>
+          <div class="card-desc">Pilah aspirasi yang butuh belanja modal APBD murni vs pergeseran anggaran operasional dinas.</div>
+          <div class="sla-pill">📑 Telaah Teknis</div>
+        </div>
+      </div>
+      <!-- Phase 6 -->
+      <div class="grid-cell">
+        <div class="step-card card-teal">
+          <div class="card-badge">BAP-02</div>
+          <div class="card-title">Format Standard Kamus Usulan</div>
+          <div class="card-desc">Ekspor data ke struktur tabel SIPD: kode rekening, koordinat GIS, dan pagu indikatif.</div>
+          <div class="sla-pill">⚙️ Format SIPD/RKPD</div>
+        </div>
+        <div class="flow-v">↓</div>
+        <div class="step-card card-teal">
+          <div class="card-badge">BAP-03</div>
+          <div class="card-title">Sinkronisasi Musrenbang Jabar</div>
+          <div class="card-desc">Penyelarasan pokok pikiran dewan ke dalam RKPD Provinsi dan RKPD Kabupaten/Kota.</div>
+          <div class="sla-pill">🏛️ Siklus Musrenbang</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LEGEND -->
+  <div class="footer-legend">
+    <div class="legend-items">
+      <div style="font-size:11px;font-weight:800;color:#0F172A;text-transform:uppercase;margin-right:4px;">Keterangan Simbol:</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#2563EB;"></div> Aksi Konstituen</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#EA580C;"></div> Otomasi Platform TIK</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#9333EA;"></div> Analisis Mesin AI</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#D97706;"></div> Verifikasi ASN DPRD</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#16A34A;"></div> Kebijakan Anggota Dewan</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#4F46E5;"></div> Eksekusi Teknis OPD</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#0D9488;"></div> Integrasi Bappeda/SIPD</div>
+      <div class="leg-pill"><div class="leg-box" style="background:#FFFBEB;border:1.5px solid #D97706;transform:rotate(45deg);"></div> Titik Keputusan (Decision Gate)</div>
+    </div>
+    <div style="font-size:10.5px;color:#64748B;font-weight:600;">
+      Semua tahapan terikat SLA mengacu pada Peraturan Tata Tertib DPRD Provinsi Jawa Barat No. 1 Tahun 2022
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="val">&lt; 5 Detik</div>
+      <div class="label">Penerbitan Tracking No</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">&lt; 30 Detik</div>
+      <div class="label">Analisis NLP & Cek Duplikasi</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">≤ 1×24 Jam</div>
+      <div class="label">Verifikasi Berkas ASN</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">≤ 2×24 Jam</div>
+      <div class="label">Konfirmasi Jadwal Dewan</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">&lt; 15 Menit</div>
+      <div class="label">Transkripsi Risalah AI</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">≤ 5×24 Jam</div>
+      <div class="label">Tanggapan Komitmen OPD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val">≤ 14 Hari Kerja</div>
+      <div class="label">Penyelesaian Lapangan 100%</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

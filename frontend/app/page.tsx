@@ -6,9 +6,10 @@ import Image from "next/image";
 import { 
   ArrowRight, Users, UserCog, Video, ShieldCheck, 
   MessageSquare, Heart, Lightbulb, CheckCircle2, 
-  Monitor, CalendarCheck, Zap, Globe, Lock
+  Monitor, CalendarCheck, Zap, Globe, Lock, FileText, Shield
 } from "lucide-react";
 import DashboardCharts from "@/components/DashboardCharts";
+import PublicTransparencyPortal from "@/components/PublicTransparencyPortal";
 
 
 export default function Home() {
@@ -41,32 +42,40 @@ export default function Home() {
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-lg leading-relaxed font-medium">
-                Hubungkan aspirasi Anda langsung ke meja perwakilan rakyat melalui platform video konferensi terenkripsi dan transparan.
+                Hubungkan aspirasi Anda langsung ke meja perwakilan rakyat melalui platform video konferensi terenkripsi dan pantau surat tindak lanjut secara transparan.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-5">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => router.push('/masyarakat')}
-                className="group px-10 py-5 bg-primary text-white font-black rounded-2xl shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(37,99,235,0.6)] hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center gap-3 text-lg"
+                className="group px-8 py-4 bg-primary text-white font-black rounded-2xl shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(37,99,235,0.6)] hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center gap-3 text-base"
               >
-                <Users size={24} />
+                <Users size={22} />
                 Sampaikan Aspirasi
-                <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
               </button>
+
+              <a 
+                href="#transparansi-surat"
+                className="px-6 py-4 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 hover:text-white font-black rounded-2xl border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 flex items-center justify-center gap-2.5 text-sm shadow-lg shadow-emerald-950/30"
+              >
+                <FileText size={18} className="text-emerald-400" />
+                Surat Tindak Lanjut (Publik)
+              </a>
+            </div>
               
-              <div className="flex items-center gap-4 px-6 py-4 bg-white/50 backdrop-blur-md rounded-2xl border border-white">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?u=${i + 50}`} alt="User" />
-                    </div>
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-[11px] font-black text-foreground uppercase">10,000+ Warga</p>
-                  <p className="text-[10px] text-muted-foreground font-bold">Telah Berpartisipasi</p>
-                </div>
+            <div className="flex items-center gap-4 px-6 py-4 bg-white/50 backdrop-blur-md rounded-2xl border border-white inline-flex">
+              <div className="flex -space-x-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                    <img src={`https://i.pravatar.cc/100?u=${i + 50}`} alt="User" />
+                  </div>
+                ))}
+              </div>
+              <div className="text-left">
+                <p className="text-[11px] font-black text-foreground uppercase">10,000+ Warga</p>
+                <p className="text-[10px] text-muted-foreground font-bold">Telah Berpartisipasi</p>
               </div>
             </div>
           </div>
@@ -144,12 +153,15 @@ export default function Home() {
                </div>
              ))}
            </div>
-         </section>
+          </section>
 
-         {/* Data Summary Section */}
-         <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
-            <DashboardCharts title="Statistik Partisipasi Publik" />
-         </section>
+          {/* Public Transparency Hub (Dokumen Surat & Realisasi Tindak Lanjut - Terbuka Tanpa Login) */}
+          <PublicTransparencyPortal />
+
+          {/* Data Summary Section */}
+          <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
+             <DashboardCharts title="Statistik Partisipasi Publik" />
+          </section>
        </div>
 
        {/* Philosophy Section */}

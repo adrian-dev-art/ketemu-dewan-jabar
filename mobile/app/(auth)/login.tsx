@@ -41,7 +41,7 @@ export default function LoginScreen() {
       await login(token, user);
     } catch (error: any) {
       console.error('🔥 Login Error Detail:', error);
-      const msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+      const msg = error.response?.data?.error || error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
       if (Platform.OS === 'web') {
         window.alert('Login Gagal: ' + msg);
       } else {

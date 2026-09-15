@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Bagan SOP Standar Format PermenPAN-RB - Platform HUDANG</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
+    padding: 24px;
+    color: #000;
+  }
+  .page {
+    background: #fff;
+    width: 1460px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .title-sop {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+  table.sop-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    position: relative;
+  }
+  table.sop-table th, table.sop-table td {
+    border: 1px solid #000;
+    padding: 6px 5px;
+    vertical-align: middle;
+  }
+  table.sop-table th {
+    background: #fff;
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  
+  /* Kolom lebar */
+  .col-no { width: 32px; text-align: center; font-weight: bold; }
+  .col-uraian { width: 275px; font-size: 10.5px; line-height: 1.35; }
+  .col-pelaksana { width: 58px; text-align: center; position: relative; padding: 0 !important; }
+  .col-kelengkapan { width: 160px; font-size: 10px; line-height: 1.3; }
+  .col-waktu { width: 75px; text-align: center; font-size: 10px; font-weight: bold; }
+  .col-output { width: 160px; font-size: 10px; line-height: 1.3; }
+  .col-ket { width: 85px; font-size: 9.5px; }
+
+  /* Diagram Symbols */
+  .sym-wrap {
+    width: 100%;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .sym-term {
+    width: 36px;
+    height: 18px;
+    background: #000;
+    border-radius: 9px;
+  }
+  .sym-act {
+    width: 38px;
+    height: 22px;
+    background: #000;
+    border-radius: 2px;
+  }
+  .sym-dec {
+    width: 22px;
+    height: 22px;
+    background: #000;
+    transform: rotate(45deg);
+  }
+
+  /* SVG lines container overlay */
+  #svg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { width: 100%; margin: 0; padding: 5mm; }
+    @page { size: A4 landscape; margin: 8mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="title-sop">
+    STANDAR OPERASIONAL PROSEDUR (SOP) PENGELOLAAN ASPIRASI DAN E-AUDIENSI BERBASIS PLATFORM HUDANG<br>
+    SEKRETARIAT DEWAN PERWAKILAN RAKYAT DAERAH PROVINSI JAWA BARAT
+  </div>
+
+  <div id="table-container" style="position: relative;">
+    <!-- SVG CONNECTING FLOW ARROWS -->
+    <svg id="svg-overlay">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#000" />
+        </marker>
+      </defs>
+    </svg>
+
+    <table class="sop-table" id="main-table">
+      <thead>
+        <tr>
+          <th rowspan="2" class="col-no">NO</th>
+          <th rowspan="2" class="col-uraian">URAIAN KEGIATAN</th>
+          <th colspan="7">PELAKSANA</th>
+          <th colspan="3">MUTU BAKU</th>
+          <th rowspan="2" class="col-ket">KET.</th>
+        </tr>
+        <tr>
+          <th class="col-pelaksana" style="font-size:9px;">Warga / Konstituen</th>
+          <th class="col-pelaksana" style="font-size:9px;">Sistem HUDANG</th>
+          <th class="col-pelaksana" style="font-size:9px;">Mesin AI</th>
+          <th class="col-pelaksana" style="font-size:9px;">Verifikator ASN</th>
+          <th class="col-pelaksana" style="font-size:9px;">Pimpinan / Dewan</th>
+          <th class="col-pelaksana" style="font-size:9px;">OPD Teknis</th>
+          <th class="col-pelaksana" style="font-size:9px;">Bappeda Jabar</th>
+          <th class="col-kelengkapan">KELENGKAPAN</th>
+          <th class="col-waktu">WAKTU</th>
+          <th class="col-output">OUTPUT</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- BARIS 1 -->
+        <tr id="row-1">
+          <td class="col-no">1</td>
+          <td class="col-uraian">Masyarakat mengakses portal HUDANG, registrasi akun (NIK 16 digit, surel aktif, domisili Jabar), dan mengajukan permohonan E-Audiensi (pilih Dewan, slot jadwal, topik usulan)</td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-1" class="sym-term"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">KTP (NIK 16 digit), alamat surel aktif, berkas foto/PDF usulan</td>
+          <td class="col-waktu">5 Menit</td>
+          <td class="col-output">Akun warga aktif & Formulir permohonan E-Audiensi terkirim</td>
+          <td class="col-ket">Mandiri via Web / Mobile App</td>
+        </tr>
+
+        <!-- BARIS 2 -->
+        <tr id="row-2">
+          <td class="col-no">2</td>
+          <td class="col-uraian">Sistem memvalidasi kelengkapan data, melakukan enkripsi NIK, menerbitkan Nomor Tiket unik, dan mencatat permohonan berstatus Pending</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-2" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Payload data JSON permohonan audiensi pemohon</td>
+          <td class="col-waktu">&lt; 5 Detik</td>
+          <td class="col-output">Nomor Tiket (AUD-202609-XXXXX) & Notifikasi Surel Tanda Terima</td>
+          <td class="col-ket">Otomasi Backend Engine</td>
+        </tr>
+
+        <!-- BARIS 3 -->
+        <tr id="row-3">
+          <td class="col-no">3</td>
+          <td class="col-uraian">Mesin AI memproses NLP ekstraksi kata kunci, deteksi duplikasi materi usulan (&gt;85%), dan rekomendasi awal klasifikasi Alat Kelengkapan Dewan (Komisi I s.d. V)</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-3" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Data teks pokok pikiran & basis data usulan historis</td>
+          <td class="col-waktu">&lt; 30 Detik</td>
+          <td class="col-output">Skor kemiripan semantik & Lembar telaah rekomendasi komisi</td>
+          <td class="col-ket">Gemini Flash AI API</td>
+        </tr>
+
+        <!-- BARIS 4 -->
+        <tr id="row-4">
+          <td class="col-no">4</td>
+          <td class="col-uraian">Verifikator ASN meneliti kelengkapan administrasi berkas, validitas KTP, dan kesesuaian batas kewenangan Pemerintah Provinsi Jawa Barat</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-4" class="sym-dec"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Berkas pemohon & rekomendasi pra-analisis AI</td>
+          <td class="col-waktu">≤ 1×24 Jam</td>
+          <td class="col-output">Status: Diterima / Perbaikan (3 Hari) / Ditolak-Pelimpahan</td>
+          <td class="col-ket">Dashboard Verifikasi ASN</td>
+        </tr>
+
+        <!-- BARIS 5 -->
+        <tr id="row-5">
+          <td class="col-no">5</td>
+          <td class="col-uraian">Anggota Dewan menerima notifikasi aspirasi terverifikasi, memeriksa telaah, dan menyetujui jadwal E-Audiensi via panel Availability Manager</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-5" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Ringkasan berkas aspirasi terverifikasi & kalender dewan</td>
+          <td class="col-waktu">≤ 2×24 Jam</td>
+          <td class="col-output">Slot jadwal disetujui & undangan tautan WebRTC terbit</td>
+          <td class="col-ket">Portal Kedewanan</td>
+        </tr>
+
+        <!-- BARIS 6 -->
+        <tr id="row-6">
+          <td class="col-no">6</td>
+          <td class="col-uraian">Pelaksanaan sesi tatap muka virtual E-Audiensi antara Dewan dan Konstituen dengan perekaman media otomatis WebRTC SFU LiveKit</td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-6-masy" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-6-sys" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-6-asn" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-6-dewan" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Kamera, mikrofon, ruang rapat digital LiveKit, agenda rapat</td>
+          <td class="col-waktu">45 - 60 Menit</td>
+          <td class="col-output">Arsip rekaman video-audio resmi Egress Service</td>
+          <td class="col-ket">Dialog Interaktif Resmi</td>
+        </tr>
+
+        <!-- BARIS 7 -->
+        <tr id="row-7">
+          <td class="col-no">7</td>
+          <td class="col-uraian">Mesin AI memproses rekaman menjadi transkrip verbatim, diarization penutur, serta intisari rekomendasi rapat dewan</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-7" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">File audio rekaman sesi E-Audiensi (MP4/OGG)</td>
+          <td class="col-waktu">&lt; 15 Menit</td>
+          <td class="col-output">Draf transkrip lengkap & ringkasan butir kesepakatan</td>
+          <td class="col-ket">Otomasi Gemini AI</td>
+        </tr>
+
+        <!-- BARIS 8 -->
+        <tr id="row-8">
+          <td class="col-no">8</td>
+          <td class="col-uraian">Pimpinan/Anggota Dewan mereview hasil transkrip, mengesahkan rumusan rekomendasi, dan membubuhkan Tanda Tangan Digital</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-8" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Draf risalah rapat & sertifikat TTE BSrE / Kominfo</td>
+          <td class="col-waktu">≤ 1×24 Jam</td>
+          <td class="col-output">Risalah E-Audiensi resmi bertandatangan digital</td>
+          <td class="col-ket">Legalitas Dokumen</td>
+        </tr>
+
+        <!-- BARIS 9 -->
+        <tr id="row-9">
+          <td class="col-no">9</td>
+          <td class="col-uraian">Verifikator ASN menerbitkan Surat Disposisi Resmi DPRD bernomor dinas dan meneruskan ke OPD teknis terkait melalui sistem</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-9" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Risalah resmi & master format surat dinas disposisi DPRD</td>
+          <td class="col-waktu">≤ 2×24 Jam</td>
+          <td class="col-output">Surat Disposisi DPRD bertanda tangan elektronik (TTE)</td>
+          <td class="col-ket">Tahap 1 Follow-Up</td>
+        </tr>
+
+        <!-- BARIS 10 -->
+        <tr id="row-10">
+          <td class="col-no">10</td>
+          <td class="col-uraian">Pejabat penghubung OPD mengonfirmasi penerimaan disposisi, mencatat tanda terima baca, dan menyusun surat komitmen rencana aksi</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-10" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Surat Disposisi DPRD & form respon dinas</td>
+          <td class="col-waktu">≤ 5×24 Jam</td>
+          <td class="col-output">Bukti baca (Tahap 2) & Surat Tanggapan Rencana Aksi (Tahap 3)</td>
+          <td class="col-ket">SLA OPD Teknis</td>
+        </tr>
+
+        <!-- BARIS 11 -->
+        <tr id="row-11">
+          <td class="col-no">11</td>
+          <td class="col-uraian">OPD melaksanakan tindak lanjut teknis di lapangan dan mengunggah Laporan Hasil Akhir beserta bukti dokumentasi fisik penyelesaian</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-11" class="sym-act"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Foto dokumentasi fisik lapangan, BAST, surat tugas dinas</td>
+          <td class="col-waktu">≤ 14 Hari Kerja</td>
+          <td class="col-output">Laporan Penyelesaian Masalah 100% (Tahap 4)</td>
+          <td class="col-ket">Audit Akuntabilitas</td>
+        </tr>
+
+        <!-- BARIS 12 -->
+        <tr id="row-12">
+          <td class="col-no">12</td>
+          <td class="col-uraian">Untuk usulan berskema penganggaran modal APBD, Bappeda melakukan kurasi kamus usulan dan sinkronisasi SIPD/RKPD Musrenbang</td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-12" class="sym-act"></div></div></td>
+          <td class="col-kelengkapan">Data Pokir DPRD terstandarisasi, GIS koordinat, pagu indikatif</td>
+          <td class="col-waktu">Siklus RKPD</td>
+          <td class="col-output">Data usulan masuk ke SIPD Bappenas / RKPD Jabar</td>
+          <td class="col-ket">Integrasi Kebijakan</td>
+        </tr>
+
+        <!-- BARIS 13 -->
+        <tr id="row-13">
+          <td class="col-no">13</td>
+          <td class="col-uraian">Verifikator ASN menutup tiket (Case Closed) setelah verifikasi tuntas, dan masyarakat pemohon mengisi evaluasi rating kepuasan layanan</td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-13-masy" class="sym-term"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"><div class="sym-wrap"><div id="node-13-asn" class="sym-term"></div></div></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-pelaksana"></td>
+          <td class="col-kelengkapan">Laporan tuntas 100% & kuesioner evaluasi 5 dimensi</td>
+          <td class="col-waktu">≤ 1×24 Jam</td>
+          <td class="col-output">Tiket Selesai (Closed) & Skor Indeks Kepuasan Konstituen</td>
+          <td class="col-ket">Publikasi Transparansi</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- KETERANGAN SIMBOL STANDAR PERMENPAN-RB -->
+  <div style="margin-top: 14px; border: 1px solid #000; padding: 8px 12px; font-size: 10px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="font-weight: bold; text-transform: uppercase;">Simbol Standar Flowchart PermenPAN-RB No. 35 Tahun 2012:</div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="width: 26px; height: 14px; background: #000; border-radius: 7px;"></div>
+      <span>Awal / Akhir (Terminator)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="width: 26px; height: 16px; background: #000; border-radius: 2px;"></div>
+      <span>Aktivitas / Proses</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="width: 16px; height: 16px; background: #000; transform: rotate(45deg);"></div>
+      <span>Pengambilan Keputusan (Decision)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="font-size: 14px; font-weight: bold;">↓ →</span>
+      <span>Arah Aliran Prosedur (Flow Direction)</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPT PENGHITUNG POSISI TEPAT DAN PENGGAMBAR GARIS SVG -->
+<script>
+window.addEventListener('load', function() {
+  const container = document.getElementById('table-container');
+  const svg = document.getElementById('svg-overlay');
+  const containerRect = container.getBoundingClientRect();
+
+  function getCenter(id) {
+    const el = document.getElementById(id);
+    if (!el) return { x: 0, y: 0, top: 0, bottom: 0, left: 0, right: 0 };
+    const r = el.getBoundingClientRect();
+    return {
+      x: r.left + r.width / 2 - containerRect.left,
+      y: r.top + r.height / 2 - containerRect.top,
+      top: r.top - containerRect.top,
+      bottom: r.bottom - containerRect.top,
+      left: r.left - containerRect.left,
+      right: r.right - containerRect.left
+    };
+  }
+
+  function addStepLine(fromId, toId) {
+    const from = getCenter(fromId);
+    const to = getCenter(toId);
+
+    // Create path: turun dari bottom elemen asal, lalu belok horizontal ke tengah elemen tujuan, lalu turun ke top elemen tujuan
+    let d = '';
+    if (Math.abs(from.x - to.x) < 2) {
+      // Garis vertikal lurus ke bawah
+      d = `M ${from.x} ${from.bottom} L ${to.x} ${to.top}`;
+    } else if (from.y < to.y) {
+      // Step down then horizontal then down
+      const midY = from.bottom + (to.top - from.bottom) / 2;
+      d = `M ${from.x} ${from.bottom} L ${from.x} ${midY} L ${to.x} ${midY} L ${to.x} ${to.top}`;
+    } else {
+      // Horizontal then vertical
+      d = `M ${from.x} ${from.bottom} L ${to.x} ${to.top}`;
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#000');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('marker-end', 'url(#arr)');
+    svg.appendChild(path);
+  }
+
+  // Buat hubungan garis antar tahapan berurutan
+  addStepLine('node-1', 'node-2');
+  addStepLine('node-2', 'node-3');
+  addStepLine('node-3', 'node-4');
+  addStepLine('node-4', 'node-5');
+  addStepLine('node-5', 'node-6-dewan');
+  
+  // Hubungan dalam Sesi E-Audiensi (Baris 6)
+  addStepLine('node-6-dewan', 'node-6-asn');
+  addStepLine('node-6-asn', 'node-6-sys');
+  addStepLine('node-6-sys', 'node-6-masy');
+  
+  // Sesi ke AI Transkripsi (Baris 7)
+  addStepLine('node-6-sys', 'node-7');
+  
+  // AI Transkripsi ke Review Dewan (Baris 8)
+  addStepLine('node-7', 'node-8');
+  
+  // Dewan ke ASN Disposisi (Baris 9)
+  addStepLine('node-8', 'node-9');
+  
+  // ASN Disposisi ke OPD Tanggapan (Baris 10)
+  addStepLine('node-9', 'node-10');
+  
+  // OPD Tanggapan ke OPD Lapangan (Baris 11)
+  addStepLine('node-10', 'node-11');
+  
+  // OPD Lapangan ke Bappeda (Baris 12)
+  addStepLine('node-11', 'node-12');
+  
+  // OPD Lapangan ke Tutup Tiket ASN (Baris 13)
+  addStepLine('node-11', 'node-13-asn');
+  
+  // ASN Tutup Tiket ke Evaluasi Warga (Baris 13)
+  addStepLine('node-13-asn', 'node-13-masy');
+});
+</script>
+
+</body>
+</html>

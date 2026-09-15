@@ -155,7 +155,7 @@ router.get('/schedules', authenticateToken, async (req: AuthRequest, res: Respon
 
         const result = await prisma.schedule.findMany({
             where,
-            orderBy: { startTime: 'desc' },
+            orderBy: { id: 'desc' },
             include: {
                 masyarakat: { select: { name: true } },
                 participants: {

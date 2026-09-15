@@ -310,7 +310,7 @@ router.get('/public/transparansi-tindak-lanjut', async (req: Request, res: Respo
         let schedules: any[] = [];
         try {
             schedules = await prisma.schedule.findMany({
-                orderBy: { startTime: 'desc' },
+                orderBy: { id: 'desc' },
                 include: {
                     masyarakat: {
                         select: {

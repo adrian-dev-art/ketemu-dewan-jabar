@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    .diagram-container {
+        background: #FFFFFF;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        width: 1160px;
+    }
+    .header-bar {
+        border-bottom: 2px solid #E2E8F0;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .title-main {
+        font-size: 23px;
+        font-weight: 800;
+        color: #000000 !important;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+    .subtitle-main {
+        font-size: 14px;
+        color: #000000 !important;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .badge-doc {
+        background: #0F172A !important;
+        color: #FFFFFF !important;
+        border: 1.5px solid #0F172A;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+    .card {
+        background: #FFFFFF;
+        border: 1.5px solid #000000;
+        border-radius: 8px;
+        padding: 14px 16px;
+    }
+    .card-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #000000 !important;
+    }
+    .card-desc {
+        font-size: 13.5px;
+        color: #000000 !important;
+        line-height: 1.5;
+    }
+    .arrow-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 26px;
+    }
+    .arrow-down {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 6px 0;
+    }
+    .stage-badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .code-pill {
+        font-family: 'Consolas', monospace;
+        background: #F1F5F9;
+        border: 1px solid #CBD5E1;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12.5px;
+        color: #000000 !important;
+        font-weight: 700;
+    }
+    .bg-blue { background: #EFF6FF; color: #000000 !important; border: 1.5px solid #93C5FD; font-weight: 800; }
+    .bg-amber { background: #FFFBEB; color: #000000 !important; border: 1.5px solid #FCD34D; font-weight: 800; }
+    .bg-purple { background: #FAF5FF; color: #000000 !important; border: 1.5px solid #D8B4FE; font-weight: 800; }
+    .bg-indigo { background: #EEF2FF; color: #000000 !important; border: 1.5px solid #A5B4FC; font-weight: 800; }
+    .bg-emerald { background: #ECFDF5; color: #000000 !important; border: 1.5px solid #6EE7B7; font-weight: 800; }
+    .bg-slate { background: #F1F5F9; color: #000000 !important; border: 1.5px solid #CBD5E1; font-weight: 800; }
+    .bg-rose { background: #FFF1F2; color: #000000 !important; border: 1.5px solid #FDA4AF; font-weight: 800; }
+    
+    /* Dark background containers -> WHITE text */
+    [style*="background: #1E3A8A"], 
+    [style*="background: #0F172A"],
+    [style*="background: #1E40AF"],
+    [style*="background: #1D4ED8"],
+    [style*="background: #047857"],
+    [style*="background: #B45309"],
+    [style*="background: #6D28D9"] {
+        color: #FFFFFF !important;
+    }
+</style>
+</head>
+<body>
+<div class="diagram-container">
+    <div class="header-bar">
+        <div>
+            <div class="title-main">Siklus Pemulihan dan Pencadangan Basis Data (Point-in-Time Recovery)</div>
+            <div class="subtitle-main">Rencana Tanggap Darurat Bencana Data (Disaster Recovery) & Replikasi PostgreSQL &bull; Platform HUDANG</div>
+        </div>
+        <div class="badge-doc">SPEC-OPS-01 &bull; Backup & PITR</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: stretch; margin-bottom: 16px;">
+        <div class="card" style="border-top: 4px solid #3B82F6;">
+            <span class="stage-badge bg-blue">1. Operasi Harian</span>
+            <div class="card-title" style="color: #1D4ED8;">WAL Archiving Otomatis</div>
+            <div class="card-desc">
+                &bull; Transaksi ditulis ke <b>Write-Ahead Log (WAL)</b> secara sinkron.<br>
+                &bull; Berkas segmen WAL diarsipkan berkala setiap 16 MB.<br>
+                &bull; Pencadangan logika harian (pg_dump) otomatis setiap pukul 02.00 WIB.
+            </div>
+        </div>
+
+        <div class="arrow-right">&rarr;</div>
+
+        <div class="card" style="border-top: 4px solid #F59E0B;">
+            <span class="stage-badge bg-amber">2. Replikasi Off-Site</span>
+            <div class="card-title" style="color: #B45309;">Enkripsi & Penyimpanan Luar</div>
+            <div class="card-desc">
+                &bull; Berkas backup dienkripsi dengan algoritma <b>AES-256 GCM</b>.<br>
+                &bull; Sinkronisasi otomatis ke penyimpanan off-site independen (Pusat Data Pemprov Jabar).<br>
+                &bull; Verifikasi checksum SHA-256 integritas berkas cadangan.
+            </div>
+        </div>
+
+        <div class="arrow-right">&rarr;</div>
+
+        <div class="card" style="border-top: 4px solid #10B981;">
+            <span class="stage-badge bg-emerald">3. Simulasi Pemulihan</span>
+            <div class="card-title" style="color: #047857;">Point-in-Time Recovery</div>
+            <div class="card-desc">
+                &bull; Basis data dapat dipulihkan ke titik detik tertentu sebelum kegagalan terjadi.<br>
+                &bull; <b>Recovery Point Objective (RPO):</b> &lt; 5 Menit kehilangan data.<br>
+                &bull; <b>Recovery Time Objective (RTO):</b> &lt; 30 Menit sistem aktif kembali.
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 12px 18px; background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; font-size: 13px; color: #334155; display: flex; justify-content: space-between;">
+        <div><b>Kepatuhan Regulasi:</b> Memenuhi Standar Keamanan Informasi ISO/IEC 27001 dan Peraturan BSSN No. 4/2021 tentang Manajemen Kelangsungan SPBE.</div>
+        <div style="font-weight: 700; color: #059669;">Ketersediaan Target: 99.9% Uptime</div>
+    </div>
+</div>
+</body>
+</html>
