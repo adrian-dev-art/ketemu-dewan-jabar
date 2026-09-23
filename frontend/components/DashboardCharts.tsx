@@ -158,7 +158,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas" }: { 
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-[#121212]">{title}</h2>
-          <p className="text-xs text-muted-foreground font-medium mt-1 uppercase tracking-widest">Analisis Data Real-time (Dummy)</p>
+          <p className="text-xs text-muted-foreground font-medium mt-1 uppercase tracking-widest">Analisis Data Real-time</p>
         </div>
         <div className="flex gap-2">
            <div className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
