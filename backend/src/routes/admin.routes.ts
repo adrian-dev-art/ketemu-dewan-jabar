@@ -143,8 +143,7 @@ router.get('/centre/performance', async (req: Request, res: Response) => {
 });
 
 // Admin Authentication Required Routes below:
-router.use(authenticateToken);
-router.use(authorizeRole(['admin']));
+router.use('/admin', authenticateToken, authorizeRole(['admin']));
 
 // GET /api/admin/stats
 router.get('/admin/stats', async (req: Request, res: Response) => {

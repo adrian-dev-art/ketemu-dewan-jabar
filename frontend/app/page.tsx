@@ -6,10 +6,11 @@ import Image from "next/image";
 import { 
   ArrowRight, Users, UserCog, Video, ShieldCheck, 
   MessageSquare, Heart, Lightbulb, CheckCircle2, 
-  Monitor, CalendarCheck, Zap, Globe, Lock, FileText, Shield
+  Monitor, CalendarCheck, Zap, Globe, Lock, FileText, Shield, BarChart3
 } from "lucide-react";
 import DashboardCharts from "@/components/DashboardCharts";
 import PublicTransparencyPortal from "@/components/PublicTransparencyPortal";
+import AspirasiPublicCharts from "@/components/AspirasiPublicCharts";
 
 
 export default function Home() {
@@ -46,22 +47,30 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-wrap gap-3">
               <button 
                 onClick={() => router.push('/masyarakat')}
-                className="group px-8 py-4 bg-primary text-white font-black rounded-2xl shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(37,99,235,0.6)] hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center gap-3 text-base"
+                className="group px-7 py-3.5 bg-primary text-white font-black rounded-2xl shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(37,99,235,0.6)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2.5 text-sm"
               >
-                <Users size={22} />
+                <Users size={18} />
                 Sampaikan Aspirasi
-                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
 
               <a 
                 href="#transparansi-surat"
-                className="px-6 py-4 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 hover:text-white font-black rounded-2xl border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 flex items-center justify-center gap-2.5 text-sm shadow-lg shadow-emerald-950/30"
+                className="px-5 py-3.5 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 hover:text-white font-bold rounded-2xl border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-md"
               >
-                <FileText size={18} className="text-emerald-400" />
-                Surat Tindak Lanjut (Publik)
+                <FileText size={17} className="text-emerald-400" />
+                Tindak Lanjut Audiensi
+              </a>
+
+              <a 
+                href="#rekap-aspirasi"
+                className="px-5 py-3.5 bg-white hover:bg-slate-50 text-slate-800 hover:text-primary font-bold rounded-2xl border border-slate-200 shadow-sm transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+              >
+                <BarChart3 size={17} className="text-primary" />
+                Analitik E-Aspirasi
               </a>
             </div>
               
@@ -158,9 +167,14 @@ export default function Home() {
           {/* Public Transparency Hub (Dokumen Surat & Realisasi Tindak Lanjut - Terbuka Tanpa Login) */}
           <PublicTransparencyPortal />
 
-          {/* Data Summary Section */}
+          {/* Data Summary Section - Statistik Partisipasi Publik */}
           <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
              <DashboardCharts title="Statistik Partisipasi Publik" />
+          </section>
+
+          {/* Rekapitulasi & Analitik Data E-Aspirasi Publik (Live Data Real-time) */}
+          <section className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
+             <AspirasiPublicCharts />
           </section>
        </div>
 

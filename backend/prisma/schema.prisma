@@ -34,6 +34,8 @@ model User {
   schedulesAsMasyarakat Schedule[]            @relation("MasyarakatSchedules")
   scheduleParticipations ScheduleParticipant[] @relation("DewanScheduleParticipants")
   akdMemberships        AKDMember[]
+  aspirasiAsMasyarakat  Aspirasi[]            @relation("MasyarakatAspirasi")
+  aspirasiAsDewan       Aspirasi[]            @relation("DewanAspirasi")
 
   @@index([role])
   @@index([email])
@@ -190,5 +192,58 @@ model FollowUp {
 
   @@index([status])
   @@index([scheduleId])
+}
+
+model Aspirasi {
+  id                Int                @id @default(autoincrement())
+  ticketNumber      String             @unique
+  judul             String
+  deskripsi         String
+  kategori          String             @default("Infrastruktur")
+  dapil             String
+  kabupatenKota     String?
+  kecamatan         String?
+  alamat            String?
+  materiUrl         String?
+  materiType        String?
+  materiFileName    String?
+  materiSize        Int?
+  masyarakatId      Int
+  masyarakat        User               @relation("MasyarakatAspirasi", fields: [masyarakatId], references: [id])
+  dewanId           Int?
+  dewan             User?              @relation("DewanAspirasi", fields: [dewanId], references: [id])
+  status            String             @default("diajukan")
+  tanggapanDewan    String?
+  tanggapanOleh     String?
+  tanggapanAt       DateTime?
+  suratTanggapanUrl String?
+  // Analisis Tenaga Ahli AI
+  aiAnalysis        String?            @db.Text
+  aiRecommendation  String?
+  aiAnalysedAt      DateTime?
+  submittedAt       DateTime           @default(now())
+  verifiedAt        DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  timelineEvents    AspirasiTimeline[]
+
+  @@index([dapil])
+  @@index([status])
+  @@index([masyarakatId])
+  @@index([dewanId])
+}
+
+model AspirasiTimeline {
+  id         Int      @id @default(autoincrement())
+  aspirasiId Int
+  aspirasi   Aspirasi @relation(fields: [aspirasiId], references: [id], onDelete: Cascade)
+  tahap      String
+  status     String   @default("selesai")
+  keterangan String?
+  aktor      String?
+  createdAt  DateTime @default(now())
+
+  @@index([aspirasiId])
 }
 

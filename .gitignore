@@ -35,3 +35,5 @@ Thumbs.db
 recordings/
 *.log
 backend/scratch/
+backend/uploads/
+*.tsbuildinfo

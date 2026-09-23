@@ -218,16 +218,16 @@ export default function PublicTransparencyPortal() {
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-widest">
             <Shield size={14} className="animate-pulse" />
-            Transparansi Publik & Tindak Lanjut Aspirasi (Tanpa Login)
+            Transparansi Publik & Tindak Lanjut Audiensi (Tanpa Login)
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
             Grafik & Jadwal Dokumen <br />
             <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">
-              Hasil Tindak Lanjut Aspirasi
+              Hasil Tindak Lanjut Audiensi
             </span>
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
-            Pantau statistik realisasi tindak lanjut, surat disposisi pimpinan DPRD, telaahan dinas OPD Pemprov Jabar, serta jadwal dan berita acara lapangan di 27 Kab/Kota Jawa Barat tanpa perlu login.
+            Pantau statistik realisasi tindak lanjut, surat disposisi pimpinan DPRD, telaahan dinas OPD Pemprov Jabar, serta jadwal dan berita acara audiensi di 27 Kab/Kota Jawa Barat tanpa perlu login.
           </p>
 
           {/* VIEW SELECTOR SWITCHER */}
@@ -271,59 +271,83 @@ export default function PublicTransparencyPortal() {
         </div>
 
         {/* EXECUTIVE KPI METRIC CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4 mb-8">
-          <div className="p-5 rounded-3xl bg-slate-800/70 border border-slate-700/80 backdrop-blur-md hover:border-blue-500/40 transition-all shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider">Total Aspirasi</span>
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400"><FileText size={16} /></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 mb-8">
+          
+          {/* Total Audiensi */}
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-blue-950/60 to-slate-800/70 border border-blue-500/25 backdrop-blur-md hover:border-blue-500/50 transition-all shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300/80">Total Audiensi</span>
+              <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20">
+                <FileText size={15} />
+              </div>
             </div>
-            <div className="text-3xl font-black text-white">{stats.totalAspirasi || items.length}</div>
-            <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+            <div className="text-4xl font-black text-white leading-none">{stats.totalAspirasi || items.length}</div>
+            <div className="text-[11px] text-blue-300/70 mt-2 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
               27 Kab/Kota Terdata
             </div>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-800/70 border border-slate-700/80 backdrop-blur-md hover:border-purple-500/40 transition-all shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider">Surat Terbit</span>
-              <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400"><FileCheck2 size={16} /></div>
+          {/* Surat Terbit */}
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-purple-950/60 to-slate-800/70 border border-purple-500/25 backdrop-blur-md hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-300/80">Surat Terbit</span>
+              <div className="p-2 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20">
+                <FileCheck2 size={15} />
+              </div>
             </div>
-            <div className="text-3xl font-black text-purple-300">
+            <div className="text-4xl font-black text-purple-300 leading-none">
               {stats.totalSemuaSurat || (stats.totalAspirasi * 3)}
             </div>
-            <div className="text-[11px] text-slate-400 mt-1">Disposisi & Tanggapan</div>
+            <div className="text-[11px] text-purple-300/70 mt-2">Disposisi &amp; Tanggapan</div>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-800/70 border border-slate-700/80 backdrop-blur-md hover:border-emerald-500/40 transition-all shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider">Realisasi Tuntas</span>
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400"><CheckCircle2 size={16} /></div>
+          {/* Realisasi Tuntas */}
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-950/60 to-slate-800/70 border border-emerald-500/30 backdrop-blur-md hover:border-emerald-500/55 transition-all shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300/80">Realisasi Tuntas</span>
+              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                <CheckCircle2 size={15} />
+              </div>
             </div>
-            <div className="text-3xl font-black text-emerald-400">
-              {stats.totalTuntas || Math.floor((stats.totalAspirasi || 25) * 0.8)} Sesi
+            <div className="text-4xl font-black text-emerald-400 leading-none">
+              {stats.totalTuntas || Math.floor((stats.totalAspirasi || 25) * 0.8)}
+              <span className="text-base ml-1 font-bold opacity-70">Sesi</span>
             </div>
-            <div className="text-[11px] text-emerald-400/80 mt-1 font-bold">
+            <div className="text-[11px] text-emerald-400/80 mt-2 font-bold">
               {stats.totalAspirasi > 0 ? Math.round(((stats.totalTuntas || Math.floor(stats.totalAspirasi * 0.8)) / stats.totalAspirasi) * 100) : 85}% Efektivitas
             </div>
           </div>
 
-          <div className="p-5 rounded-3xl bg-slate-800/70 border border-slate-700/80 backdrop-blur-md hover:border-amber-500/40 transition-all shadow-lg">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider">Respon OPD</span>
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400"><Clock size={16} /></div>
+          {/* Respon OPD */}
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-950/60 to-slate-800/70 border border-amber-500/25 backdrop-blur-md hover:border-amber-500/50 transition-all shadow-lg hover:shadow-amber-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300/80">Respon OPD</span>
+              <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
+                <Clock size={15} />
+              </div>
             </div>
-            <div className="text-3xl font-black text-amber-300">2.4 Hari</div>
-            <div className="text-[11px] text-slate-400 mt-1">Standar SLA &lt; 5 Hari</div>
+            <div className="text-4xl font-black text-amber-300 leading-none">2.4
+              <span className="text-base ml-1 font-bold opacity-70">Hari</span>
+            </div>
+            <div className="text-[11px] text-amber-300/70 mt-2">Standar SLA &lt; 5 Hari</div>
           </div>
 
-          <div className="p-5 rounded-3xl bg-emerald-950/40 border border-emerald-500/40 backdrop-blur-md col-span-2 sm:col-span-1 shadow-lg">
-            <div className="flex items-center justify-between text-emerald-300 mb-2">
-              <span className="text-[11px] font-black uppercase tracking-wider">Indeks Publik</span>
-              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400"><Award size={16} /></div>
+          {/* Indeks Publik */}
+          <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-900/60 via-teal-950/60 to-slate-800/70 border border-emerald-400/40 backdrop-blur-md col-span-2 sm:col-span-1 shadow-lg hover:shadow-emerald-500/15 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300/90">Indeks Publik</span>
+              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
+                <Award size={15} />
+              </div>
             </div>
-            <div className="text-3xl font-black text-emerald-400">98.6%</div>
-            <div className="text-[11px] text-emerald-300/80 mt-1">Tingkat Kepuasan</div>
+            <div className="text-4xl font-black text-emerald-300 leading-none">98.6%</div>
+            <div className="mt-2">
+              <div className="h-1.5 w-full bg-emerald-900/60 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full" style={{width: '98.6%'}} />
+              </div>
+              <div className="text-[11px] text-emerald-300/80 mt-1.5">Tingkat Kepuasan</div>
+            </div>
           </div>
         </div>
 
@@ -343,7 +367,7 @@ export default function PublicTransparencyPortal() {
                     <div>
                       <h3 className="text-base font-black text-white flex items-center gap-2">
                         <PieChart size={18} className="text-emerald-400" />
-                        Status Realisasi & Penanganan Aspirasi
+                        Status Realisasi & Penanganan Audiensi
                       </h3>
                       <p className="text-xs text-slate-400 mt-0.5">
                         Progres penanganan langsung oleh OPD Pemprov Jabar berdasarkan disposisi DPRD
@@ -526,11 +550,19 @@ export default function PublicTransparencyPortal() {
                   </span>
                 </div>
 
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {topOpds.map(([opdName, count], idx) => {
                     const maxVal = topOpds[0][1] as number || 1;
                     const countNum = Number(count);
                     const pct = Math.round((countNum / (stats.totalAspirasi || 28)) * 100);
+                    const gradients = [
+                      'from-purple-500 via-pink-500 to-rose-400',
+                      'from-indigo-500 via-blue-500 to-cyan-400',
+                      'from-violet-500 via-purple-500 to-pink-400',
+                      'from-blue-600 via-indigo-500 to-violet-400',
+                      'from-fuchsia-500 via-purple-500 to-indigo-400',
+                      'from-rose-500 via-pink-500 to-purple-400',
+                    ];
                     return (
                       <div 
                         key={idx}
@@ -542,19 +574,19 @@ export default function PublicTransparencyPortal() {
                         }}
                         className="p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-900 border border-slate-700/60 hover:border-purple-500/50 transition-all cursor-pointer group"
                       >
-                        <div className="flex justify-between items-center text-xs mb-1.5">
-                          <span className="font-bold text-slate-200 group-hover:text-purple-300 truncate max-w-[280px]">
-                            {idx + 1}. {opdName}
+                        <div className="flex justify-between items-center text-xs mb-2">
+                          <span className="font-bold text-slate-200 group-hover:text-purple-300 truncate max-w-[240px]">
+                            <span className="text-purple-400 font-black mr-1.5">{idx + 1}.</span>{opdName}
                           </span>
-                          <div className="flex items-center gap-2 font-mono">
-                            <span className="font-black text-purple-400">{countNum} Berkas</span>
+                          <div className="flex items-center gap-2 font-mono shrink-0">
+                            <span className="font-black text-white bg-purple-500/20 px-2 py-0.5 rounded-lg">{countNum}</span>
                             <span className="text-[10px] text-slate-500">({pct}%)</span>
                           </div>
                         </div>
                         <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-400 rounded-full transition-all duration-700" 
-                            style={{ width: `${Math.max(15, (countNum / maxVal) * 100)}%` }} 
+                            className={`h-full bg-gradient-to-r ${gradients[idx % gradients.length]} rounded-full transition-all duration-700`}
+                            style={{ width: `${Math.max(12, (countNum / maxVal) * 100)}%` }} 
                           />
                         </div>
                       </div>
@@ -580,26 +612,31 @@ export default function PublicTransparencyPortal() {
                   </span>
                 </div>
 
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {topRegencies.map(([regName, count], idx) => {
                     const maxVal = topRegencies[0][1] as number || 1;
                     const countNum = Number(count);
+                    const pct = Math.round((countNum / (stats.totalAspirasi || 28)) * 100);
+                    const hues = ['from-blue-500 via-teal-400 to-emerald-400', 'from-cyan-500 via-blue-400 to-teal-400', 'from-teal-500 via-emerald-400 to-green-400', 'from-sky-500 via-blue-400 to-cyan-400', 'from-indigo-500 via-blue-400 to-teal-400'];
                     return (
                       <div 
                         key={idx}
                         onClick={() => { setRegencyFilter(regName); setPortalView('table'); }}
                         className="p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-900 border border-slate-700/60 hover:border-blue-500/50 transition-all cursor-pointer group"
                       >
-                        <div className="flex justify-between items-center text-xs mb-1.5">
+                        <div className="flex justify-between items-center text-xs mb-2">
                           <span className="font-bold text-slate-200 group-hover:text-blue-300">
-                            {idx + 1}. {regName}
+                            <span className="text-blue-400 font-black mr-1.5">{idx + 1}.</span>{regName}
                           </span>
-                          <span className="font-mono font-black text-blue-400">{countNum} Sesi Audiensi</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="font-black text-white font-mono bg-blue-500/20 px-2 py-0.5 rounded-lg">{countNum}</span>
+                            <span className="text-[10px] text-slate-500">({pct}%)</span>
+                          </div>
                         </div>
                         <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-gradient-to-r from-blue-500 via-teal-400 to-emerald-400 rounded-full transition-all duration-700" 
-                            style={{ width: `${Math.max(20, (countNum / maxVal) * 100)}%` }} 
+                            className={`h-full bg-gradient-to-r ${hues[idx % hues.length]} rounded-full transition-all duration-700`}
+                            style={{ width: `${Math.max(18, (countNum / maxVal) * 100)}%` }} 
                           />
                         </div>
                       </div>

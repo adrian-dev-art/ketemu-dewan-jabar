@@ -8,6 +8,12 @@ interface User {
   name: string;
   email: string;
   role: string;
+  dapil?: string;
+  fraksi?: string;
+  jabatan?: string;
+  kabupaten?: string;
+  kecamatan?: string;
+  noWhatsapp?: string;
 }
 
 interface AuthContextType {

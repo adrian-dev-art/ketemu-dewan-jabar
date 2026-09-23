@@ -21,6 +21,7 @@ import publicRoutes from './routes/public.routes';
 import gisRoutes from './routes/gis.routes';
 import livekitRoutes from './routes/livekit.routes';
 import adminRoutes from './routes/admin.routes';
+import aspirasiRoutes from './routes/aspirasi.routes';
 
 const app = express();
 const server = http.createServer(app);
@@ -49,15 +50,15 @@ app.set('trust proxy', 1);
 // 1. Custom CORS Middleware
 app.use((req, res, next) => {
     const origin = req.headers.origin as string;
-    if (origin && envConfig.FRONTEND_URLS.includes(origin)) {
+    if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
     } else {
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
 
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,x-api-key,x-centre-pull-secret');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -114,6 +115,7 @@ app.use('/api', followupRoutes);
 app.use('/api', publicRoutes);
 app.use('/api', gisRoutes);
 app.use('/api', livekitRoutes);
+app.use('/api', aspirasiRoutes);
 app.use('/api', adminRoutes);
 
 // Global Error Handler

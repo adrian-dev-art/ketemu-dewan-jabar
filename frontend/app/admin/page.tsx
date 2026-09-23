@@ -9,6 +9,7 @@ import {
   CalendarDays,
   Users,
   Award,
+  MessageSquare,
 } from "lucide-react";
 import AnalysisModal from "@/components/AnalysisModal";
 import FollowUpTimelineModal, { FollowUpData } from "@/components/FollowUpTimelineModal";
@@ -21,8 +22,9 @@ import AdminOverviewTab from "@/components/admin/AdminOverviewTab";
 import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminSchedulesTab from "@/components/admin/AdminSchedulesTab";
 import AdminRatingsTab from "@/components/admin/AdminRatingsTab";
+import AdminAspirasiTab from "@/components/admin/AdminAspirasiTab";
 
-type TabKey = "overview" | "schedules" | "users" | "ratings";
+type TabKey = "overview" | "schedules" | "users" | "ratings" | "aspirasi";
 
 interface TabDef {
   key: TabKey;
@@ -31,10 +33,12 @@ interface TabDef {
   count?: number;
 }
 
+import { getBackendUrl } from "@/context/utils";
+
 export default function AdminDashboard() {
   const { token } = useAuth();
   const router = useRouter();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = getBackendUrl();
 
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [loading, setLoading] = useState(true);
@@ -152,6 +156,7 @@ export default function AdminDashboard() {
 
   const tabs: TabDef[] = [
     { key: "overview", label: "Ringkasan", icon: LayoutDashboard },
+    { key: "aspirasi", label: "E-Aspirasi", icon: MessageSquare },
     { key: "schedules", label: "Jadwal Sesi", icon: CalendarDays, count: schedulesList.length },
     { key: "users", label: "Pengguna", icon: Users, count: users.length },
     { key: "ratings", label: "Rapor Legislator", icon: Award, count: ratings.length },
@@ -278,6 +283,10 @@ export default function AdminDashboard() {
 
           {activeTab === "ratings" && (
             <AdminRatingsTab ratings={ratings} dewanList={dewanList} />
+          )}
+
+          {activeTab === "aspirasi" && (
+            <AdminAspirasiTab />
           )}
         </main>
 

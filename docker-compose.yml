@@ -28,6 +28,8 @@ services:
     restart: always
     volumes:
       - ./backend/src:/app/src
+      - ./backend/uploads:/app/uploads
+      - ./backend/prisma:/app/prisma
       - ./recordings:/app/recordings
     environment:
       DATABASE_URL: postgresql://${DB_USER:-meetdewan_user}:${DB_PASSWORD:-meetdewan_pass}@db:5432/${DB_NAME:-meetdewan_db}?schema=public

@@ -8,10 +8,12 @@ import {
   ShieldCheck, AlertCircle, Sparkles, MapPin, Calendar, FileText, Upload
 } from "lucide-react";
 
+import { getBackendUrl } from "@/context/utils";
+
 export default function PublicDisposisiPage() {
   const params = useParams();
   const scheduleId = params?.id as string;
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = getBackendUrl();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<any>(null);

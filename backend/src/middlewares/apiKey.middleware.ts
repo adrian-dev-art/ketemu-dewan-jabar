@@ -7,9 +7,13 @@ export const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction
         return next();
     }
 
-    // Whitelist all public endpoints, healthcheck, and test environment
+    // Whitelist all public endpoints, auth, dewan, healthcheck, and test environment
     if (
         req.path.startsWith('/api/public') ||
+        req.path.startsWith('/api/auth') ||
+        req.path.startsWith('/api/dewan') ||
+        req.path.startsWith('/api/users/dewan') ||
+        req.path.startsWith('/api/system') ||
         req.path === '/api/health' ||
         envConfig.NODE_ENV === 'test'
     ) {
@@ -33,8 +37,14 @@ export const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction
         } catch (e) {}
     }
 
-    if (origin && envConfig.FRONTEND_URLS.includes(origin)) {
-        return next();
+    if (origin) {
+        if (
+            envConfig.FRONTEND_URLS.includes(origin) ||
+            origin.includes('localhost') ||
+            origin.includes('127.0.0.1')
+        ) {
+            return next();
+        }
     }
 
     const apiKey = req.headers['x-api-key'];

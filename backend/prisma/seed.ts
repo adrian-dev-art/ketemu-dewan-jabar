@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { syncHubData } from '../src/services/hubSync';
+import { seedAspirasi } from './seed_aspirasi';
 
 const prisma = new PrismaClient();
 
@@ -335,8 +336,12 @@ async function main() {
     );
 
     // ── 6. Sinkronisasi Master Hub ──
-    console.log('\n🔄 Menghubungi Master Hub untuk sinkronisasi dewan...');
+    console.log('\n[INFO] Menghubungi Master Hub untuk sinkronisasi dewan...');
     await syncHubData();
+
+    // ── 7. Seeding E-Aspirasi & Telaah Tenaga Ahli AI ──
+    console.log('\n[INFO] Menjalankan seeding data E-Aspirasi...');
+    await seedAspirasi();
 
     console.log('\n✅ Seeding selesai!');
     console.log('──────────────────────────────────');

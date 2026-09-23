@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Clock, Plus, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { getBackendUrl } from "@/context/utils";
 
 interface AvailabilityManagerProps {
   dewanId: number;
@@ -14,8 +15,7 @@ export default function AvailabilityManager({ dewanId, onAvailabilityUpdate }: A
   const [endTime, setEndTime] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
-
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = getBackendUrl();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
