@@ -286,8 +286,37 @@ function MasyarakatDashboardContent() {
       <div className="max-w-[1400px] mx-auto px-0.5 sm:px-4 md:px-6 py-2 sm:py-6 w-full">
         <div aria-live="polite" className="sr-only">{announcement}</div>
         
-        {/* Header */}
-        <header className="mb-5 sm:mb-6">
+        {/* ── Mobile Header Hero Card (sm:hidden) ── */}
+        <div className="sm:hidden mb-4 p-4 rounded-2xl bg-gradient-to-br from-primary/10 via-card to-card border border-primary/20 shadow-xs">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Layanan Warga Jabar
+            </span>
+            <span className="text-[10px] font-mono font-bold text-muted-foreground">
+              DPRD Jawa Barat
+            </span>
+          </div>
+          <h2 className="text-lg font-black tracking-tight text-foreground">
+            Aspirasi &amp; Audiensi Warga
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            Sampaikan usulan pembangunan &amp; dialog langsung bersama 120 Anggota DPRD Jabar.
+          </p>
+          <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border/60">
+            <div className="px-3 py-2 bg-background/80 rounded-xl border border-border/60 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Aspirasi Mandiri</p>
+              <p className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{aspirasiList.length}</p>
+            </div>
+            <div className="px-3 py-2 bg-background/80 rounded-xl border border-border/60 text-center">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Audiensi Dewan</p>
+              <p className="text-base font-extrabold text-primary">{schedules.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Desktop Header (hidden sm:block) ── */}
+        <header className="hidden sm:block mb-5 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <p className="text-[11px] sm:text-xs font-semibold text-primary tracking-wide uppercase mb-1">
@@ -300,14 +329,14 @@ function MasyarakatDashboardContent() {
                 Suarakan usulan pembangunan, keluhan fasilitas publik, dan permohonan dialog langsung bersama 120 Anggota DPRD Provinsi Jawa Barat.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto shrink-0">
-              <div className="px-3 sm:px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Aspirasi Mandiri</p>
-                <p className="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{aspirasiList.length}</p>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Aspirasi Mandiri</p>
+                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{aspirasiList.length}</p>
               </div>
-              <div className="px-3 sm:px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Audiensi Dewan</p>
-                <p className="text-base sm:text-lg font-extrabold text-primary">{schedules.length}</p>
+              <div className="px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Audiensi Dewan</p>
+                <p className="text-lg font-extrabold text-primary">{schedules.length}</p>
               </div>
             </div>
           </div>
@@ -339,8 +368,110 @@ function MasyarakatDashboardContent() {
           </section>
         )}
 
-        {/* ── Modern Tabs Navigation ── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 sm:mb-6 border-b border-border pb-3 sm:pb-4">
+        {/* ── Mobile Segmented Control Navigation (sm:hidden) ── */}
+        <div className="sm:hidden space-y-2.5 mb-5">
+          {/* Top 2-Segment Switch (E-Aspirasi vs E-Audiensi) */}
+          <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-neutral-900 rounded-2xl border border-slate-200/80 dark:border-neutral-800">
+            <button
+              onClick={() => {
+                setActiveTab('aspirasi');
+                setCreateServiceType(null);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === 'aspirasi'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-foreground'
+              }`}
+            >
+              <FileText size={14} />
+              <span>E-Aspirasi</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                activeTab === 'aspirasi' ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+              }`}>
+                {aspirasiList.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (activeTab === 'aspirasi' || activeTab === 'create') {
+                  setActiveTab(activeSchedules.length > 0 ? 'active' : incomingSchedules.length > 0 ? 'upcoming' : 'history');
+                }
+                setCreateServiceType(null);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+                activeTab !== 'aspirasi' && activeTab !== 'create'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-foreground'
+              }`}
+            >
+              {activeSchedules.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              )}
+              <Video size={14} />
+              <span>E-Audiensi</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                activeTab !== 'aspirasi' && activeTab !== 'create' ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+              }`}>
+                {schedules.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Sub-chips for Audiensi on Mobile */}
+          {activeTab !== 'aspirasi' && activeTab !== 'create' && (
+            <div className="flex items-center gap-1.5 p-1 bg-slate-50 dark:bg-neutral-900/60 rounded-xl border border-border/60">
+              <button
+                onClick={() => setActiveTab('active')}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-center transition-all flex items-center justify-center gap-1 ${
+                  activeTab === 'active'
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {activeSchedules.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />}
+                <span>Aktif ({activeSchedules.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('upcoming')}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-center transition-all ${
+                  activeTab === 'upcoming'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Terjadwal ({incomingSchedules.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-center transition-all ${
+                  activeTab === 'history'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Riwayat ({otherSchedules.length})
+              </button>
+            </div>
+          )}
+
+          {/* Mobile Back Button (only when creating) */}
+          {activeTab === 'create' && (
+            <button
+              onClick={() => {
+                setActiveTab('aspirasi');
+                setCreateServiceType(null);
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-card border border-border text-foreground font-bold text-xs shadow-xs active:scale-98 transition-all"
+            >
+              <ArrowLeft size={14} />
+              <span>Kembali ke Daftar Layanan</span>
+            </button>
+          )}
+        </div>
+
+        {/* ── Desktop Modern Tabs Navigation (hidden sm:flex) ── */}
+        <div className="hidden sm:flex items-center justify-between gap-3 mb-5 sm:mb-6 border-b border-border pb-3 sm:pb-4">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* TAB 1: E-ASPIRASI MANDIRI */}
             <button
@@ -434,15 +565,15 @@ function MasyarakatDashboardContent() {
             </button>
           </div>
 
-          {/* Action Button: Ajukan Layanan Baru */}
-          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          {/* Desktop Action Button */}
+          <div className="flex items-center gap-2 shrink-0">
             {activeTab !== 'create' ? (
               <button
                 onClick={() => {
                   setActiveTab('create');
                   setCreateServiceType(null);
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
               >
                 <PlusCircle size={15} />
                 <span>+ Ajukan Layanan Baru</span>
@@ -453,7 +584,7 @@ function MasyarakatDashboardContent() {
                   setActiveTab('aspirasi');
                   setCreateServiceType(null);
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted transition-all shadow-xs active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted transition-all shadow-xs active:scale-95"
               >
                 <ArrowLeft size={14} />
                 <span>Kembali ke Daftar</span>
@@ -548,21 +679,23 @@ function MasyarakatDashboardContent() {
             </div>
 
             {aspirasiList.length === 0 ? (
-              <div className="py-12 text-center bg-card border border-border border-dashed rounded-2xl p-8">
-                <FileText size={32} className="mx-auto mb-3 text-muted-foreground opacity-30" />
-                <p className="text-sm font-bold text-foreground mb-1">Belum Ada E-Aspirasi yang Diajukan</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4 leading-relaxed">
-                  Anda belum pernah mengirimkan usulan aspirasi mandiri. Silakan pilih Dapil Anda dan unggah berkas materi pendukung untuk memulai.
+              <div className="py-10 sm:py-14 text-center bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3.5 shadow-xs">
+                  <FileText size={26} />
+                </div>
+                <p className="text-base font-extrabold text-foreground mb-1.5">Belum Ada E-Aspirasi yang Diajukan</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto mb-5 leading-relaxed">
+                  Sampaikan usulan pembangunan jalan, pendidikan, kesehatan, atau keluhan fasilitas umum di wilayah Anda langsung ke meja anggota DPRD perwakilan daerah pemilihan Anda.
                 </p>
                 <button
                   onClick={() => {
                     setActiveTab('create');
                     setCreateServiceType('aspirasi');
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black rounded-xl shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
                 >
-                  <PlusCircle size={14} />
-                  <span>Kirim E-Aspirasi Pertama Anda</span>
+                  <PlusCircle size={16} />
+                  <span>Kirim E-Aspirasi Sekarang</span>
                 </button>
               </div>
             ) : filteredAspirasiList.length === 0 ? (
@@ -753,10 +886,12 @@ function MasyarakatDashboardContent() {
             </div>
 
             {activeSchedules.length === 0 ? (
-              <div className="py-12 text-center bg-card border border-border border-dashed rounded-2xl p-8">
-                <Video size={32} className="mx-auto mb-3 text-muted-foreground opacity-30" />
-                <p className="text-sm font-bold text-foreground mb-1">Belum Ada Audiensi yang Sedang Aktif</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              <div className="py-10 sm:py-14 text-center bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3.5 shadow-xs">
+                  <Video size={26} />
+                </div>
+                <p className="text-base font-extrabold text-foreground mb-1.5">Belum Ada Audiensi yang Sedang Aktif</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
                   Sesi temu dewan virtual akan aktif secara otomatis pada jam ketersediaan yang telah disetujui.
                 </p>
               </div>
@@ -817,10 +952,12 @@ function MasyarakatDashboardContent() {
             </div>
 
             {incomingSchedules.length === 0 ? (
-              <div className="py-12 text-center bg-card border border-border border-dashed rounded-2xl p-8">
-                <Calendar size={32} className="mx-auto mb-3 text-muted-foreground opacity-30" />
-                <p className="text-sm font-bold text-foreground mb-1">Tidak Ada Jadwal dalam Antrian</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              <div className="py-10 sm:py-14 text-center bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3.5 shadow-xs">
+                  <Calendar size={26} />
+                </div>
+                <p className="text-base font-extrabold text-foreground mb-1.5">Tidak Ada Jadwal dalam Antrian</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
                   Sesi temu dewan yang telah disetujui akan muncul di sini menjelang waktu pelaksanaan.
                 </p>
               </div>
@@ -886,11 +1023,13 @@ function MasyarakatDashboardContent() {
             </div>
 
             {otherSchedules.length === 0 ? (
-              <div className="py-12 text-center bg-card border border-border border-dashed rounded-2xl p-8">
-                <Inbox size={32} className="mx-auto mb-3 text-muted-foreground opacity-30" />
-                <p className="text-sm font-bold text-foreground mb-1">Belum Ada Riwayat Audiensi</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-                  Anda belum memiliki riwayat audiensi tatap muka daring.
+              <div className="py-10 sm:py-14 text-center bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xs relative overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-slate-500/10 text-slate-600 dark:text-slate-400 flex items-center justify-center mx-auto mb-3.5 shadow-xs">
+                  <Inbox size={26} />
+                </div>
+                <p className="text-base font-extrabold text-foreground mb-1.5">Belum Ada Riwayat Audiensi</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                  Anda belum memiliki riwayat audiensi tatap muka daring bersama anggota dewan.
                 </p>
               </div>
             ) : (
@@ -1200,6 +1339,22 @@ function MasyarakatDashboardContent() {
             setSelectedAspirasiForTimeline(updated);
           }}
         />
+        {/* Mobile Floating Action Button (FAB) */}
+        {activeTab !== 'create' && (
+          <div className="sm:hidden fixed bottom-[4.5rem] right-4 z-40">
+            <button
+              onClick={() => {
+                setActiveTab('create');
+                setCreateServiceType(null);
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/95 hover:to-blue-700 text-white font-extrabold text-xs rounded-full shadow-xl shadow-primary/30 active:scale-95 transition-all border border-white/20"
+              aria-label="Ajukan Layanan Baru"
+            >
+              <PlusCircle size={16} />
+              <span>Ajukan Baru</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

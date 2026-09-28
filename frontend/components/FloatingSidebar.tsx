@@ -25,6 +25,7 @@ import {
   Layers,
   ArrowUpRight,
 } from "lucide-react";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function FloatingSidebar() {
   const { user, logout } = useAuth();
@@ -440,6 +441,9 @@ export default function FloatingSidebar() {
           </div>
         </header>
       </div>
+
+      {/* ── Mobile Bottom Navigation Bar ── */}
+      <MobileBottomNav onOpenMenu={() => setMobileOpen(true)} />
 
       {/* ── Mobile Slide-Over Floating Drawer ── */}
       {mobileOpen && (
