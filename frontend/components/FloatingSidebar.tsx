@@ -80,7 +80,7 @@ export default function FloatingSidebar() {
     return `group relative flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
       active
         ? "bg-primary text-white shadow-md shadow-primary/30 font-bold"
-        : "text-muted-foreground hover:text-foreground hover:bg-muted/70 hover:translate-x-0.5"
+        : "text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-800/80 hover:translate-x-0.5"
     }`;
   };
 
@@ -400,30 +400,32 @@ export default function FloatingSidebar() {
   return (
     <>
       {/* ── Desktop Professional Floating Sidebar ── */}
-      <aside className="hidden md:flex flex-col fixed left-5 top-5 bottom-5 w-[310px] rounded-[30px] bg-card/90 dark:bg-[#111116]/90 backdrop-blur-2xl border border-border/80 shadow-[0_20px_50px_rgba(0,0,0,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] p-4.5 z-40 overflow-hidden">
+      <aside className="hidden md:flex flex-col fixed left-5 top-5 bottom-5 w-[310px] rounded-[30px] bg-white dark:bg-[#111116] border border-border/80 shadow-[0_20px_50px_rgba(0,0,0,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] p-4.5 z-40 overflow-hidden">
         {renderNavContent()}
       </aside>
 
       {/* ── Mobile Floating Pill Header ── */}
       <div className="md:hidden sticky top-2.5 mx-3 z-40 mb-2.5">
-        <header className="h-14 rounded-2xl bg-card/95 backdrop-blur-xl border border-border/80 shadow-lg px-3 sm:px-4 flex items-center justify-between">
+        <header className="h-14 rounded-2xl bg-white/95 dark:bg-[#121217]/95 backdrop-blur-xl border border-slate-200/80 dark:border-neutral-800 shadow-md px-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 min-w-0">
             {settings.app_logo ? (
               <img
                 src={settings.app_logo}
                 alt="Logo"
-                className="h-7 w-auto object-contain shrink-0"
+                className="h-8 w-auto object-contain shrink-0"
               />
             ) : (
-              <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-xs shrink-0">
+              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-xs shrink-0">
                 <span className="text-white font-bold text-xs">
                   {settings.app_name?.charAt(0) || "D"}
                 </span>
               </div>
             )}
-            <span className="font-extrabold text-xs sm:text-sm font-outfit text-foreground truncate">
-              {settings.app_name || "DPRD HUDANG"}
-            </span>
+            {!settings.app_logo && (
+              <span className="font-extrabold text-xs sm:text-sm font-outfit text-foreground truncate">
+                {settings.app_name || "DPRD HUDANG"}
+              </span>
+            )}
           </Link>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -431,7 +433,7 @@ export default function FloatingSidebar() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
-              className="h-10 w-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/60 shrink-0"
+              className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-600 dark:text-slate-300 hover:text-foreground hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors border border-slate-200 dark:border-neutral-800 shrink-0"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -444,15 +446,15 @@ export default function FloatingSidebar() {
         <div className="md:hidden fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/50 transition-opacity"
             onClick={() => setMobileOpen(false)}
           />
 
           {/* Drawer Panel */}
-          <div className="relative my-2.5 ml-2.5 w-[300px] max-w-[85vw] bg-card/95 backdrop-blur-2xl rounded-[24px] h-[calc(100dvh-1.25rem)] p-4 flex flex-col z-50 shadow-2xl border border-border overflow-hidden animate-in slide-in-from-left duration-200">
+          <div className="relative my-2.5 ml-2.5 w-[300px] max-w-[85vw] bg-white dark:bg-[#121217] rounded-[24px] h-[calc(100dvh-1.25rem)] p-4 flex flex-col z-50 shadow-2xl border border-slate-200 dark:border-neutral-800 overflow-hidden animate-in slide-in-from-left duration-200">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-3.5 right-3.5 h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/50 z-10"
+              className="absolute top-3.5 right-3.5 h-9 w-9 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors border border-slate-200 dark:border-neutral-800 z-10"
               aria-label="Tutup menu"
             >
               <X size={16} />

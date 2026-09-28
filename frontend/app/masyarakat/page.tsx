@@ -341,7 +341,7 @@ function MasyarakatDashboardContent() {
 
         {/* ── Modern Tabs Navigation ── */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 sm:mb-6 border-b border-border pb-3 sm:pb-4">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* TAB 1: E-ASPIRASI MANDIRI */}
             <button
               onClick={() => {
@@ -532,16 +532,18 @@ function MasyarakatDashboardContent() {
                     />
                   </div>
                 )}
-                <button
-                  onClick={() => {
-                    setActiveTab('create');
-                    setCreateServiceType('aspirasi');
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs shrink-0"
-                >
-                  <PlusCircle size={14} />
-                  <span>+ Tulis Aspirasi</span>
-                </button>
+                {aspirasiList.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('create');
+                      setCreateServiceType('aspirasi');
+                    }}
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs shrink-0"
+                  >
+                    <PlusCircle size={14} />
+                    <span>+ Tulis Aspirasi</span>
+                  </button>
+                )}
               </div>
             </div>
 

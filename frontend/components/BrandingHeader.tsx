@@ -57,7 +57,7 @@ export default function BrandingHeader() {
                 </span>
               </h1>
             )}
-            <p className="text-[9px] text-muted-foreground font-bold mt-0.5 uppercase tracking-wider">
+            <p className="hidden sm:block text-[9px] text-muted-foreground font-bold mt-0.5 uppercase tracking-wider">
               Sekretariat DPRD Jawa Barat
             </p>
           </div>
