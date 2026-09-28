@@ -37,10 +37,9 @@ describe('transcribeVideo', () => {
       return path === videoPath || path === audioPath;
     });
 
-    const spawnEventHandlers: any = {};
     mockSpawn.mockReturnValue({
+      stderr: { on: jest.fn() },
       on: jest.fn((event, callback) => {
-        spawnEventHandlers[event] = callback;
         if (event === 'close') callback(0);
       }),
     });
@@ -51,11 +50,16 @@ describe('transcribeVideo', () => {
 
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: scheduleId },
-      data: { isTranscribing: true, isAnalyzing: true },
+      data: {
+        isTranscribing: true,
+        isAnalyzing: true,
+        transcriptionProgress: 10,
+        transcriptionStatus: "Mengekstrak audio dari video..."
+      },
     });
 
     expect(mockSpawn).toHaveBeenCalled();
-    expect(mockProcessMeetingAudio).toHaveBeenCalledWith(scheduleId, audioPath);
+    expect(mockProcessMeetingAudio).toHaveBeenCalledWith(scheduleId, expect.stringContaining('.wav'));
   });
 
   it('should handle missing video file', async () => {
@@ -65,7 +69,11 @@ describe('transcribeVideo', () => {
 
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: scheduleId },
-      data: { isTranscribing: false, isAnalyzing: false },
+      data: {
+        isTranscribing: false,
+        isAnalyzing: false,
+        transcriptionStatus: expect.stringContaining("Gagal: Video file not found")
+      },
     });
   });
 
@@ -73,6 +81,7 @@ describe('transcribeVideo', () => {
     mockExistsSync.mockReturnValue(true);
 
     mockSpawn.mockReturnValue({
+      stderr: { on: jest.fn() },
       on: jest.fn((event, callback) => {
         if (event === 'close') callback(1);
       }),
@@ -82,7 +91,11 @@ describe('transcribeVideo', () => {
 
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: scheduleId },
-      data: { isTranscribing: false, isAnalyzing: false },
+      data: {
+        isTranscribing: false,
+        isAnalyzing: false,
+        transcriptionStatus: expect.stringContaining("Gagal: ffmpeg failed with code 1")
+      },
     });
   });
 });

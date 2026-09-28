@@ -2,28 +2,51 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import * as fs from "fs";
 import * as path from "path";
+import mammoth from "mammoth";
 import { prisma } from "../lib/prisma";
 import { uploadsDir } from "../middlewares/upload.middleware";
 
-const apiKey = process.env.GEMINI_API_KEY || "";
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-const fileManager = apiKey ? new GoogleAIFileManager(apiKey) : null;
+function getGeminiClients() {
+    const apiKey = process.env.GEMINI_API_KEY || "";
+    if (!apiKey) {
+        return { apiKey: "", genAI: null, fileManager: null };
+    }
+    return {
+        apiKey,
+        genAI: new GoogleGenerativeAI(apiKey),
+        fileManager: new GoogleAIFileManager(apiKey)
+    };
+}
 
-export const PROMPT_TENAGA_AHLI_SYSTEM = `Bertindaklah sebagai staf/tenaga ahli DPRD yang bertugas menelaah proposal aspirasi masyarakat sebelum diteruskan ke rapat/keputusan anggota dewan. Proposal yang masuk formatnya sangat beragam (surat permohonan, proposal kegiatan, proposal pembangunan/infrastruktur, permohonan bantuan sosial/hibah, dll), jadi lakukan langkah berikut:
+export const PROMPT_TENAGA_AHLI_SYSTEM = `Bertindaklah sebagai staf/tenaga ahli DPRD Provinsi Jawa Barat yang bertugas menelaah proposal aspirasi masyarakat secara mendalam dan kritis sebelum diteruskan ke rapat atau keputusan anggota dewan. 
 
-1. Identifikasi dulu jenis proposal, pemohon/pengusul, wilayah/dapil terkait, dan tujuan/permintaan utamanya — ringkas dalam 2-3 kalimat di awal.
-2. Telaah kelengkapan administratif: apakah ada identitas pengusul/lembaga yang jelas, surat pengantar/tanda tangan/stempel resmi, alamat & kontak, rincian anggaran (jika ada permintaan dana), lokasi/sasaran kegiatan yang jelas, dan dokumen pendukung (KTP, proposal kegiatan, RAB, survei lokasi, dsb).
-3. Telaah substansi, dalam bentuk paragraf per-poin (gaya seperti reviewer jurnal — satu paragraf per topik, dimulai dengan label topik singkat), mencakup hal-hal yang relevan sesuai isi proposal, misalnya:
-- Urgensi & kesesuaian dengan kebutuhan riil masyarakat/wilayah
-- Kejelasan tujuan dan manfaat yang diusulkan
-- Kelayakan anggaran (apakah rincian biaya masuk akal, ada potensi mark-up, atau justru kurang detail)
-- Kesesuaian dengan prioritas pembangunan daerah / program pemerintah yang sudah berjalan (hindari duplikasi anggaran)
-- Kejelasan pihak pelaksana & mekanisme pertanggungjawaban (jika berupa bantuan/hibah)
-- Potensi risiko atau hal yang perlu diklarifikasi lebih lanjut ke pengusul
-4. Jika ada bagian proposal yang tidak lengkap/tidak jelas, sebutkan secara eksplisit apa yang kurang dan pertanyaan klarifikasi yang perlu diajukan ke pengusul — jangan menebak-nebak atau mengarang asumsi.
-5. Tutup dengan Rekomendasi: pilih salah satu — "Diteruskan untuk dibahas", "Perlu klarifikasi/kelengkapan tambahan", "Tidak direkomendasikan", disertai alasan singkat 2-3 kalimat.
+PERATURAN UTAMA:
+- Anda WAJIB membaca dan menelaah naskah/dokumen/lampiran proposal yang dilampirkan oleh pemohon secara spesifik dan faktual.
+- Kutip dan bahas temuan riil dari dokumen: judul spesifik, latar belakang teknis/masalah, pihak pengusul, rincian biaya/anggaran (jika ada), metodologi/kegiatan, dan sasaran wilayah.
+- Jangan pernah memberikan respon generik/template bila naskah dokumen terlampir.
 
-Gaya bahasa: formal, netral, berbasis fakta yang ada di dokumen — bukan opini politis. Dilarang menggunakan emoji sama sekali.`;
+Langkah-langkah penelaahan:
+1. Identifikasi Pokok Usulan & Pemohon:
+   Sebutkan jenis proposal/dokumen, subjek pembahasan, pemohon/penulis, wilayah/dapil terkait, dan tujuan utamanya secara ringkas dalam 2-3 kalimat.
+2. Telaah Kelengkapan Administratif:
+   Periksa identitas pengusul, surat pengantar/legalitas, rincian biaya/anggaran (RAB jika ada), dan dokumen pendukung. Sebutkan apa saja yang sudah lengkap dan apa yang belum ada.
+3. Telaah Substansi & Urgensi:
+   Uraikan per poin dalam gaya reviewer profesional:
+   - Urgensi & relevansi dengan kebutuhan riil masyarakat / wilayah Jawa Barat
+   - Kejelasan sasaran, metodologi, dan manfaat yang ditawarkan
+   - Kelayakan teknis & anggaran (apakah masuk akal, perlu kajian lebih lanjut, atau butuh penyesuaian standar satuan biaya)
+   - Keselarasan dengan program prioritas pemerintah daerah / komisi terkait di DPRD Jabar
+   - Potensi risiko pelaksanaan, tata kelola, atau keberlanjutan hasil
+4. Poin Klarifikasi yang Diperlukan:
+   Jika ada bagian dalam proposal yang masih kurang jelas, tidak lengkap, atau memerlukan konfirmasi teknis ke pemohon, sebutkan secara terperinci.
+5. Rekomendasi Tenaga Ahli:
+   Tentukan rekomendasi final dengan memilih salah satu dari:
+   - "Diteruskan untuk dibahas"
+   - "Perlu klarifikasi/kelengkapan tambahan"
+   - "Tidak direkomendasikan"
+   Sertakan pertimbangan kunci dalam 2-3 kalimat.
+
+Gaya bahasa: formal, objektif, berbasis fakta isi dokumen naskah. Dilarang menggunakan emoji.`;
 
 /**
  * Ekstraksi rekomendasi standar dari teks analisis
@@ -110,6 +133,8 @@ export async function analyzeAspirasiProposal(aspirasiId: number): Promise<{ ana
         throw new Error(`Data aspirasi dengan ID ${aspirasiId} tidak ditemukan.`);
     }
 
+    const { apiKey, genAI, fileManager } = getGeminiClients();
+
     // Jika tidak ada kunci API Gemini, gunakan analisis Tenaga Ahli DPRD cerdas berbasis aturan
     if (!apiKey || !genAI) {
         console.log(`[AI-ASPIRASI] GEMINI_API_KEY tidak dikonfigurasi. Menggunakan analisis internal Tenaga Ahli.`);
@@ -129,19 +154,20 @@ export async function analyzeAspirasiProposal(aspirasiId: number): Promise<{ ana
         console.log(`[AI-ASPIRASI] Memproses analisis Gemini AI untuk tiket: ${aspirasi.ticketNumber}`);
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             systemInstruction: PROMPT_TENAGA_AHLI_SYSTEM,
             generationConfig: {
                 temperature: 0.2,
-                maxOutputTokens: 2048,
+                maxOutputTokens: 2500,
             }
         });
 
+        let extractedDocText: string | null = null;
         let uploadedFileUri: string | null = null;
         let fileMimeType: string | null = null;
 
         // Periksa apakah berkas proposal fisik tersedia di server untuk dikirim ke Gemini
-        if (aspirasi.materiUrl && fileManager) {
+        if (aspirasi.materiUrl) {
             let localFilePath = path.join(process.cwd(), aspirasi.materiUrl);
             if (!fs.existsSync(localFilePath)) {
                 localFilePath = path.join(uploadsDir, 'materi', aspirasi.materiFileName || path.basename(aspirasi.materiUrl));
@@ -149,26 +175,56 @@ export async function analyzeAspirasiProposal(aspirasiId: number): Promise<{ ana
 
             if (fs.existsSync(localFilePath)) {
                 const ext = path.extname(localFilePath).toLowerCase();
-                if (ext === '.pdf') fileMimeType = 'application/pdf';
-                else if (['.png', '.jpg', '.jpeg'].includes(ext)) fileMimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
 
-                if (fileMimeType) {
+                // 1. Dokumen Word (.docx): Ekstrak teks lengkap menggunakan mammoth
+                if (ext === '.docx') {
                     try {
-                        console.log(`[AI-ASPIRASI] Mengunggah lampiran proposal (${fileMimeType}) ke Gemini File Manager...`);
-                        const uploadRes = await fileManager.uploadFile(localFilePath, {
-                            mimeType: fileMimeType,
-                            displayName: `Proposal_${aspirasi.ticketNumber}`
-                        });
-                        uploadedFileUri = uploadRes.file.uri;
-                        console.log(`[AI-ASPIRASI] Berkas terunggah: ${uploadedFileUri}`);
-                    } catch (uploadErr) {
-                        console.warn("[AI-ASPIRASI] Gagal mengunggah berkas ke Gemini File Manager, beralih ke analisis teks metadata:", uploadErr);
+                        console.log(`[AI-ASPIRASI] Mengekstrak teks dokumen Word (.docx): ${localFilePath}`);
+                        const mammothRes = await mammoth.extractRawText({ path: localFilePath });
+                        if (mammothRes.value && mammothRes.value.trim().length > 0) {
+                            extractedDocText = mammothRes.value.trim();
+                            console.log(`[AI-ASPIRASI] Berhasil mengekstrak ${extractedDocText.length} karakter dari berkas Word.`);
+                        }
+                    } catch (docErr) {
+                        console.warn("[AI-ASPIRASI] Gagal mengekstrak teks Word (.docx):", docErr);
                     }
                 }
+                // 2. Berkas Teks Biasa (.txt, .md, .csv, .json)
+                else if (['.txt', '.md', '.csv', '.json'].includes(ext)) {
+                    try {
+                        extractedDocText = fs.readFileSync(localFilePath, 'utf-8');
+                        console.log(`[AI-ASPIRASI] Berhasil membaca teks dokumen (${extractedDocText.length} karakter).`);
+                    } catch (txtErr) {
+                        console.warn("[AI-ASPIRASI] Gagal membaca teks dokumen:", txtErr);
+                    }
+                }
+                // 3. Dokumen PDF & Citra Gambar: Unggah ke Gemini File API untuk multimodal analysis
+                else if (fileManager) {
+                    if (ext === '.pdf') fileMimeType = 'application/pdf';
+                    else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+                        fileMimeType = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+                    }
+
+                    if (fileMimeType) {
+                        try {
+                            console.log(`[AI-ASPIRASI] Mengunggah lampiran proposal (${fileMimeType}) ke Gemini File Manager...`);
+                            const uploadRes = await fileManager.uploadFile(localFilePath, {
+                                mimeType: fileMimeType,
+                                displayName: `Proposal_${aspirasi.ticketNumber}`
+                            });
+                            uploadedFileUri = uploadRes.file.uri;
+                            console.log(`[AI-ASPIRASI] Berkas terunggah ke Gemini: ${uploadedFileUri}`);
+                        } catch (uploadErr) {
+                            console.warn("[AI-ASPIRASI] Gagal mengunggah berkas ke Gemini File Manager:", uploadErr);
+                        }
+                    }
+                }
+            } else {
+                console.warn(`[AI-ASPIRASI] Berkas materi tidak ditemukan di path: ${localFilePath}`);
             }
         }
 
-        const userContentText = `
+        let userContentText = `
 Berikut adalah data proposal aspirasi konstituen yang masuk ke Sekretariat DPRD Provinsi Jawa Barat:
 
 Nomor Tiket: ${aspirasi.ticketNumber}
@@ -185,12 +241,23 @@ Nama Berkas Lampiran: ${aspirasi.materiFileName || 'Tidak ada lampiran'}
 Tipe Berkas: ${aspirasi.materiType || 'none'}
 Ukuran Berkas: ${aspirasi.materiSize ? Math.round(aspirasi.materiSize / 1024) + ' KB' : '-'}
 
-Rincian Isi Deskripsi Usulan dari Pemohon:
+Rincian Isi Deskripsi Singkat dari Pemohon:
 """
 ${aspirasi.deskripsi}
-"""
+"""`;
 
-Lakukan telaah komprehensif sesuai instruksi tenaga ahli DPRD. Sajikan dalam struktur penulisan yang rapi, objektif, dan formal.`;
+        if (extractedDocText) {
+            userContentText += `\n\n--- NASKAH LENGKAP DOKUMEN PROPOSAL YANG DIUNGGAH PEMOHON (${aspirasi.materiFileName}) ---
+Berikut adalah isi teks lengkap dari naskah proposal resmi yang diunggah oleh pemohon:
+"""
+${extractedDocText.slice(0, 100000)}
+"""
+PETUNJUK KHUSUS TELAAH: Anda wajib membaca naskah dokumen di atas, mengidentifikasi detail isi proposal tersebut secara objektif, menelaah kelayakannya, dan merumuskan saran pertimbangan untuk anggota dewan berdasarkan dokumen tersebut.`;
+        } else if (!uploadedFileUri) {
+            userContentText += `\n\nCatatan: Pemohon belum melampirkan berkas naskah proposal lengkap (hanya deskripsi pengantar).`;
+        }
+
+        userContentText += `\n\nLakukan telaah komprehensif sesuai instruksi tenaga ahli DPRD. Sajikan dalam struktur penulisan yang rapi, objektif, dan formal.`;
 
         let resultText = "";
 

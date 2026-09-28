@@ -9,13 +9,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { getBackendUrl } from "@/context/utils";
 
 type SettingTab = "general" | "streaming" | "sync" | "data";
 
 export default function AdminSettingsPage() {
   const { token } = useAuth();
   const router = useRouter();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = getBackendUrl();
 
   const [activeTab, setActiveTab] = useState<SettingTab>("general");
   const [loading, setLoading] = useState(true);

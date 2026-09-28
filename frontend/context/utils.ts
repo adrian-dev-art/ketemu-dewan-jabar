@@ -36,3 +36,37 @@ export const getBackendUrl = (): string => {
   // In remote production domain (e.g., perdinkeuangan.online where Nginx reverse proxies /api on port 80/443)
   return `${protocol}//${window.location.host}`;
 };
+
+/**
+ * Dynamically resolves the LiveKit WebSocket URL based on current window location.
+ */
+export const getLiveKitUrl = (): string => {
+  if (typeof window === "undefined") {
+    return process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
+  }
+
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+  const isLocalOrLan =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+
+  if (isLocalOrLan) {
+    const envUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+    let livekitPort = "7880";
+    if (envUrl) {
+      try {
+        const parsed = new URL(envUrl.replace(/^ws/, "http"));
+        if (parsed.port) livekitPort = parsed.port;
+      } catch {}
+    }
+    return `${protocol}//${hostname}:${livekitPort}`;
+  }
+
+  return process.env.NEXT_PUBLIC_LIVEKIT_URL || `${protocol}//${hostname}:7880`;
+};
+

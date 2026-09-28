@@ -49,6 +49,7 @@ import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PreJoinComponent from "@/components/PreJoinComponent";
 import CustomChat from "@/components/CustomChat";
+import { getBackendUrl, getLiveKitUrl } from "@/context/utils";
 
 // ─── Meeting Timer ───────────────────────────────────────────
 function MeetingTimer() {
@@ -442,7 +443,7 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
               <button
                 onClick={async () => {
                   if (confirm("Hentikan live streaming?")) {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/egress/stop`, {
+                    const res = await fetch(`${getBackendUrl()}/api/livekit/egress/stop`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -465,7 +466,7 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
               <button
                 onClick={async () => {
                   if (confirm("Mulai live streaming manual?")) {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/egress/start`, {
+                    const res = await fetch(`${getBackendUrl()}/api/livekit/egress/start`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -515,7 +516,7 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                 onClick={async () => {
                   try {
                     const endpoint = isRecording ? 'stop' : 'start';
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/livekit/record/${endpoint}`, {
+                    const res = await fetch(`${getBackendUrl()}/api/livekit/record/${endpoint}`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -634,7 +635,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
 
-  const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
+  const liveKitUrl = getLiveKitUrl();
 
   // ─── Failsafe to track & stop all media streams on page unmount ───
   useEffect(() => {
@@ -685,7 +686,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
       if (!authToken || !user) return;
       try {
         const detailsRes = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/schedules`,
+          `${getBackendUrl()}/api/schedules`,
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
         if (detailsRes.ok) {
@@ -698,7 +699,7 @@ export default function RoomPage({ params }: { params: { id: string } }) {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/api/livekit/token`,
+          `${getBackendUrl()}/api/livekit/token`,
           {
             method: "POST",
             headers: {

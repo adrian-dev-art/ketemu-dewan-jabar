@@ -29,11 +29,22 @@ const server = http.createServer(app);
 // Inisialisasi Socket.io
 const io = new Server(server, {
     cors: {
-        origin: envConfig.FRONTEND_URLS,
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+            if (envConfig.FRONTEND_URLS.includes(origin)) return callback(null, true);
+            if (/^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin)) {
+                return callback(null, true);
+            }
+            if (envConfig.NODE_ENV !== 'production') {
+                return callback(null, true);
+            }
+            callback(new Error('Not allowed by CORS'));
+        },
         methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
         credentials: true
     }
 });
+
 
 app.set('io', io);
 

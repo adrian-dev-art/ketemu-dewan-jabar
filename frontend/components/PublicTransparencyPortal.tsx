@@ -8,6 +8,7 @@ import {
   FileCheck2, AlertCircle, BarChart3, PieChart, Table as TableIcon,
   LayoutGrid, ChevronRight, Check, Users, Phone, RotateCcw
 } from "lucide-react";
+import { getBackendUrl } from "@/context/utils";
 
 interface OfficialDocument {
   type: 'surat_disposisi' | 'surat_tanggapan' | 'surat_laporan';
@@ -112,7 +113,7 @@ export default function PublicTransparencyPortal() {
   const fetchTransparencyData = async () => {
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+      const backendUrl = getBackendUrl();
       const res = await fetch(`${backendUrl}/api/public/transparansi-tindak-lanjut`);
       if (res.ok) {
         const data = await res.json();

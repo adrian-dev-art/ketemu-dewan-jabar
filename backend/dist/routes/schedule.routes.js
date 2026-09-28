@@ -151,7 +151,7 @@ router.get('/schedules', auth_middleware_1.authenticateToken, (req, res) => __aw
             where.masyarakatId = Number(userId);
         const result = yield prisma_1.prisma.schedule.findMany({
             where,
-            orderBy: { startTime: 'desc' },
+            orderBy: { id: 'desc' },
             include: {
                 masyarakat: { select: { name: true } },
                 participants: {

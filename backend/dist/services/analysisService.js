@@ -98,7 +98,7 @@ function processMeetingAudio(scheduleId, audioPath) {
             });
             // 3. Generate Transcription + Analysis
             const model = genAI.getGenerativeModel({
-                model: "gemini-flash-latest",
+                model: "gemini-2.5-flash",
                 generationConfig: {
                     temperature: 0,
                     responseMimeType: "application/json"
@@ -246,30 +246,88 @@ function processMeetingAudio(scheduleId, audioPath) {
 }
 function analyzeTranscript(scheduleId, transcript) {
     return __awaiter(this, void 0, void 0, function* () {
-        // Keep existing function for fallback or manual text analysis
         try {
             console.log(`[ANALYSIS] Starting text analysis for schedule: ${scheduleId}`);
-            if (!apiKey)
+            if (!apiKey) {
+                console.warn("[ANALYSIS] GEMINI_API_KEY not found. Skipping analysis.");
                 return;
+            }
             yield prisma.schedule.update({
                 where: { id: scheduleId },
                 data: { isAnalyzing: true }
             });
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-            const prompt = `Analisis transkrip berikut dan berikan JSON: ${transcript}`;
-            const result = yield model.generateContent(prompt);
-            const text = (yield result.response).text();
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                yield prisma.schedule.update({
-                    where: { id: scheduleId },
-                    data: { analysis: JSON.parse(jsonMatch[0]), isAnalyzing: false }
-                });
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.5-flash",
+                generationConfig: {
+                    temperature: 0.2,
+                    responseMimeType: "application/json"
+                }
+            });
+            const prompt = `
+        Anda adalah asisten cerdas untuk DPRD Jawa Barat. Analisis transkrip percakapan berikut ini secara objektif:
+        """
+        ${transcript}
+        """
+
+        Tugas Anda:
+        1. Buat ringkasan eksekutif singkat (1-3 kalimat) mengenai isu utama dan respon dewan.
+        2. Tentukan sentimen dialog (Positif, Netral, atau Negatif).
+        3. Identifikasi topik-topik utama pembahasan (maksimal 4 topik).
+        4. Rumuskan rencana butir tindak lanjut konkrit yang disepakati atau dijanjikan.
+        5. Berikan penilaian skor metrik performa (skala 1 sampai 10):
+           - citizenSatisfaction: kepuasan warga
+           - dewanResponsiveness: responsivitas dan ketanggapan dewan
+           - discussionQuality: kualitas dan etika diskusi
+           - problemSolving: orientasi solusi masalah
+
+        Format output HARUS berupa JSON murni dengan format:
+        {
+            "summary": "Ringkasan eksekutif...",
+            "sentiment": "Positif/Netral/Negatif",
+            "topics": ["Topik 1", "Topik 2"],
+            "actionItems": ["Tindakan 1", "Tindakan 2"],
+            "citizenSatisfaction": 8.5,
+            "dewanResponsiveness": 9.0,
+            "discussionQuality": 8.5,
+            "problemSolving": 8.0
+        }
+        `;
+            let result;
+            let retries = 3;
+            while (retries > 0) {
+                try {
+                    result = yield model.generateContent(prompt);
+                    break;
+                }
+                catch (error) {
+                    if (((error === null || error === void 0 ? void 0 : error.status) === 503 || (error === null || error === void 0 ? void 0 : error.status) === 429) && retries > 1) {
+                        console.warn(`[ANALYSIS] Gemini busy (${error.status}). Menunggu 3 detik... (${retries - 1} percobaan tersisa)`);
+                        yield new Promise(res => setTimeout(res, 3000));
+                        retries--;
+                    }
+                    else {
+                        throw error;
+                    }
+                }
             }
+            if (!result)
+                throw new Error("Gagal mendapatkan respons dari Gemini AI.");
+            const text = result.response.text();
+            const parsed = JSON.parse(text);
+            yield prisma.schedule.update({
+                where: { id: scheduleId },
+                data: {
+                    analysis: parsed,
+                    isAnalyzing: false
+                }
+            });
+            console.log(`[ANALYSIS] Selesai menganalisis schedule #${scheduleId}:`, parsed);
+            return parsed;
         }
         catch (err) {
-            console.error(err);
+            console.error("[ANALYSIS] Error in analyzeTranscript:", err);
             yield prisma.schedule.update({ where: { id: scheduleId }, data: { isAnalyzing: false } });
+            throw err;
         }
     });
 }

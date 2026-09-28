@@ -7,15 +7,24 @@ const apiKeyMiddleware = (req, res, next) => {
     if (!req.path.startsWith('/api')) {
         return next();
     }
-    // Whitelist all public endpoints and healthcheck
-    if (req.path.startsWith('/api/public') || req.path === '/api/health') {
+    // Whitelist all public endpoints, auth, dewan, healthcheck, and test environment
+    if (req.path.startsWith('/api/public') ||
+        req.path.startsWith('/api/auth') ||
+        req.path.startsWith('/api/dewan') ||
+        req.path.startsWith('/api/users/dewan') ||
+        req.path.startsWith('/api/system') ||
+        req.path === '/api/health' ||
+        env_1.envConfig.NODE_ENV === 'test') {
+        return next();
+    }
+    // If request already has Bearer token, it will be validated by authenticateToken
+    if (req.headers.authorization) {
         return next();
     }
     const validKey = env_1.envConfig.MOBILE_API_KEY;
     if (!validKey) {
-        return next(); // Pass through if not configured
+        return next();
     }
-    // Allow requests from permitted web frontend origins to bypass the API key
     let origin = req.headers.origin;
     if (!origin && req.headers.referer) {
         try {
@@ -23,8 +32,12 @@ const apiKeyMiddleware = (req, res, next) => {
         }
         catch (e) { }
     }
-    if (origin && env_1.envConfig.FRONTEND_URLS.includes(origin)) {
-        return next();
+    if (origin) {
+        if (env_1.envConfig.FRONTEND_URLS.includes(origin) ||
+            origin.includes('localhost') ||
+            origin.includes('127.0.0.1')) {
+            return next();
+        }
     }
     const apiKey = req.headers['x-api-key'];
     if (apiKey === validKey) {

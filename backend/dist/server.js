@@ -32,6 +32,7 @@ const public_routes_1 = __importDefault(require("./routes/public.routes"));
 const gis_routes_1 = __importDefault(require("./routes/gis.routes"));
 const livekit_routes_1 = __importDefault(require("./routes/livekit.routes"));
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
+const aspirasi_routes_1 = __importDefault(require("./routes/aspirasi.routes"));
 const app = (0, express_1.default)();
 exports.app = app;
 const server = http_1.default.createServer(app);
@@ -39,7 +40,19 @@ exports.server = server;
 // Inisialisasi Socket.io
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: env_1.envConfig.FRONTEND_URLS,
+        origin: (origin, callback) => {
+            if (!origin)
+                return callback(null, true);
+            if (env_1.envConfig.FRONTEND_URLS.includes(origin))
+                return callback(null, true);
+            if (/^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin)) {
+                return callback(null, true);
+            }
+            if (env_1.envConfig.NODE_ENV !== 'production') {
+                return callback(null, true);
+            }
+            callback(new Error('Not allowed by CORS'));
+        },
         methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
         credentials: true
     }
@@ -57,15 +70,15 @@ app.set('trust proxy', 1);
 // 1. Custom CORS Middleware
 app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (origin && env_1.envConfig.FRONTEND_URLS.includes(origin)) {
+    if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
     else {
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,x-api-key,x-centre-pull-secret');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
@@ -114,6 +127,7 @@ app.use('/api', followup_routes_1.default);
 app.use('/api', public_routes_1.default);
 app.use('/api', gis_routes_1.default);
 app.use('/api', livekit_routes_1.default);
+app.use('/api', aspirasi_routes_1.default);
 app.use('/api', admin_routes_1.default);
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -123,15 +137,17 @@ app.use((err, req, res, next) => {
 // Database Connection Check & Server Listen
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield prisma_1.prisma.$connect();
-        console.log("Database PostgreSQL berhasil terhubung.");
+        if (prisma_1.prisma && typeof prisma_1.prisma.$connect === 'function') {
+            yield prisma_1.prisma.$connect();
+            console.log("Database PostgreSQL berhasil terhubung.");
+        }
     }
     catch (err) {
         console.error("Gagal menghubungkan ke database PostgreSQL:", err);
     }
 });
-connectDB();
 if (env_1.envConfig.NODE_ENV !== 'test') {
+    connectDB();
     server.listen(env_1.envConfig.PORT, () => {
         console.log(`Server DPRD HUDANG berjalan di port ${env_1.envConfig.PORT}`);
         (0, queueService_1.startQueueDaemon)();

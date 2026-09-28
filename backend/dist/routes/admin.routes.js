@@ -189,8 +189,7 @@ router.get('/centre/performance', (req, res) => __awaiter(void 0, void 0, void 0
     }
 }));
 // Admin Authentication Required Routes below:
-router.use(auth_middleware_1.authenticateToken);
-router.use((0, auth_middleware_1.authorizeRole)(['admin']));
+router.use('/admin', auth_middleware_1.authenticateToken, (0, auth_middleware_1.authorizeRole)(['admin']));
 // GET /api/admin/stats
 router.get('/admin/stats', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -309,7 +308,7 @@ router.delete('/admin/users/:id', (req, res) => __awaiter(void 0, void 0, void 0
 router.get('/admin/schedules', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const schedules = yield prisma_1.prisma.schedule.findMany({
-            orderBy: { startTime: 'desc' },
+            orderBy: { id: 'desc' },
             include: {
                 masyarakat: { select: { id: true, name: true, email: true, kabupaten: true, kecamatan: true } },
                 participants: {

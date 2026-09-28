@@ -13,6 +13,7 @@ import {
   Loader2,
   CheckCircle2
 } from "lucide-react";
+import { getBackendUrl } from "@/context/utils";
 
 export default function StreamingSettingsPage() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function StreamingSettingsPage() {
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/settings/streaming`, {
+      const res = await fetch(`${getBackendUrl()}/api/admin/settings/streaming`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -64,7 +65,7 @@ export default function StreamingSettingsPage() {
 
     try {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/settings/streaming`, {
+      const res = await fetch(`${getBackendUrl()}/api/admin/settings/streaming`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

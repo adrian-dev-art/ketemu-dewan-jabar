@@ -14,7 +14,6 @@ import {
   Inbox,
   AlertCircle,
   Check,
-  HelpCircle,
   FileText,
   Film,
   MessageSquare,
@@ -188,7 +187,7 @@ export default function DewanDashboard() {
   return (
     <ProtectedRoute allowedRoles={["dewan", "admin"]}>
       <div className="flex flex-col min-h-screen">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 w-full">
           
           {/* Header */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -342,16 +341,13 @@ export default function DewanDashboard() {
             </div>
           )}
 
-          {/* Main Layout: 9 cols list + 3 cols sidebar */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
-            {/* Left Column: Schedules or Aspirasi List */}
-            <div className="lg:col-span-9 space-y-4">
+          {/* Main Layout: Full Width Data Table */}
+          <div className="space-y-4">
               
               {/* Filter Tabs and Search Bar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                 {/* Segmented Filter Pills */}
-                <div className="inline-flex items-center gap-1 p-1 bg-muted/50 border border-border/80 rounded-xl shadow-2xs overflow-x-auto">
+                <div className="inline-flex items-center gap-1 p-1 bg-muted/50 border border-border/80 rounded-xl shadow-2xs overflow-x-auto no-scrollbar">
                   <button
                     type="button"
                     onClick={() => setSelectedFilter("all")}
@@ -435,7 +431,7 @@ export default function DewanDashboard() {
 
               {/* VIEW 1: JIKA MEMILIH TAB E-ASPIRASI DAPIL */}
               {selectedFilter === "aspirasi" ? (
-                <div className="space-y-3">
+                <div>
                   {filteredAspirasiList.length === 0 ? (
                     <div className="py-12 text-center bg-card border border-dashed border-border rounded-2xl p-6">
                       <FileText size={32} className="mx-auto mb-2 text-muted-foreground opacity-30" />
@@ -445,99 +441,137 @@ export default function DewanDashboard() {
                       </p>
                     </div>
                   ) : (
-                    filteredAspirasiList.map((a) => {
-                      const hasVideo = a.materiType === "video";
-                      const hasMateri = !!a.materiUrl;
-                      const isCompleted = a.status === "selesai";
+                    <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
+                      <div className="overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-border bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                              <th className="py-3 px-4 min-w-[190px]">Tiket &amp; Pemohon</th>
+                              <th className="py-3 px-4 min-w-[260px]">Pokok Aspirasi</th>
+                              <th className="py-3 px-4 min-w-[190px]">Telaah AI &amp; Berkas</th>
+                              <th className="py-3 px-4 min-w-[120px]">Status</th>
+                              <th className="py-3 px-4 min-w-[140px] text-right">Aksi</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border/60 text-xs">
+                            {filteredAspirasiList.map((a) => {
+                              const hasVideo = a.materiType === "video";
+                              const hasMateri = !!a.materiUrl;
+                              const isCompleted = a.status === "selesai";
 
-                      return (
-                        <div
-                          key={a.id}
-                          className="bg-card border border-border hover:border-emerald-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs transition-all"
-                        >
-                          <div className="space-y-2 min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-mono font-black text-primary">
-                                {a.ticketNumber}
-                              </span>
-                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                                {a.dapil.split("(")[0].trim()}
-                              </span>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                                isCompleted
-                                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-                                  : a.status === "tindak_lanjut"
-                                  ? "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20"
-                                  : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                              }`}>
-                                {a.status === "selesai"
-                                  ? "Tuntas Terjawab"
-                                  : a.status === "tindak_lanjut"
-                                  ? "Ditindaklanjuti"
-                                  : a.status === "diteruskan"
-                                  ? "Di Meja Dewan"
-                                  : "Verifikasi"}
-                              </span>
+                              return (
+                                <tr key={a.id} className="hover:bg-muted/30 transition-colors group">
+                                  {/* Col 1 */}
+                                  <td className="py-3.5 px-4 align-middle">
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 ring-1 ring-emerald-500/20">
+                                        <FileText size={15} />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <span className="font-mono font-bold text-primary text-[11px]">
+                                          {a.ticketNumber}
+                                        </span>
+                                        <p className="font-bold text-foreground text-xs truncate max-w-[150px]">
+                                          {a.masyarakat?.name || "Warga Konstituen"}
+                                        </p>
+                                        <span className="text-[10px] text-muted-foreground truncate block">
+                                          {a.dapil?.split("(")[0]?.trim()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
 
-                              {a.aiRecommendation && (
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border flex items-center gap-1 ${
-                                  a.aiRecommendation.toLowerCase().includes('diteruskan')
-                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
-                                    : a.aiRecommendation.toLowerCase().includes('klarifikasi')
-                                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
-                                    : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20'
-                                }`}>
-                                  <Sparkles size={11} />
-                                  <span>Telaah AI: {a.aiRecommendation}</span>
-                                </span>
-                              )}
-                            </div>
+                                  {/* Col 2 */}
+                                  <td className="py-3.5 px-4 align-middle">
+                                    <div className="max-w-[280px]">
+                                      <p className="font-semibold text-foreground line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        {a.judul}
+                                      </p>
+                                      <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                                        {a.deskripsi}
+                                      </p>
+                                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
+                                        {a.kategori}
+                                      </span>
+                                    </div>
+                                  </td>
 
-                            <div>
-                              <h4 className="text-sm font-bold text-foreground leading-snug">
-                                {a.judul}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                                {a.deskripsi}
-                              </p>
-                            </div>
+                                  {/* Col 3 */}
+                                  <td className="py-3.5 px-4 align-middle">
+                                    <div className="space-y-1.5">
+                                      {a.aiRecommendation ? (
+                                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                          a.aiRecommendation.toLowerCase().includes('diteruskan')
+                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
+                                            : a.aiRecommendation.toLowerCase().includes('klarifikasi')
+                                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20'
+                                        }`}>
+                                          <Sparkles size={11} className="shrink-0" />
+                                          <span className="truncate max-w-[160px]">{a.aiRecommendation}</span>
+                                        </div>
+                                      ) : (
+                                        <span className="text-[11px] text-muted-foreground">-</span>
+                                      )}
 
-                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                              <span className="font-semibold text-foreground">
-                                Pemohon: {a.masyarakat?.name || "Warga Konstituen"}
-                              </span>
-                              <span>•</span>
-                              <span>{a.kategori}</span>
-                              {hasMateri && (
-                                <>
-                                  <span>•</span>
-                                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
-                                    {hasVideo ? <Film size={12} /> : <FileCheck2 size={12} />}
-                                    <span>{hasVideo ? "Materi Video MP4" : "Dokumen Materi"}</span>
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
+                                      {hasMateri && (
+                                        <div className="flex items-center gap-1 font-semibold text-[11px] text-emerald-600 dark:text-emerald-400">
+                                          {hasVideo ? <Film size={12} /> : <FileCheck2 size={12} />}
+                                          <span>{hasVideo ? "Video MP4" : "Dokumen Materi"}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </td>
 
-                          <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedAspirasiForModal(a)}
-                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-                            >
-                              <MessageSquare size={13} />
-                              <span>Tinjau &amp; Tanggapi</span>
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
+                                  {/* Col 4 */}
+                                  <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                                      isCompleted
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                        : a.status === "tindak_lanjut"
+                                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                                    }`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${
+                                        isCompleted ? "bg-emerald-500" : a.status === "tindak_lanjut" ? "bg-blue-500" : "bg-amber-500 animate-pulse"
+                                      }`} />
+                                      {a.status === "selesai"
+                                        ? "Tuntas"
+                                        : a.status === "tindak_lanjut"
+                                        ? "Ditindaklanjuti"
+                                        : a.status === "diteruskan"
+                                        ? "Di Meja Dewan"
+                                        : "Verifikasi"}
+                                    </span>
+                                  </td>
+
+                                  {/* Col 5 */}
+                                  <td className="py-3.5 px-4 align-middle text-right whitespace-nowrap">
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedAspirasiForModal(a)}
+                                      className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all shadow-2xs inline-flex items-center gap-1.5"
+                                    >
+                                      <MessageSquare size={13} />
+                                      <span>Tanggapi</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="px-4 py-2.5 bg-muted/20 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Menampilkan {filteredAspirasiList.length} aspirasi dapil</span>
+                        <span className="text-[11px]">Dianalisis otomatis dengan AI Dewan Jabar</span>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
                 /* VIEW 2: LIST AUDIENSI (JADWAL TEMU LIVEKIT) */
-                <div className="space-y-3">
+                <div>
                   {filteredSchedules.length === 0 ? (
                     <div className="py-12 text-center bg-card border border-dashed border-border rounded-2xl p-6">
                       <Inbox size={32} className="mx-auto mb-2 text-muted-foreground opacity-30" />
@@ -549,146 +583,178 @@ export default function DewanDashboard() {
                       </p>
                     </div>
                   ) : (
-                    filteredSchedules.map((s) => {
-                      const isPending = s.status === "pending";
-                      const isConfirmed = s.status === "confirmed";
-                      const progress = s.followUp?.progressPercent || 0;
+                    <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
+                      <div className="overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-border bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                              <th className="py-3 px-4 min-w-[200px]">Pemohon</th>
+                              <th className="py-3 px-4 min-w-[240px]">Pokok Bahasan</th>
+                              <th className="py-3 px-4 min-w-[170px]">Jadwal Sesi</th>
+                              <th className="py-3 px-4 min-w-[110px]">Status</th>
+                              <th className="py-3 px-4 min-w-[220px] text-right">Aksi &amp; Disposisi</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border/60 text-xs">
+                            {filteredSchedules.map((s) => {
+                              const isPending = s.status === "pending";
+                              const isConfirmed = s.status === "confirmed";
+                              const progress = s.followUp?.progressPercent || 0;
 
-                      return (
-                        <div
-                          key={s.id}
-                          className="bg-card border border-border hover:border-border/80 rounded-2xl p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs transition-all"
-                        >
-                          <div className="flex items-start gap-3.5 min-w-0">
-                            <div className="w-10 h-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
-                              {s.masyarakat?.name ? s.masyarakat.name.charAt(0).toUpperCase() : "W"}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <span className="text-xs font-bold text-foreground">
-                                  {s.masyarakat?.name || "Warga Konstituen"}
-                                </span>
-                                <span className="text-xs text-muted-foreground font-mono">#{s.id}</span>
-                                <span
-                                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                                    isConfirmed
-                                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                      : isPending
-                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                                  }`}
+                              return (
+                                <tr
+                                  key={s.id}
+                                  className="hover:bg-muted/30 transition-colors group"
                                 >
-                                  {isConfirmed ? "Disetujui" : isPending ? "Menunggu" : "Ditolak"}
-                                </span>
-                              </div>
+                                  {/* Col 1: Pemohon */}
+                                  <td className="py-3.5 px-4 align-middle">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 ring-1 ring-primary/20">
+                                        {s.masyarakat?.name ? s.masyarakat.name.charAt(0).toUpperCase() : "W"}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-bold text-foreground">
+                                            {s.masyarakat?.name || "Warga Konstituen"}
+                                          </span>
+                                          <span className="text-[10px] text-muted-foreground font-mono">
+                                            #{s.id}
+                                          </span>
+                                        </div>
+                                        <span className="text-[11px] text-muted-foreground flex items-center gap-1 truncate mt-0.5">
+                                          {s.masyarakat?.kabupaten || "Jawa Barat"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
 
-                              <p className="text-xs text-foreground font-medium truncate mb-1">
-                                {s.title || "Diskusi Audiensi"}
-                              </p>
+                                  {/* Col 2: Pokok Bahasan */}
+                                  <td className="py-3.5 px-4 align-middle">
+                                    <div className="max-w-[280px]">
+                                      <p className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                                        {s.title || "Diskusi Audiensi"}
+                                      </p>
+                                      <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                                        {s.description || "Permohonan dialog & tatap muka virtual"}
+                                      </p>
+                                    </div>
+                                  </td>
 
-                              <div className="flex items-center gap-3 text-[11px] text-muted-foreground flex-wrap">
-                                <span>{s.masyarakat?.kabupaten || "Jawa Barat"}</span>
-                                <span>•</span>
-                                <div className="flex items-center gap-1">
-                                  <Clock size={12} />
-                                  <span>
-                                    {new Date(s.startTime).toLocaleString("id-ID", {
-                                      dateStyle: "medium",
-                                      timeStyle: "short",
-                                    })}{" "}
-                                    WIB
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                  {/* Col 3: Jadwal */}
+                                  <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                                        <Clock size={13} />
+                                      </div>
+                                      <div className="text-[11px] leading-tight">
+                                        <span className="font-semibold text-foreground block">
+                                          {new Date(s.startTime).toLocaleDateString("id-ID", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                          })}
+                                        </span>
+                                        <span className="text-muted-foreground">
+                                          {new Date(s.startTime).toLocaleTimeString("id-ID", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}{" "}
+                                          WIB
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
 
-                          <div className="flex items-center gap-2 shrink-0 justify-end">
-                            {isPending && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => updateStatus(s.id, "rejected")}
-                                  className="h-9 px-3 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center gap-1.5"
-                                >
-                                  <X size={13} />
-                                  <span>Tolak</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateStatus(s.id, "confirmed")}
-                                  className="h-9 px-3.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary/90 transition-colors flex items-center gap-1.5"
-                                >
-                                  <Check size={13} />
-                                  <span>Setujui</span>
-                                </button>
-                              </>
-                            )}
+                                  {/* Col 4: Status */}
+                                  <td className="py-3.5 px-4 align-middle whitespace-nowrap">
+                                    {isConfirmed ? (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        Disetujui
+                                      </span>
+                                    ) : isPending ? (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                        Menunggu
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                        Ditolak
+                                      </span>
+                                    )}
+                                  </td>
 
-                            {isConfirmed && (
-                              <button
-                                type="button"
-                                onClick={() => router.push(`/room/${s.id}`)}
-                                className="h-9 px-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs transition-colors flex items-center gap-1.5"
-                              >
-                                <Video size={13} />
-                                <span>Gabung</span>
-                              </button>
-                            )}
+                                  {/* Col 5: Aksi */}
+                                  <td className="py-3.5 px-4 align-middle text-right whitespace-nowrap">
+                                    <div className="inline-flex items-center justify-end gap-1.5">
+                                      {isPending && (
+                                        <>
+                                          <button
+                                            type="button"
+                                            onClick={() => updateStatus(s.id, "rejected")}
+                                            className="h-8 px-2.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900/50 transition-all flex items-center gap-1"
+                                            title="Tolak Audiensi"
+                                          >
+                                            <X size={13} />
+                                            <span>Tolak</span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => updateStatus(s.id, "confirmed")}
+                                            className="h-8 px-3 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-2xs transition-all flex items-center gap-1"
+                                            title="Setujui Audiensi"
+                                          >
+                                            <Check size={13} />
+                                            <span>Setujui</span>
+                                          </button>
+                                        </>
+                                      )}
 
-                            <button
-                              type="button"
-                              onClick={() => setFollowUpScheduleId(s.id)}
-                              className="h-9 px-3.5 rounded-xl font-semibold text-xs border border-border bg-card hover:bg-muted text-foreground transition-all flex items-center gap-1.5"
-                            >
-                              <FileCheck2 size={13} className="text-primary" />
-                              <span>Disposisi</span>
-                              {progress > 0 && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">
-                                  {progress}%
-                                </span>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
+                                      {isConfirmed && (
+                                        <button
+                                          type="button"
+                                          onClick={() => router.push(`/room/${s.id}`)}
+                                          className="h-8 px-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow-2xs transition-all flex items-center gap-1.5"
+                                          title="Masuk Ruang Temu Virtual"
+                                        >
+                                          <Video size={13} />
+                                          <span>Gabung</span>
+                                        </button>
+                                      )}
+
+                                      <button
+                                        type="button"
+                                        onClick={() => setFollowUpScheduleId(s.id)}
+                                        className="h-8 px-3 rounded-lg font-semibold text-xs border border-border bg-card hover:bg-muted text-foreground transition-all flex items-center gap-1.5"
+                                        title="Kirim Disposisi ke Komisi / OPD"
+                                      >
+                                        <FileCheck2 size={13} className="text-primary" />
+                                        <span>Disposisi</span>
+                                        {progress > 0 && (
+                                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">
+                                            {progress}%
+                                          </span>
+                                        )}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Table Footer info */}
+                      <div className="px-4 py-2.5 bg-muted/20 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Menampilkan {filteredSchedules.length} permohonan audiensi</span>
+                        <span className="text-[11px]">Sinkronisasi data langsung via WebSocket</span>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Right Column: Informative Sidebar */}
-            <div className="lg:col-span-3 space-y-4">
-              {/* Important Info Card */}
-              <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-                <div className="flex items-center gap-2.5 mb-3 text-primary">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <AlertCircle size={18} />
-                  </div>
-                  <h3 className="text-sm font-bold text-foreground">Dua Pintu Masuk Aspirasi</h3>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  <strong>E-Audiensi:</strong> Dialog langsung via video call sesuai slot jadwal Anda.<br />
-                  <strong>E-Aspirasi:</strong> Warga mengirimkan berkas/video usulan dari Dapil yang dapat ditanggapi langsung secara resmi di platform.
-                </p>
-              </div>
-
-              {/* Workflow Guide Card */}
-              <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <HelpCircle size={14} className="text-primary" />
-                  Alur Penanganan Aspirasi
-                </h4>
-                <ol className="text-xs text-muted-foreground space-y-2.5 list-decimal list-inside leading-relaxed">
-                  <li><strong className="text-foreground">Respon Cepat:</strong> Setujui atau tolak agenda audiensi dalam 1x24 jam.</li>
-                  <li><strong className="text-foreground">Tinjau E-Aspirasi:</strong> Putar video materi atau baca dokumen usulan dari warga di Dapil Anda.</li>
-                  <li><strong className="text-foreground">Beri Tanggapan:</strong> Tuliskan tanggapan resmi dan arahkan tindak lanjut rekomendasi dewan.</li>
-                </ol>
-              </div>
-            </div>
-
           </div>
         </div>
 

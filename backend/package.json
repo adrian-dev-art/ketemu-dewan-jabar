@@ -25,6 +25,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.15.0",
+    "mammoth": "^1.12.3",
     "nodemailer": "^10.0.10",
     "socket.io": "^4.7.5",
     "whisper-node": "^1.1.1",

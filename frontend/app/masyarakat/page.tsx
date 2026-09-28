@@ -283,7 +283,7 @@ function MasyarakatDashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 w-full">
         <div aria-live="polite" className="sr-only">{announcement}</div>
         
         {/* Header */}

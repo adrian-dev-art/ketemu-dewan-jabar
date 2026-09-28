@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
 import { SettingsProvider } from "@/context/SettingsContext";
-import RoomLayoutWrapper from "@/components/RoomLayoutWrapper";
-import BrandingHeader from "@/components/BrandingHeader";
+import AppNavigationShell from "@/components/AppNavigationShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className="antialiased min-h-screen flex flex-col bg-background text-foreground">
+      <body className="antialiased min-h-screen bg-background text-foreground">
         <AuthProvider>
           <SettingsProvider>
             <a 
@@ -27,13 +26,9 @@ export default function RootLayout({
               Langsung ke konten utama
             </a>
             
-            <RoomLayoutWrapper>
-              <BrandingHeader />
-            </RoomLayoutWrapper>
-
-            <main id="main-content" className="flex-grow flex flex-col">
+            <AppNavigationShell>
               {children}
-            </main>
+            </AppNavigationShell>
           </SettingsProvider>
         </AuthProvider>
       </body>

@@ -7,6 +7,7 @@ import {
   ShieldCheck, AlertCircle, Sparkles, Eye, Trash2, Clock
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { getBackendUrl } from "@/context/utils";
 
 export interface FollowUpData {
   id?: number;
@@ -101,7 +102,7 @@ export default function FollowUpTimelineModal({
   onUpdate
 }: FollowUpTimelineModalProps) {
   const { token, user } = useAuth();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+  const backendUrl = getBackendUrl();
 
   const [saving, setSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<string>("");

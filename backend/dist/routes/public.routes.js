@@ -305,7 +305,7 @@ router.get('/public/transparansi-tindak-lanjut', (req, res) => __awaiter(void 0,
         let schedules = [];
         try {
             schedules = yield prisma_1.prisma.schedule.findMany({
-                orderBy: { startTime: 'desc' },
+                orderBy: { id: 'desc' },
                 include: {
                     masyarakat: {
                         select: {
@@ -524,6 +524,91 @@ router.get('/public/transparansi-tindak-lanjut', (req, res) => __awaiter(void 0,
     catch (err) {
         console.error("Error fetching public transparency letters:", err);
         res.status(500).json({ error: "Gagal memuat portal transparansi tindak lanjut" });
+    }
+}));
+// GET /api/public/aspirasi/analitik (Rekap analitik agregat E-Aspirasi untuk publik / landing page)
+router.get('/public/aspirasi/analitik', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allAspirasi = yield prisma_1.prisma.aspirasi.findMany({
+            select: {
+                id: true,
+                kategori: true,
+                status: true,
+                dapil: true,
+                kabupatenKota: true,
+                createdAt: true,
+                submittedAt: true,
+                completedAt: true
+            }
+        });
+        const total = allAspirasi.length;
+        const kategoriMap = {};
+        for (const a of allAspirasi) {
+            const k = a.kategori || 'Lainnya';
+            kategoriMap[k] = (kategoriMap[k] || 0) + 1;
+        }
+        const statusMap = {};
+        for (const a of allAspirasi) {
+            const s = a.status || 'diajukan';
+            statusMap[s] = (statusMap[s] || 0) + 1;
+        }
+        const dapilMap = {};
+        for (const a of allAspirasi) {
+            const d = a.dapil || 'Tidak Diketahui';
+            const dapilLabel = d.split('(')[0].trim();
+            dapilMap[dapilLabel] = (dapilMap[dapilLabel] || 0) + 1;
+        }
+        const byDapil = Object.entries(dapilMap)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .map(([dapil, jumlah]) => ({ dapil, jumlah }));
+        const kabMap = {};
+        for (const a of allAspirasi) {
+            const k = a.kabupatenKota || 'Tidak Diketahui';
+            kabMap[k] = (kabMap[k] || 0) + 1;
+        }
+        const byKabupaten = Object.entries(kabMap)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([kabupaten, jumlah]) => ({ kabupaten, jumlah }));
+        const now = new Date();
+        const trendBulanan = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const count = allAspirasi.filter(a => {
+                const aDate = new Date(a.createdAt);
+                return aDate.getFullYear() === d.getFullYear() && aDate.getMonth() === d.getMonth();
+            }).length;
+            trendBulanan.push({
+                bulan: `${d.toLocaleString('id-ID', { month: 'short' })} ${d.getFullYear()}`,
+                jumlah: count
+            });
+        }
+        const selesaiList = allAspirasi.filter(a => a.status === 'selesai' && a.completedAt);
+        let rataWaktuSelesaiHari = 0;
+        if (selesaiList.length > 0) {
+            const totalMs = selesaiList.reduce((acc, a) => acc + (new Date(a.completedAt).getTime() - new Date(a.submittedAt || a.createdAt).getTime()), 0);
+            rataWaktuSelesaiHari = Math.round(totalMs / selesaiList.length / 86400000);
+        }
+        const thisMonth = allAspirasi.filter(a => {
+            const d = new Date(a.createdAt);
+            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        res.json({
+            total,
+            totalSelesai: statusMap['selesai'] || 0,
+            totalBulanIni: thisMonth,
+            rataWaktuSelesaiHari,
+            byKategori: Object.entries(kategoriMap).sort((a, b) => b[1] - a[1]).map(([kategori, jumlah]) => ({ kategori, jumlah })),
+            byStatus: Object.entries(statusMap).map(([status, jumlah]) => ({ status, jumlah })),
+            byDapil,
+            byKabupaten,
+            trendBulanan
+        });
+    }
+    catch (err) {
+        console.error("Error fetching public aspirasi analitik:", err);
+        res.status(500).json({ error: "Gagal mengambil data analitik aspirasi publik" });
     }
 }));
 exports.default = router;

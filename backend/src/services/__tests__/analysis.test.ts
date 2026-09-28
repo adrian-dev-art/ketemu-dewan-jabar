@@ -5,7 +5,7 @@ jest.mock("fs");
 describe('processMeetingAudio', () => {
   let processMeetingAudio: any;
   let mockUpdate: jest.Mock;
-  let mockGenerateContent: jest.Mock;
+  let mockGenerateContentStream: jest.Mock;
   let mockUploadFile: jest.Mock;
   let mockDeleteFile: jest.Mock;
   let mockExistsSync: jest.Mock;
@@ -16,7 +16,7 @@ describe('processMeetingAudio', () => {
 
     // 1. Setup mock functions
     mockUpdate = jest.fn().mockResolvedValue({});
-    mockGenerateContent = jest.fn();
+    mockGenerateContentStream = jest.fn();
     mockUploadFile = jest.fn();
     mockDeleteFile = jest.fn();
     mockExistsSync = jest.fn().mockReturnValue(true);
@@ -31,7 +31,7 @@ describe('processMeetingAudio', () => {
     jest.doMock("@google/generative-ai", () => ({
       GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
         getGenerativeModel: jest.fn(() => ({
-          generateContent: mockGenerateContent,
+          generateContentStream: mockGenerateContentStream,
         })),
       })),
     }));
@@ -60,22 +60,23 @@ describe('processMeetingAudio', () => {
       file: { uri: 'file-uri', mimeType: 'audio/wav', name: 'file-name' }
     });
 
-    const mockAIResponse = {
-      response: {
-        text: () => JSON.stringify({
-          transcription: "Halo Dunia",
-          analysis: {
-            summary: "Pertemuan membahas dunia",
-            sentiment: "Positif",
-            topics: ["Dunia"],
-            actionItems: ["Terus hidup"],
-            citizenSatisfaction: 9,
-            dewanResponsiveness: 9
-          }
-        })
+    const jsonString = JSON.stringify({
+      transcription: "Halo Dunia",
+      analysis: {
+        summary: "Pertemuan membahas dunia",
+        sentiment: "Positif",
+        topics: ["Dunia"],
+        actionItems: ["Terus hidup"],
+        citizenSatisfaction: 9,
+        dewanResponsiveness: 9
       }
-    };
-    mockGenerateContent.mockResolvedValue(mockAIResponse);
+    });
+
+    mockGenerateContentStream.mockResolvedValue({
+      stream: (async function* () {
+        yield { text: () => jsonString };
+      })()
+    });
 
     await processMeetingAudio(scheduleId, audioPath);
 
@@ -91,22 +92,28 @@ describe('processMeetingAudio', () => {
         transcription: "Halo Dunia",
         analysis: expect.any(Object),
         isTranscribing: false,
-        isAnalyzing: false
+        isAnalyzing: false,
+        transcriptionProgress: 100,
+        transcriptionStatus: "Selesai"
       },
     });
 
     expect(mockUploadFile).toHaveBeenCalled();
-    expect(mockGenerateContent).toHaveBeenCalled();
+    expect(mockGenerateContentStream).toHaveBeenCalled();
   });
 
   it('should handle missing audio file', async () => {
     mockExistsSync.mockReturnValue(false);
 
-    await processMeetingAudio(scheduleId, audioPath);
+    await expect(processMeetingAudio(scheduleId, audioPath)).rejects.toThrow('Audio file not found');
 
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: scheduleId },
-      data: { isTranscribing: false, isAnalyzing: false },
+      data: {
+        isTranscribing: false,
+        isAnalyzing: false,
+        transcriptionStatus: expect.stringContaining("Gagal: Audio file not found")
+      },
     });
   });
 
@@ -115,18 +122,21 @@ describe('processMeetingAudio', () => {
       file: { uri: 'file-uri', mimeType: 'audio/wav', name: 'file-name' }
     });
 
-    const mockAIResponse = {
-      response: {
-        text: () => "Invalid JSON Response"
-      }
-    };
-    mockGenerateContent.mockResolvedValue(mockAIResponse);
+    mockGenerateContentStream.mockResolvedValue({
+      stream: (async function* () {
+        yield { text: () => "Invalid JSON Response" };
+      })()
+    });
 
-    await processMeetingAudio(scheduleId, audioPath);
+    await expect(processMeetingAudio(scheduleId, audioPath)).rejects.toThrow('Failed to parse AI response');
 
     expect(mockUpdate).toHaveBeenCalledWith({
       where: { id: scheduleId },
-      data: { isTranscribing: false, isAnalyzing: false },
+      data: {
+        isTranscribing: false,
+        isAnalyzing: false,
+        transcriptionStatus: expect.stringContaining("Gagal: Failed to parse AI response")
+      },
     });
   });
 });
