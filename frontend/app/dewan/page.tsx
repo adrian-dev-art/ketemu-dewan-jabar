@@ -187,24 +187,24 @@ export default function DewanDashboard() {
   return (
     <ProtectedRoute allowedRoles={["dewan", "admin"]}>
       <div className="flex flex-col min-h-screen">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 w-full">
+        <div className="max-w-[1400px] mx-auto px-0.5 sm:px-4 md:px-6 py-2 sm:py-6 w-full">
           
           {/* Header */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">
+              <span className="text-[11px] sm:text-xs font-bold text-primary uppercase tracking-wider">
                 Panel Kerja Kedewanan
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight mt-0.5">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground tracking-tight mt-0.5">
                 Dasbor Legislator Jawa Barat
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-relaxed">
                 Kelola permohonan E-Audiensi tatap muka virtual dan tindak lanjuti E-Aspirasi warga di Dapil Anda.
               </p>
             </div>
 
             {user?.dapil && (
-              <div className="px-3.5 py-2 bg-muted/40 border border-border rounded-xl text-xs flex items-center gap-2 self-start sm:self-center">
+              <div className="px-3 py-1.5 sm:px-3.5 sm:py-2 bg-muted/40 border border-border rounded-xl text-xs flex items-center gap-2 self-start sm:self-center shrink-0">
                 <span className="font-bold text-muted-foreground">Wilayah:</span>
                 <span className="font-black text-foreground">{user.dapil}</span>
               </div>
@@ -212,115 +212,115 @@ export default function DewanDashboard() {
           </div>
 
           {/* 5 KPI Cards Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5 mb-5 sm:mb-6">
             <button
               type="button"
               onClick={() => setSelectedFilter("all")}
-              className={`p-4 rounded-2xl border text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all ${
                 selectedFilter === "all"
                   ? "bg-card border-primary shadow-xs ring-2 ring-primary/20"
                   : "bg-card border-border hover:border-border/80 shadow-xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-muted-foreground">Semua Audiensi</span>
-                <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                  <Calendar size={15} />
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground truncate">Semua Audiensi</span>
+                <div className="p-1 sm:p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
+                  <Calendar size={14} />
                 </div>
               </div>
-              <p className="text-2xl font-black text-foreground">{stats.total}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Agenda temu masuk</p>
+              <p className="text-xl sm:text-2xl font-black text-foreground">{stats.total}</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Agenda temu masuk</p>
             </button>
 
             <button
               type="button"
               onClick={() => setSelectedFilter("pending")}
-              className={`p-4 rounded-2xl border text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all ${
                 selectedFilter === "pending"
                   ? "bg-amber-500/5 border-amber-500 shadow-xs ring-2 ring-amber-500/20"
                   : "bg-card border-border hover:border-border/80 shadow-xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Butuh Respon</span>
-                <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                  <Clock size={15} />
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-amber-600 dark:text-amber-400 truncate">Butuh Respon</span>
+                <div className="p-1 sm:p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                  <Clock size={14} />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <p className="text-2xl font-black text-foreground">{stats.pending}</p>
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <p className="text-xl sm:text-2xl font-black text-foreground">{stats.pending}</p>
                 {stats.pending > 0 && (
-                  <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[10px] font-bold animate-pulse">
+                  <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[9px] sm:text-[10px] font-bold animate-pulse">
                     Tindakan
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Konfirmasi audiensi</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Konfirmasi audiensi</p>
             </button>
 
             <button
               type="button"
               onClick={() => setSelectedFilter("confirmed")}
-              className={`p-4 rounded-2xl border text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all ${
                 selectedFilter === "confirmed"
                   ? "bg-blue-500/5 border-blue-500 shadow-xs ring-2 ring-blue-500/20"
                   : "bg-card border-border hover:border-border/80 shadow-xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Dikonfirmasi</span>
-                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <CheckCircle2 size={15} />
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 truncate">Dikonfirmasi</span>
+                <div className="p-1 sm:p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                  <CheckCircle2 size={14} />
                 </div>
               </div>
-              <p className="text-2xl font-black text-foreground">{stats.confirmed}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Siap temu daring</p>
+              <p className="text-xl sm:text-2xl font-black text-foreground">{stats.confirmed}</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Siap temu daring</p>
             </button>
 
             <button
               type="button"
               onClick={() => setSelectedFilter("followup")}
-              className={`p-4 rounded-2xl border text-left transition-all ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all ${
                 selectedFilter === "followup"
                   ? "bg-emerald-500/5 border-emerald-500 shadow-xs ring-2 ring-emerald-500/20"
                   : "bg-card border-border hover:border-border/80 shadow-xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Disposisi OPD</span>
-                <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <FileCheck2 size={15} />
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 truncate">Disposisi OPD</span>
+                <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <FileCheck2 size={14} />
                 </div>
               </div>
-              <p className="text-2xl font-black text-foreground">{stats.withFollowUp}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Progres 4 tahap</p>
+              <p className="text-xl sm:text-2xl font-black text-foreground">{stats.withFollowUp}</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Progres 4 tahap</p>
             </button>
 
             {/* KARTU KE-5: E-ASPIRASI DAPIL */}
             <button
               type="button"
               onClick={() => setSelectedFilter("aspirasi")}
-              className={`p-4 rounded-2xl border text-left transition-all col-span-2 sm:col-span-1 ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all col-span-2 sm:col-span-1 ${
                 selectedFilter === "aspirasi"
                   ? "bg-emerald-500/10 border-emerald-500 shadow-xs ring-2 ring-emerald-500/20"
                   : "bg-card border-border hover:border-emerald-500/50 shadow-xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">E-Aspirasi Dapil</span>
-                <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                  <FileText size={15} />
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 truncate">E-Aspirasi Dapil</span>
+                <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 shrink-0">
+                  <FileText size={14} />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <p className="text-2xl font-black text-foreground">{stats.totalAspirasi}</p>
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <p className="text-xl sm:text-2xl font-black text-foreground">{stats.totalAspirasi}</p>
                 {stats.totalAspirasi > 0 && (
-                  <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded-md text-[10px] font-bold">
+                  <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded-md text-[9px] sm:text-[10px] font-bold">
                     Materi Masuk
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Video &amp; berkas konstituen</p>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Video & berkas warga</p>
             </button>
           </div>
 

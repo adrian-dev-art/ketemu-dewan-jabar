@@ -170,7 +170,7 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas & Kine
       </div>
 
       {/* ── 4 Metrik Utama Modern Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {[
           { 
             label: 'Total Aspirasi Warga', 
@@ -207,20 +207,20 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas & Kine
         ].map((card, i) => (
           <div 
             key={i} 
-            className={`relative p-5 rounded-3xl bg-card border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden bg-gradient-to-br ${card.gradient}`}
+            className={`relative p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-card border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden bg-gradient-to-br ${card.gradient}`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2.5 rounded-2xl border ${card.iconColor} group-hover:scale-110 transition-transform duration-300 shadow-xs`}>
-                <card.icon size={18} />
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border ${card.iconColor} group-hover:scale-110 transition-transform duration-300 shadow-xs`}>
+                <card.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
               </div>
-              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-[9px] sm:text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 sm:px-2 py-0.5 rounded-full">
                 {card.grow}
               </span>
             </div>
             <div>
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-0.5">{card.label}</p>
+              <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-0.5 truncate">{card.label}</p>
               <div className="flex items-baseline gap-1.5">
-                <h4 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight font-outfit">{card.value}</h4>
+                <h4 className="text-xl sm:text-3xl font-black text-foreground tracking-tight font-outfit">{card.value}</h4>
               </div>
             </div>
           </div>
@@ -228,89 +228,89 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas & Kine
       </div>
 
       {/* ── Grid Visual Chart Modern Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Topik Populer */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-5 border-b border-border/50 pb-3">
-            <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="p-1.5 sm:p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
               <MessageSquare size={16} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-foreground">Topik Populer</h3>
-              <p className="text-[10px] text-muted-foreground">Kategori isu paling sering diusulkan</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Topik Populer</h3>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Kategori isu paling sering diusulkan</p>
             </div>
           </div>
-          <div className="h-60 relative">
+          <div className="h-52 sm:h-60 relative">
             <Doughnut data={topicData} options={pieOptions} />
           </div>
         </div>
 
         {/* Tren Aktivitas Bulanan */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 lg:col-span-2">
-          <div className="flex items-center justify-between mb-5 border-b border-border/50 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 lg:col-span-2">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
                 <Activity size={16} />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm text-foreground">Tren Pertemuan &amp; Audiensi</h3>
-                <p className="text-[10px] text-muted-foreground">Volume sesi aspirasi digital 6 bulan terakhir</p>
+                <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Tren Pertemuan &amp; Audiensi</h3>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground">Volume sesi aspirasi digital 6 bulan terakhir</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+            <span className="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
               Meningkat 28%
             </span>
           </div>
-          <div className="h-60">
+          <div className="h-52 sm:h-60">
             <Line data={activityData} options={commonOptions} />
           </div>
         </div>
 
         {/* Ranking Komisi */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-5 border-b border-border/50 pb-3">
-            <div className="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="p-1.5 sm:p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20">
               <Award size={16} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-foreground">Aktivitas Komisi</h3>
-              <p className="text-[10px] text-muted-foreground">Distribusi sesi menurut komisi</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Aktivitas Komisi</h3>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Distribusi sesi menurut komisi</p>
             </div>
           </div>
-          <div className="h-56">
+          <div className="h-48 sm:h-56">
             <Bar data={komisiData} options={commonOptions} />
           </div>
         </div>
 
         {/* Ranking Dapil */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-5 border-b border-border/50 pb-3">
-            <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl border border-teal-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="p-1.5 sm:p-2 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl border border-teal-500/20">
               <MapPin size={16} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-foreground">Dapil Teraktif</h3>
-              <p className="text-[10px] text-muted-foreground">Tingkat partisipasi warga per dapil</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Dapil Teraktif</h3>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Tingkat partisipasi warga per dapil</p>
             </div>
           </div>
-          <div className="h-56">
+          <div className="h-48 sm:h-56">
             <Bar data={dapilData} options={commonOptions} />
           </div>
         </div>
 
         {/* Ranking Anggota */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-          <div className="flex items-center gap-3 mb-5 border-b border-border/50 pb-3">
-            <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="p-1.5 sm:p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20">
               <Users size={16} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-foreground">Legislator Teraktif</h3>
-              <p className="text-[10px] text-muted-foreground">Anggota dengan responsivitas tertinggi</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Legislator Teraktif</h3>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Anggota dengan responsivitas tertinggi</p>
             </div>
           </div>
-          <div className="h-56">
+          <div className="h-48 sm:h-56">
             <Bar 
               data={anggotaData} 
               options={{
@@ -322,19 +322,19 @@ export default function DashboardCharts({ title = "Rekapitulasi Aktivitas & Kine
         </div>
 
         {/* Ranking Organisasi Warga */}
-        <div className="p-6 bg-card rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 lg:col-span-3">
-          <div className="flex items-center justify-between mb-5 border-b border-border/50 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20">
+        <div className="p-4 sm:p-6 bg-card rounded-2xl sm:rounded-3xl border border-border/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 lg:col-span-3">
+          <div className="flex items-center justify-between mb-4 sm:mb-5 border-b border-border/50 pb-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20">
                 <Users size={16} />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm text-foreground">Partisipasi Organisasi &amp; Komunitas Warga</h3>
-                <p className="text-[10px] text-muted-foreground">Kelompok masyarakat dan lembaga konstituen terdaftar</p>
+                <h3 className="font-extrabold text-xs sm:text-sm text-foreground">Partisipasi Organisasi &amp; Komunitas Warga</h3>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground">Kelompok masyarakat dan lembaga konstituen terdaftar</p>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-center">
             <div className="h-52">
               <Bar 
                 data={organisasiData} 

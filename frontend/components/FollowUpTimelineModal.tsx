@@ -334,46 +334,46 @@ export default function FollowUpTimelineModal({
   const currentPercent = calculateProgress(formData);
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[110] flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-card border border-border w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[110] flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-card border border-border w-full max-w-4xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[96vh] sm:max-h-[92vh]">
         
-        <div className="px-6 sm:px-8 py-5 border-b border-border bg-gradient-to-r from-card via-card to-primary/5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-black shrink-0">
-              <FileText size={22} />
+        <div className="px-4 sm:px-8 py-3.5 sm:py-5 border-b border-border bg-gradient-to-r from-card via-card to-primary/5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-black shrink-0">
+              <FileText size={18} className="sm:w-[22px] sm:h-[22px]" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
                   Tindak Lanjut Aspirasi
                 </span>
-                <span className="text-xs text-muted-foreground font-mono font-semibold">
+                <span className="text-[10px] sm:text-xs text-muted-foreground font-mono font-semibold">
                   #ASP-{schedule.id}
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase ${
                   formData.status === 'selesai' ? 'bg-emerald-500/15 text-emerald-600' : 'bg-blue-500/15 text-blue-600'
                 }`}>
                   {formData.status === 'selesai' ? 'Tuntas 100%' : 'Sedang Diproses'}
                 </span>
               </div>
-              <h3 className="text-lg sm:text-xl font-black tracking-tight text-foreground line-clamp-1 mt-0.5">
+              <h3 className="text-sm sm:text-xl font-black tracking-tight text-foreground line-clamp-1 mt-0.5">
                 {schedule.title || "Audiensi Aspirasi"}
               </h3>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 ml-2">
             <button
               onClick={onClose}
-              className="p-2 hover:bg-muted rounded-xl text-muted-foreground hover:text-foreground transition-all"
+              className="p-1.5 sm:p-2 hover:bg-muted rounded-xl text-muted-foreground hover:text-foreground transition-all"
             >
-              <X size={20} />
+              <X size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
-        <div className="px-6 sm:px-8 py-3 bg-muted/20 border-b border-border flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
-          <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+        <div className="px-4 sm:px-8 py-2.5 sm:py-3 bg-muted/20 border-b border-border flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs shrink-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-muted-foreground text-[11px] sm:text-xs">
             <div>
               <span className="font-bold text-foreground">Pengusul:</span> {ormasName} ({citizenKab})
             </div>

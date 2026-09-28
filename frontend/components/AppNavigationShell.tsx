@@ -38,7 +38,7 @@ export default function AppNavigationShell({ children }: AppNavigationShellProps
         <FloatingSidebar />
         <main
           id="main-content"
-          className="flex-1 min-w-0 md:pl-[372px] md:pr-10 py-7 px-6 sm:px-8 transition-all duration-300"
+          className="flex-1 min-w-0 md:pl-[372px] md:pr-10 py-3.5 sm:py-7 px-3 sm:px-6 md:px-8 transition-all duration-300"
         >
           {children}
         </main>

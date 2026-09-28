@@ -230,18 +230,18 @@ export default function AspirasiForm({
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xs animate-in fade-in duration-300">
+    <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 shadow-xs animate-in fade-in duration-300">
       <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <FileText size={20} />
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <FileText size={18} className="sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <h3 className="text-lg font-black text-foreground tracking-tight">
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight truncate">
               Formulir E-Aspirasi Warga
             </h3>
-            <p className="text-xs text-muted-foreground">
-              Sampaikan usulan pembangunan, keluhan, dan laporan masyarakat disertai bukti berkas
+            <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+              Sampaikan usulan pembangunan, keluhan, dan laporan warga Jabar
             </p>
           </div>
         </div>
@@ -494,19 +494,19 @@ export default function AspirasiForm({
             )}
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5">
             <button
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl border border-border text-foreground text-xs font-bold hover:bg-muted transition-all"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-border text-foreground text-xs font-bold hover:bg-muted transition-all"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !selectedDapil || !judul.trim() || !deskripsi.trim()}
-              className={`inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all shadow-xs ${
+              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold rounded-xl transition-all shadow-xs ${
                 isSubmitting || !selectedDapil || !judul.trim() || !deskripsi.trim()
                   ? "bg-muted-foreground/30 text-muted-foreground cursor-not-allowed"
                   : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 shadow-sm"

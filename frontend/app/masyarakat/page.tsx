@@ -283,31 +283,31 @@ function MasyarakatDashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 w-full">
+      <div className="max-w-[1400px] mx-auto px-0.5 sm:px-4 md:px-6 py-2 sm:py-6 w-full">
         <div aria-live="polite" className="sr-only">{announcement}</div>
         
         {/* Header */}
-        <header className="mb-6">
+        <header className="mb-5 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold text-primary tracking-wide uppercase mb-1">
+              <p className="text-[11px] sm:text-xs font-semibold text-primary tracking-wide uppercase mb-1">
                 Layanan Partisipasi Publik Digital
               </p>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
                 Portal E-Aspirasi &amp; E-Audiensi Warga
               </h2>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
                 Suarakan usulan pembangunan, keluhan fasilitas publik, dan permohonan dialog langsung bersama 120 Anggota DPRD Provinsi Jawa Barat.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">E-Aspirasi Mandiri</p>
-                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{aspirasiList.length}</p>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto shrink-0">
+              <div className="px-3 sm:px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Aspirasi Mandiri</p>
+                <p className="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{aspirasiList.length}</p>
               </div>
-              <div className="px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">E-Audiensi Dewan</p>
-                <p className="text-lg font-extrabold text-primary">{schedules.length}</p>
+              <div className="px-3 sm:px-4 py-2 bg-card border border-border rounded-xl text-center shadow-xs">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">E-Audiensi Dewan</p>
+                <p className="text-base sm:text-lg font-extrabold text-primary">{schedules.length}</p>
               </div>
             </div>
           </div>
@@ -315,7 +315,7 @@ function MasyarakatDashboardContent() {
 
         {/* Announcement Banner */}
         {announcement && (
-          <div className="mb-6 p-3.5 bg-emerald-500/10 border border-emerald-500/25 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
+          <div className="mb-5 sm:mb-6 p-3.5 bg-emerald-500/10 border border-emerald-500/25 rounded-xl flex items-center gap-3 animate-in fade-in duration-200">
             <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 flex-grow">{announcement}</span>
             <button onClick={() => setAnnouncement("")} className="p-1 hover:bg-emerald-500/20 rounded text-emerald-700 dark:text-emerald-300">
@@ -340,8 +340,8 @@ function MasyarakatDashboardContent() {
         )}
 
         {/* ── Modern Tabs Navigation ── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6 border-b border-border pb-4">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 sm:mb-6 border-b border-border pb-3 sm:pb-4">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
             {/* TAB 1: E-ASPIRASI MANDIRI */}
             <button
               onClick={() => {
@@ -435,14 +435,14 @@ function MasyarakatDashboardContent() {
           </div>
 
           {/* Action Button: Ajukan Layanan Baru */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             {activeTab !== 'create' ? (
               <button
                 onClick={() => {
                   setActiveTab('create');
                   setCreateServiceType(null);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
               >
                 <PlusCircle size={15} />
                 <span>+ Ajukan Layanan Baru</span>
@@ -453,7 +453,7 @@ function MasyarakatDashboardContent() {
                   setActiveTab('aspirasi');
                   setCreateServiceType(null);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted transition-all shadow-xs active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted transition-all shadow-xs active:scale-95"
               >
                 <ArrowLeft size={14} />
                 <span>Kembali ke Daftar</span>

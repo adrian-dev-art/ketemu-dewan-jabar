@@ -405,33 +405,33 @@ export default function FloatingSidebar() {
       </aside>
 
       {/* ── Mobile Floating Pill Header ── */}
-      <div className="md:hidden sticky top-3 mx-4 z-40 mb-3">
-        <header className="h-14 rounded-2xl bg-card/90 backdrop-blur-xl border border-border/80 shadow-lg px-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+      <div className="md:hidden sticky top-2.5 mx-3 z-40 mb-2.5">
+        <header className="h-14 rounded-2xl bg-card/95 backdrop-blur-xl border border-border/80 shadow-lg px-3 sm:px-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 min-w-0">
             {settings.app_logo ? (
               <img
                 src={settings.app_logo}
                 alt="Logo"
-                className="h-8 w-auto object-contain"
+                className="h-7 w-auto object-contain shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-xs">
-                <span className="text-white font-bold text-sm">
+              <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-xs shrink-0">
+                <span className="text-white font-bold text-xs">
                   {settings.app_name?.charAt(0) || "D"}
                 </span>
               </div>
             )}
-            <span className="font-extrabold text-sm font-outfit text-foreground">
+            <span className="font-extrabold text-xs sm:text-sm font-outfit text-foreground truncate">
               {settings.app_name || "DPRD HUDANG"}
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <ThemeToggle />
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/60"
+              className="h-10 w-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/60 shrink-0"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -449,10 +449,10 @@ export default function FloatingSidebar() {
           />
 
           {/* Drawer Panel */}
-          <div className="relative my-4 ml-4 w-[310px] max-w-[85vw] bg-card/95 backdrop-blur-2xl rounded-[30px] h-[calc(100vh-2rem)] p-4.5 flex flex-col z-50 shadow-2xl border border-border overflow-hidden animate-in slide-in-from-left duration-200">
+          <div className="relative my-2.5 ml-2.5 w-[300px] max-w-[85vw] bg-card/95 backdrop-blur-2xl rounded-[24px] h-[calc(100dvh-1.25rem)] p-4 flex flex-col z-50 shadow-2xl border border-border overflow-hidden animate-in slide-in-from-left duration-200">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/50 z-10"
+              className="absolute top-3.5 right-3.5 h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/50 z-10"
               aria-label="Tutup menu"
             >
               <X size={16} />

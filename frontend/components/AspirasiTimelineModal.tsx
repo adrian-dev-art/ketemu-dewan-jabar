@@ -329,30 +329,30 @@ export default function AspirasiTimelineModal({
     : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm">
-      <div className="bg-card border border-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/70 backdrop-blur-sm">
+      <div className="bg-card border border-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden my-auto flex flex-col max-h-[96vh] sm:max-h-[92vh] animate-in zoom-in-95 duration-200">
         {/* Header Modal — gradient accent */}
-        <div className="relative px-6 py-4 border-b border-border flex items-center justify-between bg-gradient-to-r from-emerald-500/10 via-card to-card shrink-0">
+        <div className="relative px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex items-center justify-between bg-gradient-to-r from-emerald-500/10 via-card to-card shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
-          <div className="flex items-center gap-3 relative">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
-              <FileText size={20} />
+          <div className="flex items-center gap-2.5 sm:gap-3 relative min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+              <FileText size={18} className="sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-mono font-black text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-[10px] sm:text-xs font-mono font-black text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
                   {aspirasi.ticketNumber}
                 </span>
                 {getStatusBadge(aspirasi.status)}
               </div>
-              <h3 className="text-sm sm:text-base font-extrabold text-foreground leading-snug mt-0.5 line-clamp-1">
+              <h3 className="text-xs sm:text-base font-extrabold text-foreground leading-snug mt-0.5 line-clamp-1">
                 {aspirasi.judul}
               </h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors shrink-0"
+            className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors shrink-0 ml-2"
             title="Tutup"
           >
             <X size={18} />
@@ -360,7 +360,7 @@ export default function AspirasiTimelineModal({
         </div>
 
         {/* Modal Body (Scrollable) */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
           {/* Info Metadata Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
@@ -560,37 +560,37 @@ export default function AspirasiTimelineModal({
                   <div key={tahap.step} className="flex-1 flex flex-col items-center relative">
                     {/* Connector line (left side) */}
                     {idx > 0 && (
-                      <div className={`absolute left-0 top-[18px] w-1/2 h-0.5 ${
+                      <div className={`absolute left-0 top-[14px] sm:top-[18px] w-1/2 h-0.5 ${
                         isPassed ? 'bg-emerald-500' : 'bg-border'
                       }`} />
                     )}
                     {/* Connector line (right side) */}
                     {idx < 4 && (
-                      <div className={`absolute right-0 top-[18px] w-1/2 h-0.5 ${
+                      <div className={`absolute right-0 top-[14px] sm:top-[18px] w-1/2 h-0.5 ${
                         currentStepIndex > idx ? 'bg-emerald-500' : 'bg-border'
                       }`} />
                     )}
 
                     {/* Step circle */}
-                    <div className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
+                    <div className={`relative z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border-2 transition-all ${
                       isPassed && !isCurrent
                         ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/30'
                         : isCurrent
-                        ? 'bg-card border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-500/20'
+                        ? 'bg-card border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/25 ring-3 sm:ring-4 ring-emerald-500/20'
                         : 'bg-card border-border text-muted-foreground/40'
                     }`}>
                       {isPassed && !isCurrent ? (
-                        <CheckCircle2 size={16} />
+                        <CheckCircle2 size={13} className="sm:w-4 sm:h-4" />
                       ) : isCurrent ? (
-                        <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500 animate-pulse" />
                       ) : (
-                        <span className="text-[10px] font-black">{tahap.step}</span>
+                        <span className="text-[9px] sm:text-[10px] font-black">{tahap.step}</span>
                       )}
                     </div>
 
                     {/* Label below */}
-                    <div className="mt-2 px-1 text-center">
-                      <p className={`text-[10px] font-black leading-tight ${
+                    <div className="mt-1.5 sm:mt-2 px-0.5 sm:px-1 text-center">
+                      <p className={`text-[8.5px] sm:text-[10px] font-black leading-tight line-clamp-2 sm:line-clamp-none ${
                         isCurrent
                           ? 'text-emerald-600 dark:text-emerald-400'
                           : isPassed
