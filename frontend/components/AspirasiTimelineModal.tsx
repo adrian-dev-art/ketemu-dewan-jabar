@@ -23,6 +23,7 @@ import {
   FileSearch,
   QrCode,
 } from "lucide-react";
+import FormattedAiAnalysis from "@/components/FormattedAiAnalysis";
 
 export interface AspirasiData {
   id: number;
@@ -526,23 +527,10 @@ export default function AspirasiTimelineModal({
               <p className="text-xs text-red-500 font-semibold">{aiActionError}</p>
             )}
 
-            {/* Konten Telaah AI — better rendering */}
+            {/* Konten Telaah AI — rich structured rendering */}
             {aspirasi.aiAnalysis ? (
-              <div className="space-y-2.5">
-                <div className="text-xs text-foreground/90 leading-[1.85] font-normal bg-card/80 rounded-xl p-4 border border-border/60 max-h-80 overflow-y-auto">
-                  {aspirasi.aiAnalysis.split('\n').map((paragraph, idx) => {
-                    const trimmed = paragraph.trim();
-                    if (!trimmed) return <div key={idx} className="h-2" />;
-                    // Bold headers like "1. Identifikasi:" or "**Header**"
-                    const isBoldHeader = /^\*\*.*\*\*$/.test(trimmed) || /^\d+\.\s/.test(trimmed);
-                    const cleanText = trimmed.replace(/\*\*/g, '');
-                    return (
-                      <p key={idx} className={`${ isBoldHeader ? 'font-black text-foreground mt-2 first:mt-0' : 'text-foreground/80' }`}>
-                        {cleanText}
-                      </p>
-                    );
-                  })}
-                </div>
+              <div className="max-h-[460px] overflow-y-auto pr-1">
+                <FormattedAiAnalysis content={aspirasi.aiAnalysis} />
               </div>
             ) : (
               <div className="p-5 rounded-xl bg-card/50 border border-dashed border-violet-500/30 flex flex-col items-center justify-center text-center space-y-2">

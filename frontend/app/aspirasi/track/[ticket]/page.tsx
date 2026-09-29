@@ -29,6 +29,7 @@ import {
   FileCheck2,
 } from "lucide-react";
 import { getBackendUrl } from "@/context/utils";
+import FormattedAiAnalysis from "@/components/FormattedAiAnalysis";
 
 interface TrackAspirasiData {
   id: number;
@@ -559,21 +560,29 @@ export default function TrackAspirasiPublicPage() {
 
                 {/* AI Triage / Telaah Otomatis (If available) */}
                 {data.aiAnalysis && (
-                  <div className="bg-violet-500/5 border border-violet-500/20 rounded-3xl p-6 shadow-xs space-y-3">
-                    <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
-                      <Sparkles size={16} />
-                      <h4 className="text-xs font-extrabold uppercase tracking-wider">
-                        Telaah Cepat Sistem Cerdas HUDANG
-                      </h4>
-                    </div>
-                    <p className="text-xs text-foreground/80 leading-relaxed">
-                      {data.aiAnalysis}
-                    </p>
-                    {data.aiRecommendation && (
-                      <div className="p-3 rounded-xl bg-violet-500/10 text-violet-700 dark:text-violet-300 text-xs font-bold">
-                        Rekomendasi Disposisi: <strong>{data.aiRecommendation}</strong>
+                  <div className="bg-card border border-border/80 rounded-3xl p-6 sm:p-7 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-border/60">
+                      <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                        <div className="p-1.5 rounded-lg bg-violet-500/10">
+                          <Sparkles size={16} />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-foreground">
+                            Telaah Cerdas Tenaga Ahli (AI HUDANG)
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground">
+                            Hasil telaah kelayakan administratif, substansi, dan rekomendasi awal
+                          </p>
+                        </div>
                       </div>
-                    )}
+                      {data.aiRecommendation && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-violet-500/10 text-violet-700 dark:text-violet-300 text-xs font-bold border border-violet-500/20 self-start sm:self-auto">
+                          <span>Rekomendasi:</span>
+                          <strong className="underline decoration-violet-500/40">{data.aiRecommendation}</strong>
+                        </div>
+                      )}
+                    </div>
+                    <FormattedAiAnalysis content={data.aiAnalysis} />
                   </div>
                 )}
 
