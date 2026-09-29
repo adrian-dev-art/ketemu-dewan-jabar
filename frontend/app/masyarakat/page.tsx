@@ -25,12 +25,14 @@ import {
   Film,
   MapPin,
   Sparkles,
+  QrCode,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import FollowUpTimelineModal, { FollowUpData } from "@/components/FollowUpTimelineModal";
 import ServiceChoiceCards from "@/components/ServiceChoiceCards";
 import AspirasiForm from "@/components/AspirasiForm";
 import AspirasiTimelineModal, { AspirasiData } from "@/components/AspirasiTimelineModal";
+import AspirasiBuktiModal from "@/components/AspirasiBuktiModal";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useSocketUpdates } from "@/hooks/useSocketUpdates";
@@ -57,6 +59,7 @@ function MasyarakatDashboardContent() {
   // E-Aspirasi State
   const [aspirasiList, setAspirasiList] = useState<AspirasiData[]>([]);
   const [selectedAspirasiForTimeline, setSelectedAspirasiForTimeline] = useState<AspirasiData | null>(null);
+  const [selectedAspirasiForBukti, setSelectedAspirasiForBukti] = useState<AspirasiData | null>(null);
   const [aspirasiSearch, setAspirasiSearch] = useState("");
 
   const router = useRouter();
@@ -239,8 +242,8 @@ function MasyarakatDashboardContent() {
     setAspirasiList([newAspirasi, ...aspirasiList]);
     setCreateServiceType(null);
     setActiveTab('aspirasi');
-    setSelectedAspirasiForTimeline(newAspirasi);
-    setAnnouncement(`E-Aspirasi berhasil dikirim dengan Nomor Tiket ${newAspirasi.ticketNumber}. Anda dapat memantau timeline tindak lanjut di bawah ini.`);
+    setSelectedAspirasiForBukti(newAspirasi);
+    setAnnouncement(`E-Aspirasi berhasil dikirim dengan Nomor Tiket ${newAspirasi.ticketNumber}. Tanda Bukti Registrasi resmi telah diterbitkan.`);
   };
 
   const onRatingSubmit = async (scores: any, comment: string) => {
@@ -844,18 +847,28 @@ function MasyarakatDashboardContent() {
                             <span className="italic">Belum ditugaskan</span>
                           )}
                         </div>
-                        <button
-                          onClick={() => setSelectedAspirasiForTimeline(a)}
-                          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs border ${
-                            isCompleted
-                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
-                              : 'bg-primary/10 text-primary border-primary/25 hover:bg-primary/20'
-                          }`}
-                        >
-                          <FileCheck2 size={12} />
-                          <span>Timeline & Detail</span>
-                          <ChevronRight size={12} />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setSelectedAspirasiForBukti(a)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs border bg-background hover:bg-muted text-foreground border-border active:scale-95"
+                            title="Cetak Tanda Bukti & QR Code"
+                          >
+                            <QrCode size={13} className="text-emerald-600 dark:text-emerald-400" />
+                            <span className="hidden sm:inline">Bukti &amp; QR</span>
+                          </button>
+                          <button
+                            onClick={() => setSelectedAspirasiForTimeline(a)}
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs border ${
+                              isCompleted
+                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
+                                : 'bg-primary/10 text-primary border-primary/25 hover:bg-primary/20'
+                            }`}
+                          >
+                            <FileCheck2 size={12} />
+                            <span>Timeline &amp; Detail</span>
+                            <ChevronRight size={12} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1334,10 +1347,18 @@ function MasyarakatDashboardContent() {
           userRole="masyarakat"
           token={token || ""}
           backendUrl={backendUrl}
+          onOpenBukti={() => setSelectedAspirasiForBukti(selectedAspirasiForTimeline)}
           onUpdate={(updated) => {
             setAspirasiList(prev => prev.map(a => a.id === updated.id ? updated : a));
             setSelectedAspirasiForTimeline(updated);
           }}
+        />
+
+        {/* Tanda Bukti Penerimaan E-Aspirasi & QR Code Modal */}
+        <AspirasiBuktiModal
+          isOpen={!!selectedAspirasiForBukti}
+          onClose={() => setSelectedAspirasiForBukti(null)}
+          aspirasi={selectedAspirasiForBukti}
         />
         {/* Mobile Floating Action Button (FAB) */}
         {activeTab !== 'create' && (

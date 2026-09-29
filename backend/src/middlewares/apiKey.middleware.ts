@@ -14,6 +14,7 @@ export const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction
         req.path.startsWith('/api/dewan') ||
         req.path.startsWith('/api/users/dewan') ||
         req.path.startsWith('/api/system') ||
+        req.path.startsWith('/api/aspirasi/track') ||
         req.path === '/api/health' ||
         envConfig.NODE_ENV === 'test'
     ) {

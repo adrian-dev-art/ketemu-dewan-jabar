@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import { prisma } from '../lib/prisma';
@@ -391,6 +391,40 @@ router.get('/aspirasi/export-excel', authenticateToken, async (req: AuthRequest,
     } catch (err: any) {
         console.error("Error exporting aspirasi Excel:", err);
         return res.status(500).json({ error: "Gagal mengekspor data Excel: " + err.message });
+    }
+});
+
+// 4c. GET /api/aspirasi/track/:ticketNumber — Public Tracking endpoint (tanpa login, untuk scan QR code)
+router.get('/aspirasi/track/:ticketNumber', async (req: Request, res: Response) => {
+    try {
+        const { ticketNumber } = req.params;
+        if (!ticketNumber) {
+            return res.status(400).json({ error: "Nomor tiket tidak valid." });
+        }
+
+        const aspirasi = await prisma.aspirasi.findUnique({
+            where: { ticketNumber: ticketNumber.trim() },
+            include: {
+                masyarakat: {
+                    select: { name: true, kabupaten: true, kecamatan: true }
+                },
+                dewan: {
+                    select: { name: true, fraksi: true, dapil: true, jabatan: true }
+                },
+                timelineEvents: {
+                    orderBy: { createdAt: 'asc' }
+                }
+            }
+        });
+
+        if (!aspirasi) {
+            return res.status(404).json({ error: "Data aspirasi dengan nomor tiket tersebut tidak ditemukan." });
+        }
+
+        return res.json(aspirasi);
+    } catch (err: any) {
+        console.error("Error tracking public aspirasi:", err);
+        return res.status(500).json({ error: "Gagal memuat status aspirasi: " + err.message });
     }
 });
 

@@ -21,6 +21,7 @@ import {
   Sparkles,
   Bot,
   FileSearch,
+  QrCode,
 } from "lucide-react";
 
 export interface AspirasiData {
@@ -79,6 +80,7 @@ interface AspirasiTimelineModalProps {
   token?: string;
   backendUrl?: string;
   onUpdate?: (updated: AspirasiData) => void;
+  onOpenBukti?: () => void;
 }
 
 const TAHAPAN_DEFINITIF = [
@@ -127,6 +129,7 @@ export default function AspirasiTimelineModal({
   token,
   backendUrl,
   onUpdate,
+  onOpenBukti,
 }: AspirasiTimelineModalProps) {
   const [tanggapanText, setTanggapanText] = useState("");
   const [isSubmittingTanggapan, setIsSubmittingTanggapan] = useState(false);
@@ -350,13 +353,25 @@ export default function AspirasiTimelineModal({
               </h3>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors shrink-0 ml-2"
-            title="Tutup"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2 shrink-0 ml-2">
+            {onOpenBukti && (
+              <button
+                onClick={onOpenBukti}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-muted hover:bg-muted/80 text-foreground border border-border transition-all shadow-xs"
+                title="Lihat Dokumen Tanda Bukti & QR Code"
+              >
+                <QrCode size={13} className="text-emerald-600 dark:text-emerald-400" />
+                <span className="hidden sm:inline">Tanda Bukti & QR</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
+              title="Tutup"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body (Scrollable) */}
