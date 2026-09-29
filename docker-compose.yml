@@ -65,6 +65,7 @@ services:
     environment:
       NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5001}
       NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL:-ws://localhost:7880}
+      WATCHPACK_POLLING: "true"
       PORT: 3000
       HOSTNAME: "0.0.0.0"
     ports:

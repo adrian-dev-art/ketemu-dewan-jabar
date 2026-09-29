@@ -103,14 +103,14 @@ function KPICard({ title, value, subtitle, icon: Icon, colorClass, bg }: {
   icon: React.ElementType; colorClass: string; bg: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className={`w-12 h-12 rounded-2xl ${bg} ${colorClass} flex items-center justify-center shrink-0`}>
-        <Icon size={22} />
+    <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4 shadow-2xs hover:shadow-xs transition-shadow">
+      <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl ${bg} ${colorClass} flex items-center justify-center shrink-0`}>
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide leading-none mb-1 truncate">{title}</p>
-        <p className="text-2xl font-black text-foreground tabular-nums leading-none">{value}</p>
-        <p className="text-[11px] text-muted-foreground mt-1 truncate">{subtitle}</p>
+      <div className="min-w-0 w-full">
+        <p className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wide leading-tight line-clamp-1">{title}</p>
+        <p className="text-lg sm:text-2xl font-black text-foreground tabular-nums leading-tight mt-0.5">{value}</p>
+        <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">{subtitle}</p>
       </div>
     </div>
   );
