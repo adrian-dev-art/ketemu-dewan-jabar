@@ -431,13 +431,6 @@ export default function FloatingSidebar() {
 
           <div className="flex items-center gap-1.5 shrink-0">
             <ThemeToggle />
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
-              className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-600 dark:text-slate-300 hover:text-foreground hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors border border-slate-200 dark:border-neutral-800 shrink-0"
-            >
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
           </div>
         </header>
       </div>

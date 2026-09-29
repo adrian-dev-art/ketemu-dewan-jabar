@@ -4,32 +4,12 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useSettings } from "@/context/SettingsContext";
-import { useState, useEffect, useRef } from "react";
-import { Menu, X } from "lucide-react";
 
 export default function BrandingHeader() {
   const { settings } = useSettings();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const navRef = useRef<HTMLDivElement>(null);
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setMobileOpen(false);
-      }
-    };
-    if (mobileOpen) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [mobileOpen]);
-
-  // Close on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-background/90 backdrop-blur-md border-b border-border/60" ref={navRef}>
+    <header className="sticky top-0 z-40 w-full bg-background/90 backdrop-blur-md border-b border-border/60">
       {/* Main bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         {/* Brand */}
@@ -70,29 +50,9 @@ export default function BrandingHeader() {
           <ThemeToggle />
         </nav>
 
-        {/* Mobile: ThemeToggle always visible + hamburger */}
+        {/* Mobile: ThemeToggle only (navigation provided by MobileBottomNav) */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
-          <button
-            id="mobile-menu-toggle"
-            aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((p) => !p)}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile dropdown */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          mobileOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="px-4 pb-4 pt-2 border-t border-border/50 flex flex-col gap-1">
-          <Navbar mobileMode />
         </div>
       </div>
     </header>
