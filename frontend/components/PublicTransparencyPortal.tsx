@@ -232,122 +232,122 @@ export default function PublicTransparencyPortal() {
           </p>
 
           {/* VIEW SELECTOR SWITCHER */}
-          <div className="inline-flex p-1.5 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xl mt-4">
+          <div className="inline-flex max-w-full overflow-x-auto scrollbar-none p-1.5 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xl mt-4">
             <button
               onClick={() => setPortalView('charts')}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex items-center gap-2 px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all shrink-0 ${
                 portalView === 'charts'
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <BarChart3 size={16} />
+              <BarChart3 size={15} className="sm:w-4 sm:h-4" />
               <span>Grafik Analitik</span>
             </button>
 
             <button
               onClick={() => setPortalView('table')}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex items-center gap-2 px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all shrink-0 ${
                 portalView === 'table'
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <TableIcon size={16} />
-              <span>Tabel Jadwal Sesi ({items.length})</span>
+              <TableIcon size={15} className="sm:w-4 sm:h-4" />
+              <span>Tabel Sesi ({items.length})</span>
             </button>
 
             <button
               onClick={() => setPortalView('grid')}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex items-center gap-2 px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all shrink-0 ${
                 portalView === 'grid'
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <LayoutGrid size={16} />
+              <LayoutGrid size={15} className="sm:w-4 sm:h-4" />
               <span>Grid Lembar Surat</span>
             </button>
           </div>
         </div>
 
         {/* EXECUTIVE KPI METRIC CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4 mb-8">
           
           {/* Total Audiensi */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-blue-950/60 to-slate-800/70 border border-blue-500/25 backdrop-blur-md hover:border-blue-500/50 transition-all shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300/80">Total Audiensi</span>
-              <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                <FileText size={15} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-950/60 to-slate-800/70 border border-blue-500/25 backdrop-blur-md hover:border-blue-500/50 transition-all shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-blue-300/80">Total Audiensi</span>
+              <div className="p-1.5 sm:p-2 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20">
+                <FileText size={14} className="sm:w-[15px] sm:h-[15px]" />
               </div>
             </div>
-            <div className="text-4xl font-black text-white leading-none">{stats.totalAspirasi || items.length}</div>
-            <div className="text-[11px] text-blue-300/70 mt-2 flex items-center gap-1.5">
+            <div className="text-2xl sm:text-4xl font-black text-white leading-none">{stats.totalAspirasi || items.length}</div>
+            <div className="text-[10px] sm:text-[11px] text-blue-300/70 mt-1.5 sm:mt-2 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
               27 Kab/Kota Terdata
             </div>
           </div>
 
           {/* Surat Terbit */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-purple-950/60 to-slate-800/70 border border-purple-500/25 backdrop-blur-md hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10 hover:-translate-y-0.5 duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-300/80">Surat Terbit</span>
-              <div className="p-2 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20">
-                <FileCheck2 size={15} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-purple-950/60 to-slate-800/70 border border-purple-500/25 backdrop-blur-md hover:border-purple-500/50 transition-all shadow-lg hover:shadow-purple-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-purple-300/80">Surat Terbit</span>
+              <div className="p-1.5 sm:p-2 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20">
+                <FileCheck2 size={14} className="sm:w-[15px] sm:h-[15px]" />
               </div>
             </div>
-            <div className="text-4xl font-black text-purple-300 leading-none">
+            <div className="text-2xl sm:text-4xl font-black text-purple-300 leading-none">
               {stats.totalSemuaSurat || (stats.totalAspirasi * 3)}
             </div>
-            <div className="text-[11px] text-purple-300/70 mt-2">Disposisi &amp; Tanggapan</div>
+            <div className="text-[10px] sm:text-[11px] text-purple-300/70 mt-1.5 sm:mt-2">Disposisi &amp; Tanggapan</div>
           </div>
 
           {/* Realisasi Tuntas */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-950/60 to-slate-800/70 border border-emerald-500/30 backdrop-blur-md hover:border-emerald-500/55 transition-all shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300/80">Realisasi Tuntas</span>
-              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                <CheckCircle2 size={15} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-950/60 to-slate-800/70 border border-emerald-500/30 backdrop-blur-md hover:border-emerald-500/55 transition-all shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-300/80">Realisasi Tuntas</span>
+              <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                <CheckCircle2 size={14} className="sm:w-[15px] sm:h-[15px]" />
               </div>
             </div>
-            <div className="text-4xl font-black text-emerald-400 leading-none">
+            <div className="text-2xl sm:text-4xl font-black text-emerald-400 leading-none">
               {stats.totalTuntas || Math.floor((stats.totalAspirasi || 25) * 0.8)}
-              <span className="text-base ml-1 font-bold opacity-70">Sesi</span>
+              <span className="text-xs sm:text-base ml-1 font-bold opacity-70">Sesi</span>
             </div>
-            <div className="text-[11px] text-emerald-400/80 mt-2 font-bold">
+            <div className="text-[10px] sm:text-[11px] text-emerald-400/80 mt-1.5 sm:mt-2 font-bold">
               {stats.totalAspirasi > 0 ? Math.round(((stats.totalTuntas || Math.floor(stats.totalAspirasi * 0.8)) / stats.totalAspirasi) * 100) : 85}% Efektivitas
             </div>
           </div>
 
           {/* Respon OPD */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-950/60 to-slate-800/70 border border-amber-500/25 backdrop-blur-md hover:border-amber-500/50 transition-all shadow-lg hover:shadow-amber-500/10 hover:-translate-y-0.5 duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300/80">Respon OPD</span>
-              <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
-                <Clock size={15} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-amber-950/60 to-slate-800/70 border border-amber-500/25 backdrop-blur-md hover:border-amber-500/50 transition-all shadow-lg hover:shadow-amber-500/10 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-amber-300/80">Respon OPD</span>
+              <div className="p-1.5 sm:p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
+                <Clock size={14} className="sm:w-[15px] sm:h-[15px]" />
               </div>
             </div>
-            <div className="text-4xl font-black text-amber-300 leading-none">2.4
-              <span className="text-base ml-1 font-bold opacity-70">Hari</span>
+            <div className="text-2xl sm:text-4xl font-black text-amber-300 leading-none">2.4
+              <span className="text-xs sm:text-base ml-1 font-bold opacity-70">Hari</span>
             </div>
-            <div className="text-[11px] text-amber-300/70 mt-2">Standar SLA &lt; 5 Hari</div>
+            <div className="text-[10px] sm:text-[11px] text-amber-300/70 mt-1.5 sm:mt-2">Standar SLA &lt; 5 Hari</div>
           </div>
 
           {/* Indeks Publik */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-900/60 via-teal-950/60 to-slate-800/70 border border-emerald-400/40 backdrop-blur-md col-span-2 sm:col-span-1 shadow-lg hover:shadow-emerald-500/15 hover:-translate-y-0.5 duration-300">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300/90">Indeks Publik</span>
-              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
-                <Award size={15} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-900/60 via-teal-950/60 to-slate-800/70 border border-emerald-400/40 backdrop-blur-md col-span-2 sm:col-span-1 shadow-lg hover:shadow-emerald-500/15 hover:-translate-y-0.5 duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-300/90">Indeks Publik</span>
+              <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
+                <Award size={14} className="sm:w-[15px] sm:h-[15px]" />
               </div>
             </div>
-            <div className="text-4xl font-black text-emerald-300 leading-none">98.6%</div>
-            <div className="mt-2">
+            <div className="text-2xl sm:text-4xl font-black text-emerald-300 leading-none">98.6%</div>
+            <div className="mt-1.5 sm:mt-2">
               <div className="h-1.5 w-full bg-emerald-900/60 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full" style={{width: '98.6%'}} />
               </div>
-              <div className="text-[11px] text-emerald-300/80 mt-1.5">Tingkat Kepuasan</div>
+              <div className="text-[10px] sm:text-[11px] text-emerald-300/80 mt-1">Tingkat Kepuasan</div>
             </div>
           </div>
         </div>

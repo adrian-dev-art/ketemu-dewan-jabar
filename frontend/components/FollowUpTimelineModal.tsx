@@ -394,7 +394,7 @@ export default function FollowUpTimelineModal({
           </div>
         </div>
 
-        <div className="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-3.5 sm:p-8 space-y-4 sm:space-y-6 overflow-y-auto custom-scrollbar flex-1">
           {saveSuccess && (
             <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
               <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -403,30 +403,30 @@ export default function FollowUpTimelineModal({
           )}
 
           {/* SECTION 1: DOKUMEN DISPOSISI RESMI DPRD */}
-          <div className="p-5 rounded-3xl bg-card border border-border space-y-4 shadow-xs">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold shrink-0">
-                  <FileText size={20} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-card border border-border space-y-3.5 sm:space-y-4 shadow-xs">
+            <div className="flex items-start justify-between gap-2.5">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold shrink-0">
+                  <FileText size={18} className="sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h4 className="font-black text-sm text-foreground">1. Surat Disposisi Resmi DPRD Jabar</h4>
-                  <p className="text-xs text-muted-foreground">Diterbitkan oleh pimpinan/komisi DPRD untuk meneruskan aspirasi ke dinas terkait.</p>
+                <div className="min-w-0">
+                  <h4 className="font-black text-xs sm:text-sm text-foreground truncate">1. Surat Disposisi Resmi DPRD Jabar</h4>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1">Diterbitkan oleh pimpinan/komisi DPRD untuk dinas terkait.</p>
                 </div>
               </div>
 
               {formData.suratDisposisiUrl ? (
-                <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-black uppercase flex items-center gap-1">
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[9px] sm:text-[10px] font-black uppercase flex items-center gap-1 shrink-0">
                   <CheckCircle2 size={12} /> Berkas Terlampir
                 </span>
               ) : (
-                <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 text-[10px] font-black uppercase">
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 text-[9px] sm:text-[10px] font-black uppercase shrink-0">
                   Belum Ada Berkas
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-[11px] font-bold uppercase text-muted-foreground mb-1.5">
                   Nomor Surat Disposisi DPRD
@@ -468,11 +468,11 @@ export default function FollowUpTimelineModal({
                 />
               </div>
 
-              <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2">
-                <div className="flex items-center gap-2">
-                  <label className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-xs">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="px-3.5 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-xs">
                     <Upload size={14} />
-                    <span>{uploadingType === 'disposisi' ? 'Mengunggah...' : formData.suratDisposisiUrl ? 'Ganti File Surat Disposisi (.pdf)' : 'Unggah File Surat Disposisi (PDF)'}</span>
+                    <span>{uploadingType === 'disposisi' ? 'Mengunggah...' : formData.suratDisposisiUrl ? 'Ganti Berkas (.pdf)' : 'Unggah Surat Disposisi (.pdf)'}</span>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
@@ -489,7 +489,7 @@ export default function FollowUpTimelineModal({
                       className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-xl text-xs font-bold text-foreground flex items-center gap-1.5 border border-border"
                     >
                       <Eye size={14} />
-                      <span>Lihat Berkas PDF</span>
+                      <span>Lihat PDF</span>
                     </a>
                   )}
                 </div>
@@ -498,7 +498,7 @@ export default function FollowUpTimelineModal({
                   type="button"
                   onClick={() => handleSave()}
                   disabled={saving}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:opacity-90 transition-all"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-bold hover:opacity-90 transition-all self-end sm:self-auto"
                 >
                   {saving ? "Menyimpan..." : "Simpan Disposisi"}
                 </button>
@@ -507,30 +507,30 @@ export default function FollowUpTimelineModal({
           </div>
 
           {/* SECTION 2: DOKUMEN TANGGAPAN & TELAAHAN OPD */}
-          <div className="p-5 rounded-3xl bg-card border border-border space-y-4 shadow-xs">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold shrink-0">
-                  <FileText size={20} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-card border border-border space-y-3.5 sm:space-y-4 shadow-xs">
+            <div className="flex items-start justify-between gap-2.5">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold shrink-0">
+                  <FileText size={18} className="sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h4 className="font-black text-sm text-foreground">2. Surat Tanggapan & Telaahan Teknis OPD</h4>
-                  <p className="text-xs text-muted-foreground">Diterbitkan oleh dinas/instansi terkait sebagai respon resmi telaahan aspirasi.</p>
+                <div className="min-w-0">
+                  <h4 className="font-black text-xs sm:text-sm text-foreground truncate">2. Surat Tanggapan &amp; Telaahan Teknis OPD</h4>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1">Respon resmi dari dinas/instansi terkait telaahan aspirasi.</p>
                 </div>
               </div>
 
               {formData.suratTanggapanUrl ? (
-                <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-black uppercase flex items-center gap-1">
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[9px] sm:text-[10px] font-black uppercase flex items-center gap-1 shrink-0">
                   <CheckCircle2 size={12} /> Berkas Terlampir
                 </span>
               ) : (
-                <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-muted text-muted-foreground text-[9px] sm:text-[10px] font-bold shrink-0">
                   Opsional / Menunggu
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-[11px] font-bold uppercase text-muted-foreground mb-1.5">
                   Nomor Surat Tanggapan OPD
@@ -570,11 +570,11 @@ export default function FollowUpTimelineModal({
                 />
               </div>
 
-              <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2">
-                <div className="flex items-center gap-2">
-                  <label className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-xs">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="px-3.5 sm:px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-xs">
                     <Upload size={14} />
-                    <span>{uploadingType === 'tanggapan' ? 'Mengunggah...' : formData.suratTanggapanUrl ? 'Ganti File Tanggapan' : 'Unggah Surat Tanggapan (PDF)'}</span>
+                    <span>{uploadingType === 'tanggapan' ? 'Mengunggah...' : formData.suratTanggapanUrl ? 'Ganti Berkas' : 'Unggah Surat Tanggapan (.pdf)'}</span>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
@@ -600,7 +600,7 @@ export default function FollowUpTimelineModal({
                   type="button"
                   onClick={() => handleSave()}
                   disabled={saving}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 transition-all"
+                  className="px-4 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 transition-all self-end sm:self-auto"
                 >
                   {saving ? "Menyimpan..." : "Simpan Tanggapan"}
                 </button>
@@ -609,30 +609,30 @@ export default function FollowUpTimelineModal({
           </div>
 
           {/* SECTION 3: BERITA ACARA / LAPORAN REALISASI LAPANGAN */}
-          <div className="p-5 rounded-3xl bg-card border border-border space-y-4 shadow-xs">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold shrink-0">
-                  <FileText size={20} />
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-card border border-border space-y-3.5 sm:space-y-4 shadow-xs">
+            <div className="flex items-start justify-between gap-2.5">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                  <FileText size={18} className="sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h4 className="font-black text-sm text-foreground">3. Berita Acara & Laporan Realisasi Lapangan</h4>
-                  <p className="text-xs text-muted-foreground">Bukti dokumen penyelesaian pengerjaan fisik atau realisasi bantuan di lapangan.</p>
+                <div className="min-w-0">
+                  <h4 className="font-black text-xs sm:text-sm text-foreground truncate">3. Berita Acara &amp; Laporan Realisasi Lapangan</h4>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1">Bukti dokumen penyelesaian fisik atau bantuan di lapangan.</p>
                 </div>
               </div>
 
               {formData.suratLaporanUrl ? (
-                <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-black uppercase flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Tuntas & Terlampir
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 text-[9px] sm:text-[10px] font-black uppercase flex items-center gap-1 shrink-0">
+                  <CheckCircle2 size={12} /> Tuntas &amp; Terlampir
                 </span>
               ) : (
-                <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                <span className="px-2.5 sm:px-3 py-1 rounded-full bg-muted text-muted-foreground text-[9px] sm:text-[10px] font-bold shrink-0">
                   Opsional / Menunggu
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-[11px] font-bold uppercase text-muted-foreground mb-1.5">
                   Nomor Berita Acara Realisasi
@@ -679,11 +679,11 @@ export default function FollowUpTimelineModal({
                 />
               </div>
 
-              <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2">
-                <div className="flex items-center gap-2">
-                  <label className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-xs">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="px-3.5 sm:px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-xs">
                     <Upload size={14} />
-                    <span>{uploadingType === 'laporan' ? 'Mengunggah...' : formData.suratLaporanUrl ? 'Ganti File Berita Acara' : 'Unggah Berita Acara (PDF/Foto)'}</span>
+                    <span>{uploadingType === 'laporan' ? 'Mengunggah...' : formData.suratLaporanUrl ? 'Ganti Berkas' : 'Unggah Berita Acara (.pdf/foto)'}</span>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
@@ -709,7 +709,7 @@ export default function FollowUpTimelineModal({
                   type="button"
                   onClick={() => handleSave()}
                   disabled={saving}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all"
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all self-end sm:self-auto"
                 >
                   {saving ? "Menyimpan..." : "Simpan Berita Acara"}
                 </button>
@@ -720,24 +720,24 @@ export default function FollowUpTimelineModal({
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="px-6 sm:px-8 py-4 bg-muted/30 border-t border-border flex items-center justify-between shrink-0">
-          <p className="text-[11px] text-muted-foreground">
+        <div className="px-4 sm:px-8 py-3 sm:py-4 bg-muted/30 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground text-center sm:text-left">
             Dokumen yang diunggah akan langsung dapat diakses publik di Landing Page secara transparan.
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             <button
               onClick={() => handleSave()}
               disabled={saving}
-              className="px-4 py-2.5 bg-muted hover:bg-muted/80 border border-border text-foreground rounded-xl text-xs font-bold transition-all"
+              className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 sm:py-2.5 bg-muted hover:bg-muted/80 border border-border text-foreground rounded-xl text-xs font-bold transition-all"
             >
-              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+              {saving ? "Menyimpan..." : "Simpan"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl text-xs hover:opacity-90 transition-all"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 bg-primary text-primary-foreground font-bold rounded-xl text-xs hover:opacity-90 transition-all text-center"
             >
-              Selesai & Tutup
+              Tutup
             </button>
           </div>
         </div>

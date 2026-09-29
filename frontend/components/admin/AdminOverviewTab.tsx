@@ -49,10 +49,10 @@ export default function AdminOverviewTab({
   const router = useRouter();
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <AdminStatsCard
           title="Total Pengguna Terdaftar"
           value={stats.totalUsers}
@@ -88,30 +88,30 @@ export default function AdminOverviewTab({
       </div>
 
       {/* Follow-Up Progress Banner */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 sm:mb-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
                 <Activity size={17} />
               </div>
-              <h3 className="text-sm font-bold text-foreground tracking-tight">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
                 Progres 4 Tahap Tindak Lanjut &amp; Disposisi OPD
               </h3>
             </div>
-            <p className="text-xs text-muted-foreground mt-1.5 pl-10.5">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 pl-10.5">
               Pemantauan realisasi telaahan dinas dan serah terima berita acara hasil aspirasi
             </p>
           </div>
           <button
             onClick={() => setActiveTab("schedules")}
-            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
+            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0 pl-10.5 sm:pl-0"
           >
             Lihat Tabel Lengkap <ArrowRight size={13} />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
           {[
             { label: "1. Surat Disposisi", value: followUpStats.totalDisposed, icon: Share2, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10" },
             { label: "2. Dibaca OPD", value: followUpStats.viewed, icon: Eye, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-500/10" },
@@ -120,14 +120,14 @@ export default function AdminOverviewTab({
           ].map((step, i) => (
             <div
               key={i}
-              className="bg-muted/30 border border-border/80 rounded-2xl p-4 flex items-center gap-3.5 hover:bg-muted/60 transition-colors shadow-2xs"
+              className="bg-muted/30 border border-border/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3.5 hover:bg-muted/60 transition-colors shadow-2xs"
             >
-              <div className={`w-10 h-10 rounded-xl ${step.bg} ${step.color} flex items-center justify-center shrink-0`}>
-                <step.icon size={18} />
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl ${step.bg} ${step.color} flex items-center justify-center shrink-0`}>
+                <step.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
               </div>
-              <div>
-                <p className="text-[11px] font-medium text-muted-foreground leading-snug">{step.label}</p>
-                <p className="text-xl font-bold text-foreground tabular-nums">{step.value}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-medium text-muted-foreground leading-tight truncate">{step.label}</p>
+                <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums mt-0.5">{step.value}</p>
               </div>
             </div>
           ))}
@@ -136,12 +136,12 @@ export default function AdminOverviewTab({
 
       {/* Analytics Charts */}
       {ratings.length > 0 && (
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <TrendingUp size={17} />
             </div>
-            <h3 className="text-sm font-bold text-foreground tracking-tight">
+            <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
               Distribusi Evaluasi &amp; Kepuasan Layanan Dewan
             </h3>
           </div>
@@ -150,17 +150,17 @@ export default function AdminOverviewTab({
       )}
 
       {/* Quick Action Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <button
           id="admin-overview-schedules-btn"
           onClick={() => setActiveTab("schedules")}
-          className="group p-5 bg-card hover:bg-muted/40 border border-border hover:border-primary/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
+          className="group p-4 sm:p-5 bg-card hover:bg-muted/40 border border-border hover:border-primary/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-            <Video size={20} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
+            <Video size={18} className="sm:w-5 sm:h-5" />
           </div>
-          <p className="text-sm font-bold text-foreground">Kelola Jadwal Sesi</p>
-          <p className="text-xs text-muted-foreground mt-1 leading-snug">
+          <p className="text-xs sm:text-sm font-bold text-foreground">Kelola Jadwal Sesi</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-snug">
             Monitoring rapat video call dan disposisi aspirasi
           </p>
         </button>
@@ -168,13 +168,13 @@ export default function AdminOverviewTab({
         <button
           id="admin-overview-streaming-btn"
           onClick={() => router.push("/admin/settings/streaming")}
-          className="group p-5 bg-card hover:bg-muted/40 border border-border hover:border-purple-500/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
+          className="group p-4 sm:p-5 bg-card hover:bg-muted/40 border border-border hover:border-purple-500/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
         >
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-            <Settings size={20} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
+            <Settings size={18} className="sm:w-5 sm:h-5" />
           </div>
-          <p className="text-sm font-bold text-foreground">Pengaturan Live Streaming</p>
-          <p className="text-xs text-muted-foreground mt-1 leading-snug">
+          <p className="text-xs sm:text-sm font-bold text-foreground">Pengaturan Live Streaming</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-snug">
             Kelola konfigurasi Egress RTMP dan server siaran
           </p>
         </button>
@@ -182,13 +182,13 @@ export default function AdminOverviewTab({
         <button
           id="admin-overview-export-btn"
           onClick={() => { if (onExportBackup) onExportBackup(); }}
-          className="group p-5 bg-card hover:bg-muted/40 border border-border hover:border-emerald-500/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
+          className="group p-4 sm:p-5 bg-card hover:bg-muted/40 border border-border hover:border-emerald-500/40 rounded-2xl text-left transition-all hover:shadow-md hover:-translate-y-0.5"
         >
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-            <Download size={20} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
+            <Download size={18} className="sm:w-5 sm:h-5" />
           </div>
-          <p className="text-sm font-bold text-foreground">Ekspor Cadangan Sistem</p>
-          <p className="text-xs text-muted-foreground mt-1 leading-snug">
+          <p className="text-xs sm:text-sm font-bold text-foreground">Ekspor Cadangan Sistem</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-snug">
             Unduh rekapitulasi data format JSON resmi
           </p>
         </button>

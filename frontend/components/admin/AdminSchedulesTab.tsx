@@ -244,7 +244,7 @@ export default function AdminSchedulesTab({
         </div>
 
         {/* Filter Badges Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 text-xs">
           <div>
             <label className="block text-[10px] font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">Status Sesi</label>
             <select
@@ -296,7 +296,7 @@ export default function AdminSchedulesTab({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label className="block text-[10px] font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">Urutan Data</label>
             <div className="flex items-center gap-1.5">
               <select
@@ -323,7 +323,7 @@ export default function AdminSchedulesTab({
       </div>
 
       {/* Result summary text */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-muted-foreground px-1">
         <span>
           Menampilkan <strong className="text-foreground">{filteredSchedules.length}</strong> dari{" "}
           <strong className="text-foreground">{schedules.length}</strong> sesi pertemuan (Urut: <span className="text-foreground font-semibold">{sortBy === "id" ? "Terbaru Dibuat" : sortBy === "startTime" ? "Waktu Sesi" : sortBy}</span>)
@@ -331,8 +331,154 @@ export default function AdminSchedulesTab({
         <span className="text-[11px] font-medium">Halaman {page} dari {totalPages}</span>
       </div>
 
-      {/* Modern Responsive Table */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
+      {/* ── Mobile Card List View (< md) ── */}
+      <div className="block md:hidden space-y-3">
+        {paginatedSchedules.length === 0 ? (
+          <div className="bg-card border border-border rounded-2xl p-8 text-center text-muted-foreground">
+            <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-2.5">
+              <CalendarDays size={24} className="opacity-40 text-muted-foreground" />
+            </div>
+            <p className="text-xs font-bold text-foreground">Tidak Ada Jadwal Ditemukan</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Coba ubah kata kunci pencarian atau sesuaikan filter Anda.</p>
+          </div>
+        ) : (
+          paginatedSchedules.map((s) => {
+            const fu = s.followUp;
+            const progress = fu?.progressPercent || 0;
+            const isDone = progress === 100 || fu?.status === "selesai";
+            const badge = STATUS_BADGE[s.status] || { label: s.status, bg: "bg-muted", text: "text-foreground", border: "border-border" };
+
+            return (
+              <div key={s.id} className="bg-card border border-border rounded-2xl p-4 shadow-2xs space-y-3">
+                {/* Header: ID, Date, Status */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
+                        #ASP-{s.id}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Calendar size={11} className="text-primary shrink-0" />
+                        {new Date(s.startTime).toLocaleString("id-ID", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-bold text-foreground mt-1.5 leading-snug line-clamp-2">
+                      {s.title}
+                    </h4>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold border uppercase tracking-wider shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}>
+                    {badge.label}
+                  </span>
+                </div>
+
+                {/* Info Box: Warga & Dewan */}
+                <div className="bg-muted/20 border border-border/60 rounded-xl p-2.5 space-y-1.5 text-xs">
+                  <div className="flex items-center gap-1.5 text-[11px]">
+                    <span className="font-semibold text-foreground">{s.masyarakat?.name || "Masyarakat"}</span>
+                    <span className="text-muted-foreground flex items-center gap-0.5">
+                      <MapPin size={10} className="shrink-0" />
+                      {s.masyarakat?.kabupaten || "Jawa Barat"}
+                    </span>
+                  </div>
+                  {s.participants && s.participants.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
+                      <span className="font-bold text-foreground">Dewan:</span>
+                      {s.participants.map((p) => (
+                        <span key={p.dewanId} className="px-1.5 py-0.5 bg-card border border-border rounded-md font-medium text-foreground">
+                          {p.dewan?.name || `Dewan #${p.dewanId}`}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Disposisi Progress Banner */}
+                <button
+                  type="button"
+                  onClick={() => onOpenFollowUp(s.id)}
+                  className="w-full bg-muted/30 hover:bg-muted/60 border border-border/80 rounded-xl p-2.5 flex items-center justify-between gap-3 text-left transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground mb-1">
+                      <span>Progres Disposisi OPD</span>
+                      <span className="font-bold text-foreground tabular-nums">{progress}%</span>
+                    </div>
+                    <div className="w-full bg-muted/70 rounded-full h-1.5 overflow-hidden border border-border/50">
+                      <div
+                        className={`h-full transition-all duration-300 ${
+                          isDone ? "bg-emerald-500" : progress >= 50 ? "bg-indigo-500" : "bg-amber-500"
+                        }`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    {fu?.sharedTo && (
+                      <p className="text-[10px] text-muted-foreground truncate mt-1">
+                        OPD: <span className="text-foreground font-medium">{fu.sharedTo}</span>
+                      </p>
+                    )}
+                  </div>
+                  <FileCheck2 size={16} className="text-primary shrink-0" />
+                </button>
+
+                {/* Mobile Action Buttons */}
+                <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/50">
+                  <button
+                    onClick={() => onOpenFollowUp(s.id)}
+                    className="py-2 px-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <FileCheck2 size={13} />
+                    <span>Disposisi</span>
+                  </button>
+
+                  {s.transcription || s.analysis ? (
+                    <button
+                      onClick={() => onOpenAnalysis(s.id, s.title)}
+                      className="py-2 px-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors shadow-2xs"
+                    >
+                      <Sparkles size={13} />
+                      <span>Notulensi</span>
+                    </button>
+                  ) : s.recordingUrl ? (
+                    <button
+                      onClick={() => handleTriggerTranscribe(s.id)}
+                      disabled={transcribingId === s.id || s.isTranscribing}
+                      className="py-2 px-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 transition-colors disabled:opacity-50"
+                    >
+                      {transcribingId === s.id || s.isTranscribing ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <FileText size={12} />
+                      )}
+                      <span>Transkrip</span>
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="py-2 px-2 bg-muted/40 text-muted-foreground/50 rounded-xl text-[11px] font-medium flex items-center justify-center"
+                    >
+                      No Rec
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleDeleteSchedule(s.id)}
+                    className="py-2 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Trash2 size={13} />
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop Schedules Table (>= md) ── */}
+      <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead className="sticky top-0 z-10 bg-muted/60 dark:bg-muted/40 border-b border-border text-muted-foreground">
@@ -515,60 +661,64 @@ export default function AdminSchedulesTab({
             </tbody>
           </table>
         </div>
-
-        {/* Pagination Toolbar */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground bg-card">
-            <span className="text-xs font-medium">
-              Menampilkan {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredSchedules.length)} dari{" "}
-              <strong className="text-foreground">{filteredSchedules.length}</strong> jadwal
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronsLeft size={14} />
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              {pageNumbers.map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setPage(n)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${
-                    n === page
-                      ? "bg-purple-600 text-white shadow-xs"
-                      : "border border-border hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronRight size={14} />
-              </button>
-              <button
-                onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
-                className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                <ChevronsRight size={14} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination Toolbar */}
+      {totalPages > 1 && (
+        <div className="p-3.5 sm:p-4 bg-card border border-border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground shadow-xs">
+          <span className="text-xs font-medium text-center sm:text-left">
+            Menampilkan {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredSchedules.length)} dari{" "}
+            <strong className="text-foreground">{filteredSchedules.length}</strong> jadwal
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              title="Awal"
+            >
+              <ChevronsLeft size={14} />
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              title="Sebelumnya"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            {pageNumbers.map((n) => (
+              <button
+                key={n}
+                onClick={() => setPage(n)}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                  n === page
+                    ? "bg-purple-600 text-white shadow-xs"
+                    : "border border-border hover:bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              title="Selanjutnya"
+            >
+              <ChevronRight size={14} />
+            </button>
+            <button
+              onClick={() => setPage(totalPages)}
+              disabled={page === totalPages}
+              className="w-8 h-8 flex items-center justify-center border border-border rounded-xl hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              title="Akhir"
+            >
+              <ChevronsRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

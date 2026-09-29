@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
@@ -399,40 +399,89 @@ export default function AdminAspirasiTab() {
 
       {/* Table */}
       <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h3 className="text-sm font-bold text-foreground tracking-tight">Data Detail Aspirasi</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{filteredList.length} aspirasi ditemukan</p>
+            <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">Data Detail Aspirasi</h3>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">{filteredList.length} aspirasi ditemukan</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative col-span-2 sm:col-span-1">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input type="text" placeholder="Cari judul, tiket, nama..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40 w-48" />
+                className="pl-8 pr-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40 w-full sm:w-48" />
             </div>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
+              className="px-2.5 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
               <option value="all">Semua Status</option>
               {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
+              className="px-2.5 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
               <option value="all">Semua Kategori</option>
               {kategoriOptions.map(k => <option key={k} value={k}>{k}</option>)}
             </select>
             <select value={filterDapil} onChange={e => setFilterDapil(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
+              className="px-2.5 py-2 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40">
               <option value="all">Semua Dapil</option>
               {dapilOptions.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
             <button onClick={handleExport} disabled={exporting}
-              className="px-3.5 py-2 text-xs font-bold rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 transition-all disabled:opacity-50">
+              className="px-3.5 py-2 text-xs font-bold rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50">
               <Download size={12} />{exporting ? "..." : "Excel"}
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* ── Mobile Card List View (< md) ── */}
+        <div className="block md:hidden p-3.5 space-y-3">
+          {loadingTable ? (
+            <div className="p-8 flex flex-col items-center gap-2.5 text-muted-foreground">
+              <RefreshCw size={20} className="animate-spin text-purple-600" />
+              <p className="text-xs">Memuat data aspirasi...</p>
+            </div>
+          ) : paginatedList.length === 0 ? (
+            <div className="p-8 flex flex-col items-center gap-2 text-muted-foreground text-center">
+              <Inbox size={28} strokeWidth={1.2} />
+              <p className="text-xs font-medium">Tidak ada data aspirasi ditemukan</p>
+            </div>
+          ) : (
+            paginatedList.map((a, i) => (
+              <div key={a.id} className="bg-card border border-border rounded-xl p-3.5 space-y-2.5 shadow-2xs">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-mono text-[10px] text-purple-600 dark:text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-md">
+                    {a.ticketNumber}
+                  </span>
+                  <StatusBadge status={a.status} />
+                </div>
+
+                <h4 className="text-xs font-bold text-foreground leading-snug line-clamp-2">
+                  {a.judul}
+                </h4>
+
+                <div className="flex flex-wrap gap-1.5 text-[10px]">
+                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full font-medium">
+                    {a.kategori || "Umum"}
+                  </span>
+                  <span className="px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
+                    {a.dapil?.split("(")[0]?.trim() || "Jabar"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-border/50 text-muted-foreground">
+                  <span className="font-medium truncate max-w-[160px] text-foreground">
+                    {a.masyarakat?.name || "Warga"}
+                  </span>
+                  <span className="text-[10px] tabular-nums">
+                    {a.submittedAt ? new Date(a.submittedAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* ── Desktop Aspirasi Table (>= md) ── */}
+        <div className="hidden md:block overflow-x-auto">
           {loadingTable ? (
             <div className="p-12 flex flex-col items-center gap-3 text-muted-foreground">
               <RefreshCw size={22} className="animate-spin" />
@@ -475,8 +524,8 @@ export default function AdminAspirasiTab() {
         </div>
 
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Halaman {currentPage} dari {totalPages} ({filteredList.length} total)</span>
+          <div className="p-3.5 sm:p-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground text-center sm:text-left">Halaman {currentPage} dari {totalPages} ({filteredList.length} total)</span>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
                 className="w-8 h-8 flex items-center justify-center rounded-lg border border-border hover:bg-muted disabled:opacity-40 transition-colors">

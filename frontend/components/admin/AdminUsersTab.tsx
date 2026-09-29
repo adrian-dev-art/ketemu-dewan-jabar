@@ -158,8 +158,8 @@ export default function AdminUsersTab({
     <div className="space-y-6 animate-in fade-in duration-300">
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border rounded-2xl p-4 shadow-xs">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-card border border-border rounded-2xl p-3.5 sm:p-4 shadow-xs">
+        <div className="relative flex-1">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             id="users-search"
@@ -172,13 +172,13 @@ export default function AdminUsersTab({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <Filter size={14} className="text-muted-foreground shrink-0" />
+          <div className="flex items-center gap-1.5 flex-1 min-w-[130px] sm:flex-none">
+            <Filter size={14} className="text-muted-foreground shrink-0 hidden sm:block" />
             <select
               id="users-role-filter"
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="text-xs bg-muted/40 border border-border rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-foreground font-semibold transition-all"
+              className="w-full sm:w-auto text-xs bg-muted/40 border border-border rounded-xl px-3 sm:px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-foreground font-semibold transition-all"
             >
               <option value="all">Semua Peran ({users.length})</option>
               <option value="masyarakat">Masyarakat ({roleCounts.masyarakat})</option>
@@ -187,13 +187,13 @@ export default function AdminUsersTab({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-1 min-w-[160px] sm:flex-none">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-xs bg-muted/40 border border-border rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-foreground font-semibold transition-all"
+              className="w-full sm:w-auto text-xs bg-muted/40 border border-border rounded-xl px-3 sm:px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-foreground font-semibold transition-all"
             >
-              <option value="id">Terbaru Terdaftar (Latest ID)</option>
+              <option value="id">Terbaru (ID)</option>
               <option value="name">Nama Pengguna</option>
               <option value="role">Peran / Role</option>
               <option value="email">Email</option>
@@ -216,8 +216,80 @@ export default function AdminUsersTab({
         <strong className="text-foreground">{users.length}</strong> total pengguna (Urut: <span className="text-foreground font-semibold">{sortBy === "id" ? "Pendaftar Terbaru" : sortBy}</span>)
       </div>
 
-      {/* Modern Users Table */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
+      {/* ── Mobile Card List View (< md) ── */}
+      <div className="block md:hidden space-y-3">
+        {filteredUsers.length === 0 ? (
+          <div className="bg-card border border-border rounded-2xl p-8 text-center text-muted-foreground">
+            <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-2.5">
+              <Users size={24} className="opacity-40 text-muted-foreground" />
+            </div>
+            <p className="text-xs font-bold text-foreground">Pengguna Tidak Ditemukan</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Coba sesuaikan kata kunci pencarian.</p>
+          </div>
+        ) : (
+          filteredUsers.map((u) => {
+            const roleBadge = ROLE_BADGE[u.role] || { label: u.role, bg: "bg-muted", text: "text-foreground", border: "border-border" };
+            return (
+              <div key={u.id} className="bg-card border border-border rounded-2xl p-4 shadow-2xs space-y-3">
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 border border-purple-500/20">
+                      {u.name ? u.name.charAt(0).toUpperCase() : "U"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-xs text-foreground truncate">{u.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">ID #{u.id} {u.nip ? `• NIP: ${u.nip}` : ""}</p>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold border uppercase tracking-wider shrink-0 ${roleBadge.bg} ${roleBadge.text} ${roleBadge.border}`}>
+                    {roleBadge.label}
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-xs text-muted-foreground bg-muted/20 rounded-xl p-2.5 border border-border/50">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-medium truncate">{u.email}</span>
+                    {u.noWhatsapp && (
+                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 shrink-0">{u.noWhatsapp}</span>
+                    )}
+                  </div>
+                  {u.role === "dewan" ? (
+                    <div className="pt-0.5 border-t border-border/40 text-[11px]">
+                      <span className="font-semibold text-foreground">{u.fraksi || "Fraksi -"}</span>
+                      {(u.jabatan || u.dapil) && <span> &middot; {u.jabatan || u.dapil}</span>}
+                    </div>
+                  ) : u.instansi ? (
+                    <div className="pt-0.5 border-t border-border/40 text-[11px] text-foreground font-medium">
+                      Instansi: {u.instansi}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                  <button
+                    onClick={() => handleOpenEdit(u)}
+                    className="flex-1 py-2 px-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <Edit size={13} />
+                    <span>Edit Profil</span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteUser(u.id)}
+                    className="py-2 px-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    title="Hapus Pengguna"
+                  >
+                    <Trash2 size={13} />
+                    <span className="sr-only sm:not-sr-only">Hapus</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop Users Table (>= md) ── */}
+      <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead className="sticky top-0 z-10 bg-muted/60 dark:bg-muted/40 border-b border-border text-muted-foreground">
@@ -289,7 +361,7 @@ export default function AdminUsersTab({
                         )}
                       </td>
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-foreground">{u.email}</div>
+                        <div className="semibold text-foreground">{u.email}</div>
                         {u.noWhatsapp && (
                           <div className="text-[11px] text-muted-foreground mt-0.5">{u.noWhatsapp}</div>
                         )}
@@ -338,15 +410,15 @@ export default function AdminUsersTab({
 
       {/* Edit User Modal */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-card border border-border rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 my-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl sm:rounded-3xl w-full max-w-lg p-4 sm:p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 my-auto max-h-[92vh] overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between border-b border-border pb-3.5">
-              <h3 className="text-sm font-bold text-foreground">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground truncate pr-2">
                 Edit Profil: {editingUser.name}
               </h3>
               <button
                 onClick={() => setEditingUser(null)}
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
+                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors shrink-0"
               >
                 <X size={16} />
               </button>
@@ -364,7 +436,7 @@ export default function AdminUsersTab({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-muted-foreground mb-1.5 font-bold">Email</label>
                   <input
@@ -390,7 +462,7 @@ export default function AdminUsersTab({
               </div>
 
               {editForm.role === "dewan" && (
-                <div className="grid grid-cols-3 gap-2.5 bg-muted/20 p-3.5 rounded-2xl border border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-muted/20 p-3 sm:p-3.5 rounded-2xl border border-border">
                   {["fraksi", "jabatan", "dapil"].map((field) => (
                     <div key={field}>
                       <label className="block text-muted-foreground mb-1 text-[10px] font-bold uppercase tracking-wider">{field}</label>
@@ -405,7 +477,7 @@ export default function AdminUsersTab({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-muted-foreground mb-1.5 font-bold">Instansi / Ormas</label>
                   <input

@@ -75,26 +75,26 @@ function DewanPerformanceCard({ dewan, ratings }: { dewan: any; ratings: any[] }
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="text-right flex items-center sm:block gap-1 sm:gap-0">
             <div className={`flex items-center gap-1 justify-end ${scoreColor}`}>
-              <Star size={14} className="fill-current" />
-              <span className="text-base font-extrabold tabular-nums">{overallAvg}</span>
+              <Star size={13} className="fill-current" />
+              <span className="text-sm sm:text-base font-extrabold tabular-nums">{overallAvg}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground font-medium">rata-rata kepuasan</p>
+            <p className="text-[10px] text-muted-foreground font-medium hidden sm:block">rata-rata kepuasan</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center text-muted-foreground">
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
+            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </div>
         </div>
       </div>
 
       {expanded && (
-        <div className="border-t border-border p-4 bg-muted/20 space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <div className="border-t border-border p-3.5 sm:p-4 bg-muted/20 space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
             {Object.entries(ASPECT_LABELS).map(([key, label]) => (
-              <div key={key} className="text-center p-3 bg-card rounded-xl border border-border/80 shadow-2xs">
-                <p className="text-[10px] text-muted-foreground mb-1.5 font-bold uppercase tracking-wider">{label}</p>
+              <div key={key} className="text-center p-2.5 sm:p-3 bg-card rounded-xl border border-border/80 shadow-2xs">
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-1 font-bold uppercase tracking-wider truncate">{label}</p>
                 <StarBar value={avgAspect(key)} />
               </div>
             ))}
@@ -104,7 +104,7 @@ function DewanPerformanceCard({ dewan, ratings }: { dewan: any; ratings: any[] }
             {dewanRatings.map((r: any) => (
               <div
                 key={r.id}
-                className="flex items-start gap-3 p-3.5 bg-card border border-border/80 rounded-xl text-xs"
+                className="flex items-start gap-3 p-3 sm:p-3.5 bg-card border border-border/80 rounded-xl text-xs"
               >
                 <div className="w-full">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -163,29 +163,31 @@ export default function AdminRatingsTab({ ratings, dewanList }: AdminRatingsTabP
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
 
       {/* Dewan Performance Accordion Section */}
       <div>
         <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
             <Award size={17} />
           </div>
-          <h3 className="text-sm font-bold text-foreground tracking-tight">
+          <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">
             Rapor Performa Legislator Berdasarkan Ulasan Konstituen
           </h3>
         </div>
 
         {dewanList.filter((d) => ratings.some((r) => r.dewanId === d.id)).length === 0 ? (
-          <div className="bg-card border border-border rounded-2xl p-12 text-center text-muted-foreground flex flex-col items-center justify-center shadow-xs">
-            <div className="w-16 h-16 rounded-3xl bg-muted/60 flex items-center justify-center mb-3">
-              <Award size={32} className="opacity-40 text-muted-foreground" />
+          <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 text-center text-muted-foreground flex flex-col items-center justify-center shadow-xs">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-muted/60 flex items-center justify-center mb-3">
+              <Award size={28} className="opacity-40 text-muted-foreground" />
             </div>
-            <p className="text-sm font-bold text-foreground mb-1">Belum Ada Ulasan Masuk</p>
-            <p className="text-xs text-muted-foreground">Ulasan akan terkumpul otomatis setelah warga menyelesaikan sesi pertemuan dengan anggota dewan.</p>
+            <p className="text-xs sm:text-sm font-bold text-foreground mb-1">Belum Ada Ulasan Masuk</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground max-w-sm">
+              Ulasan akan terkumpul otomatis setelah warga menyelesaikan sesi pertemuan dengan anggota dewan.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {dewanList.map((dewan) => (
               <DewanPerformanceCard key={dewan.id} dewan={dewan} ratings={ratings} />
             ))}
@@ -197,10 +199,10 @@ export default function AdminRatingsTab({ ratings, dewanList }: AdminRatingsTabP
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <MessageSquare size={17} />
             </div>
-            <h3 className="text-sm font-bold text-foreground tracking-tight flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight flex items-center gap-2">
               Daftar Ulasan &amp; Penilaian Masuk
               <span className="px-2 py-0.5 bg-muted rounded-full text-[10px] font-bold text-muted-foreground">
                 {filteredRatings.length}
@@ -221,8 +223,55 @@ export default function AdminRatingsTab({ ratings, dewanList }: AdminRatingsTabP
           </div>
         </div>
 
-        {/* Modern Ratings Table */}
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
+        {/* ── Mobile Card List View (< md) ── */}
+        <div className="block md:hidden space-y-3">
+          {filteredRatings.length === 0 ? (
+            <div className="bg-card border border-border rounded-2xl p-8 text-center text-muted-foreground">
+              <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-2.5">
+                <MessageSquare size={24} className="opacity-40 text-muted-foreground" />
+              </div>
+              <p className="text-xs font-bold text-foreground">Belum Ada Penilaian Masuk</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Ulasan akan otomatis tampil setelah warga memberi penilaian.</p>
+            </div>
+          ) : (
+            filteredRatings.map((r) => (
+              <div key={r.id} className="bg-card border border-border rounded-2xl p-4 shadow-2xs space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-xs text-foreground leading-snug">{r.dewanName}</h4>
+                    <p className="text-[10px] text-muted-foreground">{r.dewanFraksi || "DPRD Jawa Barat"}</p>
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg font-extrabold text-xs shrink-0">
+                    <Star size={11} className="fill-current" />
+                    <span>{r.avgScore}</span>
+                    <span className="text-[9px] opacity-70">/ 5</span>
+                  </div>
+                </div>
+
+                <div className="bg-muted/20 border border-border/60 rounded-xl p-2.5 space-y-1 text-xs">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-foreground">Warga: {r.masyarakatName}</span>
+                    <span className="text-muted-foreground text-[10px]">
+                      {new Date(r.meetingDate).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground line-clamp-1">
+                    Sesi: <span className="text-foreground font-medium">{r.meetingTitle}</span>
+                  </p>
+                </div>
+
+                {r.comment && (
+                  <p className="text-xs text-muted-foreground italic bg-card border border-border/40 p-2.5 rounded-xl">
+                    &ldquo;{r.comment}&rdquo;
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* ── Desktop Ratings Table (>= md) ── */}
+        <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="sticky top-0 z-10 bg-muted/60 dark:bg-muted/40 border-b border-border text-muted-foreground">

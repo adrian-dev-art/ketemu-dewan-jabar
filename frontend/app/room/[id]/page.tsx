@@ -197,7 +197,7 @@ function RoomControlsDock({
           }`}
           title={isMicrophoneEnabled ? "Matikan Mikrofon" : "Nyalakan Mikrofon"}
         >
-          {isMicrophoneEnabled ? <Mic size={19} /> : <MicOff size={19} />}
+          {isMicrophoneEnabled ? <Mic size={18} /> : <MicOff size={18} />}
         </button>
 
         {/* Camera Toggle */}
@@ -210,24 +210,24 @@ function RoomControlsDock({
           }`}
           title={isCameraEnabled ? "Matikan Kamera" : "Nyalakan Kamera"}
         >
-          {isCameraEnabled ? <Video size={19} /> : <VideoOff size={19} />}
+          {isCameraEnabled ? <Video size={18} /> : <VideoOff size={18} />}
         </button>
 
-        {/* Screen Share */}
+        {/* Screen Share — hidden on mobile (not supported well) */}
         <button
           onClick={toggleScreenShare}
-          className={`custom-control-btn ${
+          className={`custom-control-btn hidden md:inline-flex ${
             isScreenShareEnabled
               ? "custom-control-btn--active-blue"
               : "custom-control-btn--normal"
           }`}
           title={isScreenShareEnabled ? "Hentikan Berbagi Layar" : "Bagikan Layar"}
         >
-          <MonitorUp size={19} />
+          <MonitorUp size={18} />
         </button>
 
         {/* Vertical Divider */}
-        <div className="w-[1px] h-6 bg-white/10 mx-0.5" />
+        <div className="w-[1px] h-5 bg-white/10 mx-0.5" />
 
         {/* Chat Toggle */}
         <button
@@ -248,7 +248,7 @@ function RoomControlsDock({
           }`}
           title="Buka Chat Diskusi"
         >
-          <MessageSquare size={19} />
+          <MessageSquare size={18} />
           {chatOpen && activeTab === 'chat' && <span className="room-control-indicator" />}
         </button>
 
@@ -271,12 +271,12 @@ function RoomControlsDock({
           }`}
           title="Detail Agenda Aspirasi"
         >
-          <Info size={19} />
+          <Info size={18} />
           {chatOpen && activeTab === 'info' && <span className="room-control-indicator bg-amber-400 shadow-[0_0_6px_#f59e0b]" />}
         </button>
 
         {/* Vertical Divider */}
-        <div className="w-[1px] h-6 bg-white/10 mx-0.5" />
+        <div className="w-[1px] h-5 bg-white/10 mx-0.5" />
 
         {/* Leave Call */}
         <button
@@ -284,7 +284,7 @@ function RoomControlsDock({
           className="leave-call-btn"
           title="Keluar Pertemuan"
         >
-          <PhoneOff size={16} />
+          <PhoneOff size={15} />
           <span className="hidden sm:inline">Keluar</span>
         </button>
       </div>
@@ -396,7 +396,7 @@ function AgendaInfoPanel({ meetingDetails, roomId }: { meetingDetails: any; room
 // ─── Active Room UI ──────────────────────────────────────────
 function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: string; meetingId: string; meetingDetails: any; onLeave: () => void }) {
   const { user } = useAuth();
-  const [chatOpen, setChatOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'info'>('chat');
   const [layout, setLayout] = useState<'grid' | 'speaker'>('grid');
   const [isRecording, setIsRecording] = useState(meetingDetails?.isRecording || false);
@@ -406,38 +406,39 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
       {/* ── Top Bar ── */}
       <div className="room-top-bar">
         {/* Left section: Identity & Room Info */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {meetingDetails?.isStreaming ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/20 border border-red-500/35 flex-shrink-0">
-              <Radio size={12} className="text-red-400 animate-pulse" />
-              <span className="text-[11px] font-bold text-red-300 uppercase tracking-wider">Live Streaming</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/20 border border-red-500/35 flex-shrink-0">
+              <Radio size={11} className="text-red-400 animate-pulse" />
+              <span className="text-[10px] font-bold text-red-300 uppercase tracking-wider hidden xs:inline">Live</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex-shrink-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex-shrink-0">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Sesi Audiensi</span>
+              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Sesi</span>
             </div>
           )}
 
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] flex-shrink-0">
-            <span className="text-[11px] text-zinc-400 font-medium">Ruang</span>
-            <span className="text-[11px] font-bold text-zinc-100 font-mono">#{roomId}</span>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/[0.07] border border-white/[0.08] flex-shrink-0">
+            <span className="text-[10px] text-zinc-400 font-medium hidden sm:inline">Ruang</span>
+            <span className="text-[10px] font-bold text-zinc-100 font-mono">#{roomId}</span>
           </div>
 
           {meetingDetails?.title && (
-            <div className="hidden md:flex items-center max-w-[260px] lg:max-w-[380px] truncate text-xs text-zinc-300 font-medium px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06]">
+            <div className="hidden md:flex items-center max-w-[200px] lg:max-w-[380px] truncate text-xs text-zinc-300 font-medium px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
               <span className="truncate">{meetingDetails.title}</span>
             </div>
           )}
         </div>
 
         {/* Center section: Meeting Clock */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center flex-shrink-0">
           <MeetingTimer />
         </div>
 
         {/* Right section: Controls & Badges */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Admin streaming controls — hidden on mobile */}
           {user?.role === 'admin' && (
             meetingDetails?.isStreaming ? (
               <button
@@ -457,10 +458,10 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     }
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors border border-red-500/30 text-white"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-600 hover:bg-red-700 transition-colors border border-red-500/30 text-white"
               >
-                <LogOut size={12} className="rotate-180" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Stop Stream</span>
+                <LogOut size={11} className="rotate-180" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Stop</span>
               </button>
             ) : (
               <button
@@ -483,29 +484,29 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     }
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500/30 text-white"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors border border-blue-500/30 text-white"
               >
-                <Radio size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Start Stream</span>
+                <Radio size={11} />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Stream</span>
               </button>
             )
           )}
 
-          {/* Grid vs Speaker Layout Toggle */}
-          <div className="flex items-center bg-white/[0.06] rounded-full p-1 border border-white/[0.1]">
+          {/* Grid vs Speaker Layout Toggle — hidden on mobile */}
+          <div className="hidden sm:flex items-center bg-white/[0.06] rounded-full p-1 border border-white/[0.1]">
             <button
               onClick={() => setLayout('grid')}
               className={`p-1.5 rounded-full transition-all ${layout === 'grid' ? 'bg-emerald-500 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
               title="Tampilan Grid (Semua Peserta)"
             >
-              <LayoutGrid size={14} />
+              <LayoutGrid size={13} />
             </button>
             <button
               onClick={() => setLayout('speaker')}
               className={`p-1.5 rounded-full transition-all ${layout === 'speaker' ? 'bg-emerald-500 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
               title="Tampilan Pembicara Utama"
             >
-              <UserSquare2 size={14} />
+              <UserSquare2 size={13} />
             </button>
           </div>
 
@@ -536,21 +537,16 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                     alert("Terjadi kesalahan koneksi saat mencoba merekam.");
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all border ${
+                className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full transition-all border ${
                   isRecording 
                   ? "bg-red-500/20 border-red-500/40 text-red-400" 
                   : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                 }`}
              >
-                {isRecording ? <StopCircle size={12} className="animate-pulse" /> : <Circle size={12} />}
-                <span className="text-[10px] font-bold uppercase tracking-wider">{isRecording ? "Stop Rec" : "Record"}</span>
+                {isRecording ? <StopCircle size={11} className="animate-pulse" /> : <Circle size={11} />}
+                <span className="text-[10px] font-bold uppercase tracking-wider">{isRecording ? "Stop" : "Rec"}</span>
              </button>
           )}
-
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25">
-            <Shield size={12} className="text-emerald-400" />
-            <span className="text-[10px] font-semibold text-emerald-300">256-bit Terenkripsi</span>
-          </div>
         </div>
       </div>
 
@@ -561,10 +557,10 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
           <VideoStage layout={layout} />
         </div>
 
-        {/* Chat & Agenda Sidebar */}
+        {/* Chat & Agenda Sidebar — full overlay on mobile */}
         {chatOpen && (
           <div className="room-chat-sidebar">
-            <div className="room-chat-header flex items-center justify-between px-3 py-2.5 border-b border-white/[0.08] bg-zinc-950/70">
+            <div className="room-chat-header flex items-center justify-between px-3 py-2 border-b border-white/[0.08] bg-zinc-950/70">
               <div className="flex items-center gap-1 bg-white/[0.06] p-1 rounded-xl border border-white/[0.08]">
                 <button
                   onClick={() => setActiveTab('chat')}
@@ -591,12 +587,14 @@ function ActiveRoom({ roomId, meetingId, meetingDetails, onLeave }: { roomId: st
                 </button>
               </div>
 
+              {/* Close button — more prominent on mobile */}
               <button
                 onClick={() => setChatOpen(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-zinc-300 hover:text-white bg-white/[0.08] hover:bg-white/15 transition-all text-xs font-medium border border-white/10"
                 title="Tutup Panel"
               >
-                <X size={15} />
+                <X size={14} />
+                <span className="md:hidden">Kembali ke Video</span>
               </button>
             </div>
 

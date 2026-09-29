@@ -164,54 +164,54 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <div className="min-h-screen bg-background text-foreground pb-16">
+      <div className="min-h-screen bg-background text-foreground pb-24 sm:pb-16">
 
         {/* ── Admin Page Header & Navigation Bar ── */}
         <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
             {/* Identity Badge */}
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-sm shrink-0">
-                <ShieldCheck size={22} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-sm shrink-0">
+                <ShieldCheck size={20} className="sm:w-[22px] sm:h-[22px]" />
               </div>
-              <div>
-                <h1 className="text-base font-bold tracking-tight text-foreground leading-snug">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-base font-bold tracking-tight text-foreground leading-snug truncate">
                   Panel Super Administrator
                 </h1>
-                <p className="text-xs text-muted-foreground">
-                  Pusat Kendali Aspirasi &amp; Pengawasan DPRD Provinsi Jawa Barat
+                <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                  Pusat Kendali Aspirasi &amp; Pengawasan DPRD Jabar
                 </p>
               </div>
             </div>
 
             {/* Header Action Buttons */}
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
               <button
                 id="admin-refresh-btn"
                 onClick={fetchData}
                 disabled={loading}
-                className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-border bg-card/90 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-all shadow-xs active:scale-95 disabled:opacity-50"
+                className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl border border-border bg-card/90 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-all shadow-xs active:scale-95 disabled:opacity-50"
                 title="Muat Ulang Data"
               >
                 <RefreshCw size={13} className={loading ? "animate-spin text-primary" : ""} />
-                <span className="hidden sm:inline">Segarkan</span>
+                <span>Segarkan</span>
               </button>
 
               <button
                 id="admin-settings-btn"
                 onClick={() => router.push("/admin/settings")}
-                className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-border bg-card/90 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl border border-border bg-card/90 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
                 title="Pengaturan Sistem"
               >
                 <Settings size={13} />
-                <span className="hidden sm:inline">Pengaturan</span>
+                <span>Pengaturan</span>
               </button>
             </div>
           </div>
 
           {/* ── Modern Floating Pill Tab Bar ── */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3">
-            <div className="flex items-center gap-1.5 p-1.5 bg-muted/40 dark:bg-muted/25 rounded-2xl border border-border/70 overflow-x-auto custom-scrollbar">
+            <div className="flex items-center gap-1.5 p-1.5 bg-muted/40 dark:bg-muted/25 rounded-2xl border border-border/70 overflow-x-auto scrollbar-none touch-pan-x pr-4">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
@@ -220,17 +220,17 @@ export default function AdminDashboard() {
                     key={tab.key}
                     id={`admin-tab-${tab.key}`}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 select-none ${
+                    className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 select-none ${
                       isActive
                         ? "bg-purple-600 text-white shadow-md shadow-purple-600/25"
                         : "text-muted-foreground hover:text-foreground hover:bg-card/70"
                     }`}
                   >
-                    <Icon size={15} />
+                    <Icon size={14} className="sm:w-[15px] sm:h-[15px]" />
                     <span>{tab.label}</span>
                     {tab.count !== undefined && (
                       <span
-                        className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-colors ${
+                        className={`px-1.5 sm:px-2 py-0.5 text-[10px] font-bold rounded-full transition-colors ${
                           isActive
                             ? "bg-white/20 text-white"
                             : "bg-muted-foreground/15 text-muted-foreground"
