@@ -1,6 +1,6 @@
 # STANDAR OPERASIONAL PROSEDUR (SOP)
 
-## PENYELENGGARAAN E-AUDIENSI DAN PENGAWALAN ASPIRASI BERBASIS PLATFORM HUDANG
+## PENYELENGGARAAN E-ASPIRASI, E-AUDIENSI, DAN PENGAWALAN REKAM JEJAK BERBASIS PLATFORM HUDANG
 
 ### SEKRETARIAT DEWAN PERWAKILAN RAKYAT DAERAH PROVINSI JAWA BARAT
 
@@ -10,10 +10,10 @@
 
 | Parameter Dokumen | Spesifikasi dan Penetapan Formal |
 | :--- | :--- |
-| Judul Dokumen | Standar Operasional Prosedur Penyelenggaraan E-Audiensi dan Pengawalan Tindak Lanjut Aspirasi Berbasis Platform HUDANG |
+| Judul Dokumen | Standar Operasional Prosedur Penyelenggaraan Pelayanan E-Aspirasi Terpadu, Musyawarah E-Audiensi Virtual, dan Pengawalan Rekam Jejak Aspirasi Berbasis Platform HUDANG |
 | Kode Klasifikasi / Nomor Registrasi | SOP/DPRD-JBR/HUDANG/2026/001 |
 | Tanggal Efektif Mulai Berlaku | 15 September 2026 |
-| Status Revisi / Edisi | Edisi 2.0 (Revisi Praktis Terpadu – Selaras Alur Sistem Aplikasi) |
+| Status Revisi / Edisi | Edisi 2.1 (Revisi Komprehensif Terpadu – Selaras 100% Fitur Aplikasi E-Aspirasi & E-Audiensi) |
 | Unit Organisasi Pemilik Proses | Sekretariat Dewan Perwakilan Rakyat Daerah Provinsi Jawa Barat |
 | Unit Pelaksana Teknis Harian | Bagian Persidangan dan Perundang-undangan serta Bagian Fasilitasi Penganggaran dan Pengawasan |
 | Unit Pendukung Operasional TIK | Subbagian Humas, Protokol, dan Publikasi bersama Tim Pengelola SPBE Diskominfo Jabar |
@@ -24,7 +24,7 @@
 | Sasaran Pemakai Layanan | 1. Warga Masyarakat / Konstituen / Delegasi Komunitas pada 15 Daerah Pemilihan (Dapil) se-Jawa Barat.<br>2. Pimpinan dan Anggota DPRD Provinsi Jawa Barat (120 Anggota, Fraksi, dan Komisi I s.d. V).<br>3. Tim Administrator & Fasilitator Sidang Sekretariat DPRD Jawa Barat.<br>4. Pejabat Penghubung dan Kepala Perangkat Daerah Teknis (Organisasi Perangkat Daerah / OPD) Pemprov Jabar.<br>5. Tim Perekayasa TIK Diskominfo Provinsi Jawa Barat. |
 
 > [!NOTE]
-> Standar Operasional Prosedur (SOP) ini mengikat secara hukum seluruh aparatur sipil negara, pimpinan dan anggota kedewanan, serta pejabat perangkat daerah di lingkungan Pemerintah Daerah Provinsi Jawa Barat dalam penyelenggaraan penyerapan aspirasi publik dan musyawarah daring.
+> Standar Operasional Prosedur (SOP) ini mengikat secara hukum seluruh aparatur sipil negara, pimpinan dan anggota kedewanan, serta pejabat perangkat daerah di lingkungan Pemerintah Daerah Provinsi Jawa Barat dalam penyelenggaraan penyerapan aspirasi publik, pengelolaan usulan digital, serta musyawarah daring.
 
 ---
 
@@ -32,9 +32,15 @@
 
 ### 2.1 Dasar Pemikiran Operasional
 
-Provinsi Jawa Barat memiliki bentang wilayah seluas 37.087,92 kilometer persegi dengan 18 Kabupaten dan 9 Kota serta total populasi melampaui 51,7 juta jiwa yang terdistribusi ke dalam 15 Daerah Pemilihan. Berdasarkan evaluasi empiris tata laksana audiensi manual di lingkungan Sekretariat DPRD Provinsi Jawa Barat, pelaksanaan tatap muka fisik di Gedung DPRD Kota Bandung sering terkendala jarak geografis pelosok, benturan agenda reses dewan, serta keterbatasan kapasitas ruang rapat fisik.
+Provinsi Jawa Barat memiliki bentang wilayah seluas 37.087,92 kilometer persegi dengan 18 Kabupaten dan 9 Kota serta total populasi melampaui 51,7 juta jiwa yang terdistribusi ke dalam 15 Daerah Pemilihan. Berdasarkan evaluasi empiris tata laksana penyerapan aspirasi dan audiensi manual di lingkungan Sekretariat DPRD Provinsi Jawa Barat, pelaksanaan tatap muka fisik di Gedung DPRD Kota Bandung sering terkendala jarak geografis pelosok, benturan agenda reses dewan, serta keterbatasan kapasitas ruang rapat fisik.
 
-Kehadiran Platform HUDANG (Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak rakyat) mengintegrasikan seluruh proses pelayanan ke dalam satu pintu layanan terpadu berbasis digital: **Permohonan E-Audiensi (Tatap Muka Virtual Langsung)**. Melalui platform ini, masyarakat dapat memilih Anggota Dewan yang dituju, menentukan slot jadwal yang tersedia, berdialog langsung via video conference WebRTC terenkripsi, memperoleh risalah rapat otomatis berbasis kecerdasan buatan (AI), serta mengawal 4 tahap tindak lanjut oleh Perangkat Daerah (OPD) teknis secara transparan hingga tuntas 100%.
+Kehadiran Platform HUDANG (Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak rakyat) mengintegrasikan seluruh proses pelayanan ke dalam **Dua Kanal Pelayanan Terpadu Berbasis Digital**:
+
+1. **Kanal E-Aspirasi Terpadu (Kanal Usulan Asinkron)**:
+   Memfasilitasi warga masyarakat, kelompok swadaya masyarakat (KSM), pengurus desa/kelurahan, dan komunitas untuk menyampaikan proposal aspirasi pembangunan secara mandiri tanpa harus datang ke gedung dewan. Dilengkapi fasilitas unggah berkas multimedia (Proposal/RAB format PDF dan Rekaman Video Faktual Lapangan hingga 50 MB), penerbitan Lembar Tanda Bukti Resmi ber-QR Code untuk transparansi publik, penelaahan otomatis oleh model AI Tenaga Ahli Kedewanan (Gemini 2.5 Flash), pengawalan rekam jejak 5 tahapan definitif, hingga penyampaian tanggapan resmi anggota dewan dan pengunduhan surat balasan resmi.
+
+2. **Kanal E-Audiensi Virtual (Kanal Musyawarah Sinkron)**:
+   Memfasilitasi musyawarah tatap muka daring langsung (*live video conference*) antara Konstituen dengan 120 Anggota DPRD Jawa Barat melalui media WebRTC LiveKit SFU terenkripsi, transkripsi otomatis verbatim dan ringkasan eksekutif risalah persidangan berbasis AI, pengawalan 4 tahap tindak lanjut oleh Perangkat Daerah (OPD) teknis hingga tuntas 100%, serta instrumen evaluasi kinerja kedewanan 5 dimensi.
 
 ### 2.2 Asas-Asas Penyelenggaraan Pelayanan Publik
 
@@ -52,57 +58,88 @@ Penyelenggaraan pelayanan E-Audiensi berpedoman pada asas-asas utama administras
 
 ### 2.3 Tujuan Standar Operasional Prosedur
 
-1. Memberikan panduan kerja yang lugas, terstandarisasi, dan mudah dipahami bagi seluruh pihak dalam penyelenggaraan E-Audiensi berbasis Platform HUDANG.
+### 2.3 Tujuan Standar Operasional Prosedur
 
-2. Menjamin transparansi status permohonan warga melalui penerbitan Nomor Registrasi Tiket Digital yang dapat dipantau setiap saat.
+1. Memberikan panduan kerja yang lugas, terstandarisasi, dan mudah dipahami bagi seluruh pemangku kepentingan dalam penyelenggaraan dua kanal pelayanan utama Platform HUDANG: E-Aspirasi Terpadu dan E-Audiensi Virtual.
 
-3. Memfasilitasi tatap muka virtual resmi antara Konstituen dengan 120 Anggota DPRD Jawa Barat melalui media video conference yang aman, berkualitas tinggi, dan terdokumentasi resmi.
+2. Menjamin transparansi status penanganan usulan warga melalui penerbitan Nomor Registrasi Tiket Digital (`ASP-YYYYMM-XXXXX` dan `AUD-YYYYMM-XXXXX`) yang dapat dipantau setiap saat secara terbuka.
 
-4. Menjamin akuntabilitas tindak lanjut rekomendasi audiensi melalui pengawalan empat tahap berurutan oleh Organisasi Perangkat Daerah (OPD) Pemprov Jawa Barat hingga tuntas 100%.
+3. Menjamin standardisasi penerbitan Dokumen Lembar Tanda Bukti Penerimaan E-Aspirasi resmi berstempel dinas dan dilengkapi QR Code Publik resolusi tinggi untuk kemudahan pemantauan oleh konstituen, aparat wilayah, maupun media.
 
-5. Mengukur indeks kinerja pelayanan kedewanan secara objektif melalui instrumen evaluasi kepuasan konstituen multi-dimensi pasca-audiensi.
+4. Menerapkan tata kelola penelaahan cerdas berbasis AI Tenaga Ahli Kedewanan (Gemini 2.5 Flash) guna mempercepat proses telaah administratif, substansi, dan perumusan rekomendasi awal usulan masyarakat sebelum dibahas dalam rapat komisi/fraksi.
+
+5. Menjamin akuntabilitas pengawalan rekam jejak 5 tahapan definitif aspirasi dan 4 tahap tindak lanjut hasil audiensi oleh Perangkat Daerah (OPD) Pemprov Jawa Barat hingga tuntas 100%.
+
+6. Memfasilitasi tatap muka virtual resmi antara Konstituen dengan 120 Anggota DPRD Jawa Barat melalui media video conference yang aman, berkualitas tinggi, dan terdokumentasi resmi.
+
+7. Mengukur indeks kinerja pelayanan kedewanan secara objektif melalui instrumen evaluasi kepuasan konstituen multi-dimensi pasca-audiensi.
 
 ### 2.4 Batasan Ruang Lingkup Layanan
 
-SOP ini mengatur alur operasional satu pintu layanan Platform HUDANG yang mencakup:
+SOP ini mengatur alur operasional tata kelola pelayanan Platform HUDANG yang mencakup dua pilar layanan terintegrasi:
 
-1. Registrasi mandiri akun warga, validasi identitas berbasis NIK 16 digit, dan aktivasi akun melalui konfirmasi surel (email).
+#### A. Pilar Layanan E-Aspirasi Terpadu (Kanal Usulan Asinkron)
+1. Registrasi mandiri akun warga, validasi NIK 16 digit, dan pemilihan wilayah domisili (Dapil, Kab/Kota, Kecamatan, Alamat).
+2. Pengisian formulir E-Aspirasi elektronik dan pengunggahan berkas materi pendukung multi-format (Proposal/RAB format PDF dan Rekaman Video Faktual Lapangan hingga 50 MB).
+3. Penerbitan instan Lembar Tanda Bukti Penerimaan E-Aspirasi berkop dinas Sekretariat DPRD Jabar, nomor tiket resmi, dan kode QR pelacakan publik.
+4. Penelaahan kelayakan awal secara otomatis dan on-demand berbantuan model AI Tenaga Ahli Kedewanan berdasarkan 5 pilar kriteria formal.
+5. Verifikasi kelengkapan berkas administrasi oleh staf Sekretariat DPRD dan penyaluran disposisi ke Komisi I s.d. V atau Fraksi dewan.
+6. Pengawalan rekam jejak 5 tahapan definitif (*Pengajuan*, *Verifikasi Administrasi*, *Diteruskan ke Meja Dewan*, *Tindak Lanjut & Pembahasan*, *Tuntas Terjawab* / *Aspirasi Ditolak*).
+7. Penyampaian catatan tanggapan resmi anggota dewan, pengunggahan naskah dinas balasan, serta notifikasi surel otomatis kepada pemohon.
+8. Portal pelacakan publik terbuka (`/aspirasi/track/:ticketNumber`) via scanner QR Code tanpa memerlukan login akun.
+9. Dasbor analitik sebaran aspirasi 15 Dapil dan ekspor laporan rekapitulasi naskah dinas format Microsoft Excel multi-sheet.
 
-2. Pengajuan permohonan E-Audiensi (pemilihan Anggota Dewan/Komisi/Dapil, pemilihan slot jadwal yang tersedia, dan pengisian pokok usulan beserta berkas bukti).
-
-3. Penelaahan dan konfirmasi persetujuan jadwal audiensi oleh Anggota Dewan bersangkutan didukung fasilitator Sekretariat DPRD.
-
-4. Penyelenggaraan forum musyawarah tatap muka virtual (E-Audiensi) berbasis teknologi WebRTC LiveKit SFU.
-
-5. Perekaman sesi resmi, transkripsi teks otomatis, dan penyusunan ringkasan eksekutif risalah persidangan berbantuan Google Gemini AI.
-
-6. Pengawalan empat tahap tindak lanjut hasil audiensi oleh Perangkat Daerah (OPD) Pemprov Jabar (Disposisi Resmi, Bukti Baca OPD, Tanggapan & Komitmen OPD, serta Laporan Hasil Lapangan 100%).
-
-7. Penilaian indeks kepuasan konstituen (Rating System) dan pemutakhiran data capaian keterbukaan informasi pada Portal Transparansi Publik.
+#### B. Pilar Layanan E-Audiensi Virtual (Kanal Musyawarah Sinkron)
+1. Pengajuan permohonan E-Audiensi dengan memilih Anggota Dewan, Dapil, dan slot kalender ketersediaan (*Availability Manager*).
+2. Penelaahan dan konfirmasi persetujuan jadwal audiensi oleh Anggota Dewan bersangkutan didukung fasilitator Sekretariat DPRD.
+3. Penyelenggaraan forum musyawarah tatap muka virtual (E-Audiensi) berbasis teknologi WebRTC LiveKit SFU.
+4. Perekaman sesi resmi (LiveKit Egress), transkripsi teks verbatim otomatis, dan penyusunan ringkasan eksekutif risalah persidangan berbantuan AI.
+5. Pengawalan empat tahap tindak lanjut hasil audiensi oleh Perangkat Daerah (OPD) Pemprov Jabar (Disposisi Resmi, Bukti Baca OPD, Tanggapan & Komitmen OPD, serta Laporan Hasil Lapangan 100%).
+6. Penilaian indeks kepuasan konstituen (Rating System) dan pemutakhiran data capaian keterbukaan informasi pada Portal Transparansi Publik.
 
 ---
 
 ## 3. DEFINISI OPERASIONAL DAN GLOSARIUM ISTILAH BAKU
 
-1. **Platform HUDANG**: Sistem informasi resmi berbasis web dan mobile yang dikembangkan oleh Sekretariat DPRD Provinsi Jawa Barat untuk memfasilitasi musyawarah E-Audiensi tatap muka virtual dan pengawalan tindak lanjut aspirasi pembangunan daerah.
+1. **Platform HUDANG**: Sistem informasi resmi berbasis web dan mobile yang dikembangkan oleh Sekretariat DPRD Provinsi Jawa Barat untuk memfasilitasi penyerapan E-Aspirasi terpadu, musyawarah E-Audiensi tatap muka virtual, dan pengawalan tindak lanjut pembangunan daerah.
 
-2. **Masyarakat / Konstituen**: Setiap warga negara atau delegasi lembaga/komunitas yang memiliki identitas kependudukan sah (NIK) dan bertempat tinggal di wilayah Provinsi Jawa Barat (15 Daerah Pemilihan).
+2. **Masyarakat / Konstituen**: Setiap warga negara atau delegasi lembaga/komunitas yang memiliki identitas kependudukan sah (NIK 16 digit) dan bertempat tinggal di wilayah Provinsi Jawa Barat (15 Daerah Pemilihan).
 
-3. **E-Audiensi**: Forum musyawarah tatap muka virtual resmi antara Konstituen dengan Anggota DPRD Provinsi Jawa Barat yang difasilitasi melalui media video conference interaktif terenkripsi.
+3. **E-Aspirasi**: Kanal pelayanan penyampaian usulan aspirasi masyarakat secara digital berbasis naskah deskripsi, data wilayah administratif, dan berkas materi pendukung dokumen atau video tanpa keharusan tatap muka langsung.
 
-4. **Nomor Registrasi Tiket**: Kode alfanumerik unik yang diterbitkan otomatis oleh sistem saat permohonan audiensi berhasil dikirimkan (contoh: `AUD-202609-00125`), berfungsi sebagai identitas pelacakan terpadu.
+4. **Nomor Tiket Aspirasi**: Kode alfanumerik unik yang diterbitkan otomatis oleh sistem saat permohonan aspirasi berhasil dikirimkan (format: `ASP-YYYYMM-XXXXX`), berfungsi sebagai identitas registrasi dan pelacakan terpadu.
 
-5. **Availability Manager (Manajer Jadwal)**: Modul kalender ketersediaan waktu kerja kedewanan di mana Anggota Dewan menyediakan slot jam pertemuan daring yang dapat dipilih oleh masyarakat.
+5. **Lembar Tanda Bukti Penerimaan E-Aspirasi**: Dokumen digital resmi berkepala surat Sekretariat DPRD Provinsi Jawa Barat yang memuat nomor tiket, rincian permohonan, stempel digital verifikasi kedinasan, dan QR Code publik yang dapat dicetak/disimpan dalam format standar A4.
 
-6. **LiveKit SFU (Selective Forwarding Unit)**: Infrastruktur server gateway transmisi media audio-video berbasis WebRTC yang menyediakan panggilan tatap muka berlatensi rendah, adaptif terhadap kondisi jaringan, dan aman.
+6. **Kode QR Pelacakan Publik Terbuka**: Kode matriks dua dimensi beresolusi tinggi yang menghubungkan pemindai ke tautan web pelacakan publik terbuka (`/aspirasi/track/:ticketNumber`) untuk transparansi publik tanpa perlu login.
 
-7. **Transkrip & Ringkasan Gemini AI**: Notulensi dan ringkasan eksekutif pokok pembicaraan yang diproses secara otomatis dari rekaman audio pertemuan menggunakan kecerdasan buatan Google Gemini AI.
+7. **Alur 5 Tahapan Definitif Aspirasi**: Standar alur tahapan penanganan usulan masyarakat yang mencakup:
+   - Tahap 1: Pengajuan Aspirasi (`diajukan`) - Oleh Masyarakat
+   - Tahap 2: Verifikasi Administrasi (`verifikasi`) - Oleh Sekretariat DPRD
+   - Tahap 3: Diteruskan ke Meja Dewan (`diteruskan`) - Oleh Fraksi / Komisi
+   - Tahap 4: Tindak Lanjut & Pembahasan (`tindak_lanjut`) - Oleh Anggota Dewan / OPD
+   - Tahap 5: Tuntas Terjawab (`selesai`) - Oleh DPRD Jawa Barat
+   - Status Khusus: Aspirasi Ditolak / Dihentikan (`ditolak`) dengan catatan alasan transparan.
 
-8. **Empat Tahap Tindak Lanjut (Follow-Up Tracker)**: Mekanisme pengawalan rekomendasi audiensi yang terbagi dalam 4 fase akuntabilitas: Disposisi Resmi Dewan, Bukti Baca Pejabat OPD, Surat Tanggapan Komitmen OPD, serta Laporan Hasil Akhir Lapangan 100% Tuntas.
+8. **Telaah Cerdas AI Tenaga Ahli Kedewanan (AI Triage HUDANG)**: Modul inferensi kecerdasan buatan berbasis Google Gemini 2.5 Flash yang menelaah usulan secara multi-pilar (Identifikasi Proposal & Pemohon, Telaah Kelengkapan Administratif, Telaah Substansi & Urgensi, Poin Klarifikasi, dan Rekomendasi Tenaga Ahli).
 
-9. **Organisasi Perangkat Daerah (OPD)**: Dinas, badan, atau biro di lingkungan Pemerintah Daerah Provinsi Jawa Barat yang menerima disposisi rekomendasi dewan untuk mengeksekusi penanganan teknis di lapangan.
+9. **Materi Pendukung Multi-Format**: Berkas dokumen PDF (proposal usulan, legalitas KSM, surat lurah/camat, RAB) atau rekaman video faktual kondisi lapangan (MP4/WebM/MOV) dengan batas ukuran maksimal 50 MB yang dilengkapi penampil dokumen dan pemutar video interaktif.
 
-10. **Portal Transparansi Publik**: Laman keterbukaan informasi publik yang menampilkan rekapitulasi statistik jadwal audiensi, progres penyelesaian tindak lanjut OPD, dan indeks kepuasan konstituen tanpa memerlukan login akun.
+10. **E-Audiensi**: Forum musyawarah tatap muka virtual resmi antara Konstituen dengan Anggota DPRD Provinsi Jawa Barat yang difasilitasi melalui media video conference interaktif terenkripsi berbasis WebRTC LiveKit SFU.
+
+11. **Nomor Registrasi Tiket Audiensi**: Kode unik permohonan audiensi daring (format: `AUD-YYYYMM-XXXXX`).
+
+12. **Availability Manager (Manajer Jadwal)**: Modul kalender ketersediaan waktu kerja kedewanan di mana Anggota Dewan menyediakan slot jam pertemuan daring yang dapat dipilih oleh masyarakat.
+
+13. **LiveKit SFU (Selective Forwarding Unit)**: Infrastruktur server gateway transmisi media audio-video berbasis WebRTC yang menyediakan panggilan tatap muka berlatensi rendah, adaptif terhadap kondisi jaringan, dan aman.
+
+14. **Transkrip & Ringkasan Gemini AI**: Notulensi dan ringkasan eksekutif pokok pembicaraan yang diproses secara otomatis dari rekaman audio pertemuan menggunakan kecerdasan buatan Google Gemini AI.
+
+15. **Empat Tahap Tindak Lanjut (Follow-Up Tracker)**: Mekanisme pengawalan rekomendasi audiensi yang terbagi dalam 4 fase akuntabilitas: Disposisi Resmi Dewan, Bukti Baca Pejabat OPD, Surat Tanggapan Komitmen OPD, serta Laporan Hasil Akhir Lapangan 100% Tuntas.
+
+16. **Organisasi Perangkat Daerah (OPD)**: Dinas, badan, atau biro di lingkungan Pemerintah Daerah Provinsi Jawa Barat yang menerima disposisi rekomendasi dewan untuk mengeksekusi penanganan teknis di lapangan.
+
+17. **Portal Transparansi Publik**: Laman keterbukaan informasi publik yang menampilkan rekapitulasi statistik jadwal audiensi, progres penyelesaian tindak lanjut OPD, dan indeks kepuasan konstituen tanpa memerlukan login akun.
 
 ---
 
@@ -112,6 +149,7 @@ Prinsip pembagian peran mengacu pada standar tata kelola RACI (*Responsible, Acc
 
 | No | Rincian Aktivitas Operasional | Masyarakat | Anggota Dewan | Fasilitator / Admin Sekretariat | Pejabat OPD | Tim Perekayasa TIK |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **A** | **Tata Kelola Layanan E-Audiensi Virtual** | | | | | |
 | 1 | Pendaftaran Akun Warga & Validasi NIK | R, A | I | I | - | C, I |
 | 2 | Pengajuan Permohonan E-Audiensi (Pilih Dewan & Jadwal) | R, A | I | I | - | I |
 | 3 | Penelaahan Berkas & Konfirmasi Persetujuan Jadwal | I | R, A | C, R | - | I |
@@ -123,6 +161,16 @@ Prinsip pembagian peran mengacu pada standar tata kelola RACI (*Responsible, Acc
 | 9 | Tahap 4 Follow-Up: Eksekusi Lapangan & Bukti 100% | I | I | C | R, A | - |
 | 10 | Pengisian Evaluasi Kepuasan Dewan (Rating 5 Bintang) | R, A | I | I | - | I |
 | 11 | Pemutakhiran Portal Transparansi Publik | I | I | R | I | R, A |
+| **B** | **Tata Kelola Layanan E-Aspirasi Terpadu** | | | | | |
+| 12 | Pengajuan E-Aspirasi Mandiri & Unggah Berkas PDF/Video (50MB) | R, A | I | I | - | I |
+| 13 | Penerbitan Lembar Tanda Bukti & QR Code Pelacakan Terbuka | I | I | R | - | R, A |
+| 14 | Penelaahan Otomatis oleh Model AI Tenaga Ahli Gemini | I | C | R | - | R, A |
+| 15 | Verifikasi Administrasi & Penyaluran Aspirasi ke Komisi/Fraksi | I | C | R, A | - | I |
+| 16 | Pembahasan Materi Usulan dalam Rapat Komisi / Penelaahan Lapangan | I | R, A | C, R | C | - |
+| 17 | Penyampaian Tanggapan Resmi Dewan & Unggah Dokumen Balasan | I | R, A | R | I | - |
+| 18 | Pengiriman Notifikasi Surel Status & Tanggapan ke Pemohon | I | I | R | - | R, A |
+| 19 | Pemindaian QR Code & Pemantauan Stepper 5 Tahap Publik | R, A | I | I | I | I |
+| 20 | Pengelolaan Analitik Dasbor & Ekspor Rekapitulasi Excel Multi-Sheet | - | I | R, A | - | R, A |
 
 ---
 
@@ -272,6 +320,115 @@ Bagan alur berikut mengilustrasikan pembuktian akuntabilitas pasca-audiensi mula
 4. **Waktu Standar**: Pengisian evaluasi oleh warga dilakukan dalam kurun waktu 7 hari kalender pasca-audiensi.
 5. **Keluaran**: Skor Indeks Kepuasan Konstituen dan Pembaruan Dasbor Statistik Transparansi Publik.
 
+### 6.8 Prosedur Pengajuan E-Aspirasi Mandiri dan Pengunggahan Materi Pendukung (PDF & Video)
+
+1. **Pelaksana**: Warga Masyarakat / Delegasi Komunitas didukung antarmuka `AspirasiForm` dan sistem otomatis.
+2. **Kelengkapan Masukan**:
+   - Judul Usulan Aspirasi (minimal 5 karakter, maksimal 255 karakter).
+   - Deskripsi Rinci Usulan (minimal 20 karakter).
+   - Kategori Urusan: Infrastruktur, Pendidikan, Kesehatan, Lingkungan Hidup, Pertanian & Ketahanan Pangan, Sosial & Ekonomi, atau Lainnya.
+   - Daerah Pemilihan (Dapil I s.d. XV Jawa Barat).
+   - Lokus Administratif: Kabupaten/Kota, Kecamatan, dan Alamat Spesifik.
+   - Pilihan Anggota Dewan Tujuan (opsional).
+   - Berkas Materi Pendukung Multi-Format: Dokumen PDF (proposal teknis, akta KSM, surat lurah/camat, RAB) atau Rekaman Video Faktual Lapangan (MP4, WebM, QuickTime MOV) dengan batas ukuran maksimal 50 MB.
+3. **Uraian Prosedur**:
+   - Pemohon masuk ke portal masyarakat (`/masyarakat`) dan memilih tab **E-Aspirasi**, lalu mengklik tombol **Buat Aspirasi Baru**.
+   - Pemohon mengisi seluruh kolom isian formulir sesuai fakta kebutuhan pembangunan wilayah.
+   - Apabila melampirkan berkas bukti fisik, pemohon mengunggah dokumen PDF atau video rekaman lapangan. Sistem memproses pengunggahan melalui endpoint `POST /api/aspirasi/upload-materi`, melakukan konversi base64 aman, memeriksa ukuran berkas (maksimal 50 MB), melakukan sanitasi nama berkas, dan menyimpannya pada repositori berkas lokal (`uploads/materi`).
+   - Pemohon mengklik tombol **Kirimkan Aspirasi**.
+   - Sistem menerbitkan Nomor Registrasi Tiket unik berformat `ASP-YYYYMM-XXXXX`, menyimpan rekaman ke dalam basis data dengan status awal `diajukan`, mencatat log riwayat awal pada `AspirasiTimeline`, memancarkan event Socket.IO `aspirasi:created`, serta memicu eksekusi analisis Tenaga Ahli AI secara asinkron di latar belakang.
+4. **Waktu Standar**: Kurang dari 5 menit untuk pengisian; proses transmisi dan penerbitan tiket di bawah 5 detik.
+5. **Keluaran**: Nomor Registrasi Tiket Resmi (`ASP-YYYYMM-XXXXX`) dan Notifikasi Konfirmasi Pengajuan Sukses.
+
+### 6.9 Prosedur Penerbitan Lembar Tanda Bukti Penerimaan E-Aspirasi Resmi dan Kode QR Publik
+
+1. **Pelaksana**: Komponen Modal `AspirasiBuktiModal` pada antarmuka pengguna pemohon.
+2. **Kelengkapan Masukan**: Objek data aspirasi yang berhasil diterbitkan oleh sistem.
+3. **Uraian Prosedur**:
+   - Segera setelah pengajuan berhasil, sistem menampilkan jendela modal **Lembar Tanda Bukti Penerimaan E-Aspirasi**.
+   - Sistem menghasilkan Kode QR publik beresolusi tinggi (level koreksi galat H) berbasis URL absolut pelacakan publik: `{origin}/aspirasi/track/{ticketNumber}`.
+   - Lembar Tanda Bukti memuat:
+     - Kop resmi dinas Sekretariat DPRD Provinsi Jawa Barat lengkap dengan lambang daerah.
+     - Nomor Registrasi Tiket tercetak tebal dengan tipografi monospace.
+     - Identitas pemohon (Nama, Nomor WhatsApp, Wilayah Domisili).
+     - Rincian usulan (Judul, Kategori, Dapil, Lokus Wilayah, Tanggal Pengajuan).
+     - Status tahapan awal (*Diajukan / Menunggu Verifikasi Administrasi*).
+     - Checklist lampiran materi pendukung (Tipe Berkas, Nama File, Ukuran).
+     - Stempel digital resmi dan kode verifikasi tanda tangan elektronik Sekretariat DPRD Jabar.
+   - Pemohon dapat melakukan:
+     - **Cetak Lembar Bukti (Print)**: Menghasilkan cetakan fisik atau berkas PDF standar A4 melalui fungsi cetak peramban (`window.print()`).
+     - **Salin Tautan**: Menyimpan tautan pelacakan publik ke dalam clipboard.
+     - **Bagikan WhatsApp**: Mengirimkan naskah bukti tanda terima beserta tautan pelacakan ke aplikasi WhatsApp warga/kelompok.
+     - **Unduh QR Code**: Mengunduh berkas gambar kode QR dalam format PNG (`QR-Bukti-Aspirasi-ASP-XXXXXX.png`).
+4. **Waktu Standar**: Instan (kurang dari 2 detik).
+5. **Keluaran**: Dokumen Lembar Tanda Bukti Penerimaan Resmi dan Berkas Kode QR Publik.
+
+### 6.10 Prosedur Penelaahan Cerdas oleh Tenaga Ahli AI Kedewanan (AI Triage HUDANG)
+
+1. **Pelaksana**: Mesin Inferensi Gemini 2.5 Flash (`analyzeAspirasiProposal`) bersama Analis Kebijakan Sekretariat DPRD.
+2. **Kelengkapan Masukan**: Naskah deskripsi usulan, data wilayah dapil, dan berkas lampiran PDF/Video yang diunggah pemohon.
+3. **Uraian Prosedur**:
+   - Sistem secara otomatis (atau melalui tombol on-demand pada modal admin/dewan via `POST /api/aspirasi/:id/analisis-ai`) mengirimkan data usulan ke pipeline Tenaga Ahli AI.
+   - Model AI menginspeksi berkas naskah proposal secara faktual dan menghasilkan telaah berstruktur 5 pilar baku:
+     1. **Bagian I – Identifikasi Proposal & Pemohon**: Menelaah subjek pembahasan, pemohon/KSM pengusul, wilayah dapil, dan pokok usulan dalam 2–3 kalimat.
+     2. **Bagian II – Telaah Kelengkapan Administratif**: Menguji identitas pengusul, surat pengantar lurah/rekomendasi camat, legalitas KSM, dan rincian anggaran biaya (RAB).
+     3. **Bagian III – Telaah Substansi & Urgensi**: Menilai urgensi terhadap krisis riil wilayah (misal penanganan sampah Bandung Raya, perbaikan jalan, jembatan pelosok), kejelasan sasaran/manfaat, kelayakan teknis/anggaran, keselarasan dengan program prioritas Pemprov Jabar/RPJMD, serta analisis potensi risiko dan mitigasi.
+     4. **Bagian IV – Poin Klarifikasi yang Diperlukan**: Mengidentifikasi kejelasan izin lahan (fasos/fasum), persetujuan warga sekitar, atau konfirmasi teknis instansi.
+     5. **Bagian V – Rekomendasi Tenaga Ahli**: Merumuskan rekomendasi tegas antara *"Diteruskan untuk dibahas"*, *"Perlu klarifikasi/kelengkapan tambahan"*, atau *"Tidak direkomendasikan"* disertai pertimbangan kunci.
+   - Hasil telaah disimpan pada kolom `aiAnalysis` dan `aiRecommendation` di pangkalan data relasional.
+   - Antarmuka menampilkan hasil telaah menggunakan komponen perender modular `FormattedAiAnalysis` dengan kartu tematik berwarna, badge pill sub-kunci, dan penekanan visual pada rekomendasi kedewanan.
+4. **Waktu Standar**: Kurang dari 15 detik pasca-pengajuan atau pemanggilan on-demand.
+5. **Keluaran**: Laporan Naskah Telaah Kritis Tenaga Ahli AI dan Label Rekomendasi Disposisi.
+
+### 6.11 Prosedur Verifikasi Administrasi dan Penyaluran Aspirasi ke Komisi/Fraksi
+
+1. **Pelaksana**: Staf Bagian Persidangan dan Perundang-undangan Sekretariat DPRD Jawa Barat.
+2. **Kelengkapan Masukan**: Berkas permohonan aspirasi pada Dasbor Admin (`/admin` tab Aspirasi).
+3. **Uraian Prosedur**:
+   - Verifikator memeriksa keabsahan NIK pemohon, kejelasan lokasi usulan, serta kelengkapan berkas materi PDF/video pendukung.
+   - Verifikator meninjau hasil telaah awal model Tenaga Ahli AI sebagai bahan pertimbangan kelayakan administrasi.
+   - Verifikator melakukan mutasi status pada antarmuka admin (`PATCH /api/aspirasi/:id/status`):
+     - **Status Verifikasi (`verifikasi`)**: Berkas sedang ditelaah lebih lanjut oleh tim analis.
+     - **Status Diteruskan (`diteruskan`)**: Usulan dinyatakan lengkap dan memenuhi syarat formal, kemudian diteruskan ke meja pimpinan/anggota dewan pada komisi terkait (Komisi I Pemerintahan, Komisi II Perekonomian, Komisi III Keuangan, Komisi IV Pembangunan/Infrastruktur, atau Komisi V Kesejahteraan Rakyat).
+     - **Status Ditolak (`ditolak`)**: Usulan tidak memenuhi kriteria regulasi atau bukan merupakan kewenangan Pemerintah Provinsi Jawa Barat, disertai pengisian catatan keterangan alasan penolakan yang objektif.
+   - Sistem mencatat rekaman mutasi secara otomatis pada `AspirasiTimeline`, memancarkan event pembaruan via Socket.IO, dan mengirimkan notifikasi surel resmi ke alamat email pemohon.
+4. **Waktu Standar**: Maksimal 2x24 jam kerja sejak usulan masuk.
+5. **Keluaran**: Pembaruan Status Verifikasi Administrasi dan Entri Audit Jejak Rekam.
+
+### 6.12 Prosedur Pelacakan Publik Terbuka 5 Tahapan Definitif via Pemindaian QR Code
+
+1. **Pelaksana**: Publik, Pemohon Warga, Perangkat Desa/Kelurahan, Pers, dan Anggota Dewan.
+2. **Kelengkapan Masukan**: Pemindaian kode QR pada lembar tanda bukti atau akses tautan langsung `/aspirasi/track/:ticketNumber`.
+3. **Uraian Prosedur**:
+   - Pengguna memindai kode QR menggunakan kamera ponsel pintar atau memasukkan nomor tiket pada bilah pencarian pelacakan.
+   - Peramban membuka laman publik `/aspirasi/track/:ticketNumber` tanpa meminta login akun.
+   - Sistem menyajikan informasi transparan yang mencakup:
+     - **Stepper 5 Tahapan Definitif**: Visualisasi alur progres horizontal/vertikal interaktif (*Tahap 1: Pengajuan Aspirasi*, *Tahap 2: Verifikasi Administrasi*, *Tahap 3: Diteruskan ke Meja Dewan*, *Tahap 4: Tindak Lanjut & Pembahasan*, *Tahap 5: Tuntas Terjawab*, atau *Status Ditolak/Dihentikan*).
+     - **Rincian Data Usulan**: Judul, uraian masalah, kategori, dapil, lokus wilayah, dan nama pemohon (dengan NIK tersensor sesuai ketentuan UU Pelindungan Data Pribadi).
+     - **Inspeksi Materi Bukti**: Pemutar video terintegrasi untuk berkas rekaman lapangan (MP4/WebM/MOV) dan tombol unduh dokumen PDF untuk naskah proposal teknis atau tabel RAB.
+     - **Telaah Cerdas Sistem Cerdas HUDANG**: Tampilan naskah analisis kelayakan dari model Tenaga Ahli AI yang tersusun rapi dalam kartu-kartu tematik.
+     - **Tanggapan Resmi Dewan**: Bagian khusus yang memuat naskah tanggapan dewan, identitas penanggap, serta tautan unduh surat jawaban dinas.
+     - **Buku Catatan Rekam Jejak (Timeline)**: Kronologi lengkap stempel waktu, keterangan aktivitas, dan instansi/aktor penanggung jawab.
+4. **Waktu Standar**: Akses instan dalam waktu pemuatan di bawah 1 detik.
+5. **Keluaran**: Informasi Transparansi Rekam Jejak Aspirasi Publik yang Akuntabel.
+
+### 6.13 Prosedur Penyampaian Tanggapan Resmi Dewan, Penerbitan Naskah Balasan, dan Notifikasi Surel
+
+1. **Pelaksana**: Pimpinan dan Anggota DPRD Provinsi Jawa Barat didukung staf komisi/fraksi.
+2. **Kelengkapan Masukan**: Antarmuka `AspirasiTimelineModal` pada Dasbor Dewan (`/dewan` tab Aspirasi).
+3. **Uraian Prosedur**:
+   - Anggota Dewan membuka aspirasi yang dialokasikan pada daerah pemilihannya.
+   - Dewan menelaah pokok usulan, memeriksa materi video dokumentasi lapangan atau dokumen proposal PDF, serta membaca hasil rekomendasi Tenaga Ahli AI.
+   - Anggota Dewan mengisi formulir tanggapan resmi pada bagian bawah modal:
+     - Menuliskan naskah **Tanggapan Resmi Kedewanan** (memuat pandangan fraksi/komisi, hasil pembahasan rapat kerja, atau rekomendasi advokasi anggaran).
+     - Menginput tautan surat tanggapan / surat disposisi komisi bila naskah dinas formal telah diterbitkan.
+     - Memilih status akhir: *Tindak Lanjut Lapangan/OPD* (`tindak_lanjut`) atau *Tuntas Terjawab* (`selesai`).
+   - Dewan mengklik tombol **Kirim Tanggapan Resmi**.
+   - Sistem mengeksekusi `POST /api/aspirasi/:id/tanggapan`, memutakhirkan basis data, mencatat event timeline "Tanggapan Resmi Kedewanan", memancarkan event Socket.IO, dan memicu pengiriman email notifikasi otomatis kepada pemohon via `sendAspirasiResponseEmail`.
+   - Laman pelacakan publik (`/aspirasi/track/:ticketNumber`) secara seketika memutakhirkan tampilan tanggapan resmi dewan sehingga pemohon dan masyarakat luas dapat langsung membacanya.
+4. **Waktu Standar**: Maksimal 5 hari kerja sejak aspirasi diterima di meja komisi/fraksi dewan.
+5. **Keluaran**: Naskah Tanggapan Resmi Kedewanan, Pembaruan Stepper Status Menjadi Tuntas, dan Pengiriman Surel Notifikasi ke Warga.
+
 ---
 
 ## 7. STANDAR TINGKAT LAYANAN (SERVICE LEVEL AGREEMENT / SLA) DAN KONTINJENSI TEKNIS
@@ -280,6 +437,7 @@ Bagan alur berikut mengilustrasikan pembuktian akuntabilitas pasca-audiensi mula
 
 | No | Tahapan Pelayanan Operasional | Batas Waktu Standar (SLA) | Penanggung Jawab | Bukti Keluaran Sistem |
 | :--- | :--- | :--- | :--- | :--- |
+| **A** | **Standar Layanan E-Audiensi Virtual** | | | |
 | 1 | Pendaftaran Akun dan Aktivasi Pengguna | Kurang dari 2 Menit | Sistem Otomatis / Warga | Akun Aktif & Surel Konfirmasi |
 | 2 | Penerbitan Nomor Registrasi Tiket Audiensi | Kurang dari 5 Detik | Sistem Otomatis HUDANG | Tiket Digital (`AUD-YYYYMM-XXXXX`) |
 | 3 | Konfirmasi dan Persetujuan Jadwal oleh Dewan | Maksimal 2 kali 24 Jam Kerja | Anggota Dewan / Fasilitator | Status Jadwal *Confirmed* & Tautan Ruang |
@@ -290,6 +448,14 @@ Bagan alur berikut mengilustrasikan pembuktian akuntabilitas pasca-audiensi mula
 | 8 | Tahap 3: Unggah Surat Tanggapan & Komitmen OPD | Maksimal 5 kali 24 Jam Kerja | Kepala Instansi OPD Terkait | Surat Tanggapan Resmi & Rencana Aksi |
 | 9 | Tahap 4: Laporan Hasil Akhir Lapangan 100% | Maksimal 14 Hari Kerja | Tim Pelaksana Teknis OPD | Laporan Akhir & Foto Dokumentasi Tuntas |
 | 10 | Evaluasi Kepuasan Pelayanan oleh Konstituen | 7 Hari Kalender Pasca-Audiensi | Warga Konstituen Pemohon | Nilai Bintang 1–5 & Catatan Ulasan Warga |
+| **B** | **Standar Layanan E-Aspirasi Terpadu** | | | |
+| 11 | Pengunggahan Berkas Materi PDF / Video (50 MB) | Kurang dari 30 Detik | Modul Ingestion Berkas | Jalur URI Berkas `/uploads/materi/...` |
+| 12 | Penerbitan Nomor Tiket & Tanda Bukti QR Code | Kurang dari 3 Detik | Generator Tiket & QR HUDANG | Lembar Tanda Bukti & Tiket `ASP-YYYYMM-XXXXX` |
+| 13 | Penelaahan Cerdas Otomatis Tenaga Ahli AI | Kurang dari 15 Detik | Model Gemini 2.5 Flash API | Laporan Telaah 5 Pilar pada `aiAnalysis` |
+| 14 | Verifikasi Administrasi oleh Sekretariat DPRD | Maksimal 2 kali 24 Jam Kerja | Staf Bagian Persidangan | Mutasi Status `verifikasi` / `perbaikan` |
+| 15 | Penyaluran Aspirasi ke Meja Komisi / Fraksi | Maksimal 1 kali 24 Jam Kerja | Fasilitator Sekretariat DPRD | Mutasi Status `diteruskan` & Notifikasi Surel |
+| 16 | Pembahasan & Penyampaian Tanggapan Resmi Dewan | Maksimal 5 Hari Kerja | Anggota Dewan / Pimpinan Komisi | Naskah Tanggapan Resmi & Surat Jawaban |
+| 17 | Pemutakhiran Real-Time Stepper Lacak Publik | Instan (Real-Time Socket.IO) | Mesin Pelacakan Terbuka | Stepper Status Tuntas & Akses QR Code Publik |
 
 ### 7.2 Tata Kelola Kontinjensi dan Gangguan Teknis
 

@@ -116,6 +116,11 @@ Sistem menerapkan arsitektur kendali akses berbasis peran (*Role-Based Access Co
 | FR-14 | Portal Keterbukaan Publik & Sensor Data Pribadi | Menyediakan endpoint publik tanpa otentikasi untuk membaca data agregat penanganan aspirasi, risalah publik, dan dokumen dinas tuntas dengan penyensoran data pribadi (*data masking*). | Seluruh karakter NIK disensor menyisakan 4 digit awal dan 4 digit akhir, alamat email disamarkan, dan nomor telepon seluler disensor sesuai mandat Undang-Undang Pelindungan Data Pribadi. |
 | FR-15 | Mesin Ekspor Data Terstandarisasi SIPD | Menyaring usulan aspirasi yang telah berstatus disetujui, memetakan atribut usulan ke dalam kamus data perencanaan daerah SIPD, dan mengekspor paket data dalam format JSON dan XLSX. | Berkas luaran ekspor mematuhi spesifikasi skema data SIPD Kemendagri, memuat kode rekening urusan pemerintahan daerah dan koordinat lintang-bujur desimal secara valid. |
 | FR-16 | Moderasi Darurat, Filter SARA & Audit Forensik | Melakukan inspeksi leksikal terhadap teks usulan masuk menggunakan kamus kata terlarang (*profanity filter*), mengkarantina konten berbahaya, dan merekam log forensik audit secara permanen. | Permintaan HTTP yang memuat konten berbahaya otomatis dialihkan ke antrean karantina dengan status respons kode 422 Unprocessable Entity, mencatat alamat IP klien dan User Agent ke log audit. |
+| FR-17 | Ingestion E-Aspirasi Terpadu & Multi-Format Media Vault | Memproses pengajuan usulan aspirasi masyarakat (Mandiri/Kelompok) berbasis NIK 16 digit, pemetaan wilayah dapil (I–XV), lokus kabupaten/kota, kecamatan, dan alamat fisik, serta mendukung pengunggahan berkas materi pendukung dokumen PDF dan video rekaman faktual (MP4/WebM/MOV) hingga 50 MB dengan deteksi tipe MIME aman. | Mengembalikan kode status 201 Created dengan nomor registrasi tiket `ASP-YYYYMM-XXXXX`, menyimpan metadata berkas pada kolom `materiUrl`, `materiType`, `materiFileName`, dan `materiSize` secara transaksional dalam waktu di bawah 300 milidetik. |
+| FR-18 | Generator Tanda Bukti E-Aspirasi & QR Code Publik | Menerbitkan dokumen tanda terima digital resmi berkepala surat Sekretariat DPRD Provinsi Jawa Barat yang memuat rincian identitas pemohon, nomor tiket registrasi resmi, stempel digital verifikasi kedinasan, dan QR Code publik beresolusi tinggi (vektor SVG/PNG) untuk pelacakan langsung. | Dokumen tanda bukti dapat diunduh/dicetak instan dalam format standar A4, dan QR Code terverifikasi mengarahkan peramban secara presisi ke rute publik `/aspirasi/track/:ticketNumber` dengan latensi pembuatan kode di bawah 50 milidetik. |
+| FR-19 | Public Open Tracking Engine 5 Tahapan Definitif | Menyediakan rute pelacakan publik terbuka tanpa kewajiban autentikasi bagi warga, media, dan pemangku kepentingan untuk memantau siklus penanganan 5 tahapan definitif (*Diajukan*, *Verifikasi Administrasi*, *Diteruskan ke Komisi/Fraksi*, *Tindak Lanjut Lapangan/OPD*, *Selesai* / *Ditolak*). | Endpoint `/api/aspirasi/track/:ticketNumber` mengembalikan payload publik dengan penyensoran data pribadi sesuai mandat UU PDP No. 27/2022, menyajikan stepper tahapan interaktif, penampil dokumen PDF, pemutar video, dan tanggapan dewan dalam waktu di bawah 150 milidetik. |
+| FR-20 | Pipeline Telaah Cerdas Tenaga Ahli (AI HUDANG Gemini) | Menjalankan model inferensi kecerdasan buatan Gemini 2.5 Flash yang menelaah usulan secara multi-pilar (*Identifikasi Proposal*, *Telaah Administratif*, *Telaah Substansi & Urgensi Wilayah*, *Catatan Klarifikasi*, dan *Rekomendasi Disposisi Kedewanan*) serta memformat keluaran ke dalam komponen antarmuka responsif (`FormattedAiAnalysis`). | Inferensi AI selesai dalam waktu di bawah 15 detik, menyimpan naskah telaah pada kolom `aiAnalysis`, menetapkan ringkasan rekomendasi pada `aiRecommendation`, dan menampilkan card tematik berwarna dinamis serta pill badges pada portal administrasi dan pelacakan publik. |
+| FR-21 | Modul Tanggapan Kedewanan & Disposisi Komisi | Memfasilitasi pimpinan/anggota DPRD serta staf komisi untuk meninjau materi berkas dan hasil telaah AI, memberikan catatan tanggapan resmi kedewanan berstempel digital, serta mengunggah surat balasan/disposisi resmi komisi untuk diunduh pemohon. | Payload tanggapan memutakhirkan kolom `tanggapanDewan`, `tanggapanOleh`, `tanggapanAt`, dan `suratTanggapanUrl`, memicu pembaruan status ke *Diteruskan ke Komisi/Fraksi* atau *Selesai*, serta dapat langsung diakses publik pada stepper rekam jejak. |
 
 ### 1.5 Spesifikasi Kebutuhan Non-Fungsional Kuantitatif (Non-Functional Requirements)
 
@@ -521,6 +526,12 @@ Tabel spesifikasi di bawah merinci kontrak antarmuka pemrograman aplikasi mencak
 | `GET` | `/api/public/transparency` | Akses Publik Bebas | Parameter Kueri: `?kabupaten=Bandung&komisi=Komisi+IV` | `{"totalCompleted":48,"averageRating":4.7,"items":[{"scheduleId":101,"title":"string","documents":[]}]}` | 200 OK |
 | `GET` | `/api/export/sipd` | Peran `bappeda` / `admin` | Parameter Kueri: `?tahun=2027&format=json` | `{"sipdPayloadVersion":"1.0","usulan":[{"kodeRekening":"string","uraian":"string","lokus":"string","anggaran":0}]}` | 200 OK / 403 Forbidden |
 | `GET` | `/api/gis/perjalanan-dinas` | Akses Publik / Internal | Parameter Kueri: `?tahun=2026` | `{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kabupaten":"string","total":15},"geometry":{}}]}` | 200 OK |
+| `POST` | `/api/aspirasi` | Peran `masyarakat` | Multipart Form: `judul`, `deskripsi`, `kategori`, `dapil`, `kabupatenKota`, `kecamatan`, `alamat`, `materi` (PDF/Video) | `{"success":true,"aspirasi":{"id":1,"ticketNumber":"ASP-202609-40912","status":"Diajukan","materiUrl":"/uploads/..."}}` | 201 Created / 400 Bad Request |
+| `GET` | `/api/aspirasi/my` | Peran `masyarakat` | Parameter Kueri: `?status=all&page=1&limit=20` | `{"aspirasi":[{"id":1,"ticketNumber":"ASP-202609-40912","judul":"string","status":"Diajukan","aiRecommendation":"string"}],"total":1}` | 200 OK / 401 Unauthorized |
+| `GET` | `/api/aspirasi/track/:ticketNumber` | Akses Publik Bebas (QR Code) | Parameter Jalur: `ticketNumber` (contoh: `ASP-202609-40912`) | `{"ticketNumber":"string","judul":"string","status":"string","currentStep":1,"aiAnalysis":"string","materiUrl":"string","tanggapanDewan":"string"}` | 200 OK / 404 Not Found |
+| `POST` | `/api/aspirasi/:id/triage` | Peran `verifikator` / `dewan` / `admin` | Tidak ada payload masukan (memicu eksekusi Gemini AI) | `{"message":"Telaah AI berhasil dijalankan","aiAnalysis":"string","aiRecommendation":"string"}` | 200 OK / 500 Error |
+| `POST` | `/api/aspirasi/:id/tanggapan` | Peran `dewan` / `admin` | `{"tanggapanText":"string","suratTanggapanUrl":"string"}` | `{"message":"Tanggapan dewan berhasil disimpan","tanggapanDewan":"string","status":"Diteruskan"}` | 200 OK / 400 Bad Request |
+| `PATCH` | `/api/aspirasi/:id/status` | Peran `verifikator` / `admin` | `{"status":"Diajukan" \| "Verifikasi Administrasi" \| "Diteruskan ke Komisi/Fraksi" \| "Tindak Lanjut Lapangan/OPD" \| "Selesai" \| "Ditolak"}` | `{"message":"Status aspirasi diperbarui","status":"string"}` | 200 OK / 400 Bad Request |
 
 ### 3.3 Spesifikasi Rinci Skema Payload dan Validasi Data JSON
 
@@ -653,6 +664,107 @@ Struktur data respons geospasial pada endpoint `GET /api/gis/perjalanan-dinas`:
       }
     }
   ]
+}
+```
+
+#### 3.3.6 Skema Payload Pengajuan E-Aspirasi & Berkas Materi Multimedia (PDF & Video)
+
+Payload permintaan multipart/form-data untuk pengajuan E-Aspirasi pada endpoint `POST /api/aspirasi`:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AspirasiSubmissionPayload",
+  "type": "object",
+  "properties": {
+    "judul": { "type": "string", "minLength": 5, "maxLength": 255 },
+    "deskripsi": { "type": "string", "minLength": 20 },
+    "kategori": { 
+      "type": "string", 
+      "enum": ["Infrastruktur", "Pendidikan", "Kesehatan", "Lingkungan Hidup", "Pertanian & Ketahanan Pangan", "Sosial & Ekonomi", "Lainnya"] 
+    },
+    "dapil": { "type": "string", "pattern": "^DAPIL\\s+[I|V|X]+.*$" },
+    "kabupatenKota": { "type": "string" },
+    "kecamatan": { "type": "string" },
+    "alamat": { "type": "string" },
+    "materi": {
+      "type": "string",
+      "format": "binary",
+      "description": "Berkas PDF proposal/RAB atau berkas video MP4/WebM/MOV maksimal 50 MB"
+    }
+  },
+  "required": ["judul", "deskripsi", "kategori", "dapil"]
+}
+```
+
+#### 3.3.7 Skema Payload Hasil Telaah Cerdas Tenaga Ahli AI & Tanggapan Dewan
+
+Struktur respons inferensi model Tenaga Ahli AI Gemini 2.5 Flash pada endpoint `POST /api/aspirasi/:id/triage`:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AiTriageResponse",
+  "type": "object",
+  "properties": {
+    "success": { "type": "boolean" },
+    "message": { "type": "string" },
+    "aiAnalysis": {
+      "type": "string",
+      "description": "Teks evaluasi terstruktur 5 pilar (Identifikasi, Administrasi, Substansi, Klarifikasi, Rekomendasi)"
+    },
+    "aiRecommendation": {
+      "type": "string",
+      "enum": ["Diteruskan untuk dibahas", "Perlu klarifikasi kelengkapan", "Ditolak / bukan kewenangan provinsi"]
+    }
+  },
+  "required": ["success", "aiAnalysis", "aiRecommendation"]
+}
+```
+
+#### 3.3.8 Skema Respons Publik Pelacakan 5 Tahapan Definitif Aspirasi
+
+Payload endpoint publik `GET /api/aspirasi/track/:ticketNumber` yang dipicu oleh pemindaian QR Code (bebas autentikasi dengan sensor data pribadi):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PublicTrackAspirasiResponse",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "ticketNumber": { "type": "string", "pattern": "^ASP-\\d{6}-\\d{5}$" },
+    "judul": { "type": "string" },
+    "deskripsi": { "type": "string" },
+    "kategori": { "type": "string" },
+    "dapil": { "type": "string" },
+    "kabupatenKota": { "type": "string" },
+    "kecamatan": { "type": "string" },
+    "alamat": { "type": "string" },
+    "status": { "type": "string" },
+    "currentStep": { "type": "integer", "minimum": 0, "maximum": 4 },
+    "isCompleted": { "type": "boolean" },
+    "isDitolak": { "type": "boolean" },
+    "materiUrl": { "type": "string", "nullable": true },
+    "materiType": { "type": "string", "enum": ["application/pdf", "video/mp4", "video/webm", "video/quicktime", null] },
+    "materiFileName": { "type": "string", "nullable": true },
+    "materiSize": { "type": "integer", "nullable": true },
+    "aiAnalysis": { "type": "string", "nullable": true },
+    "aiRecommendation": { "type": "string", "nullable": true },
+    "tanggapanDewan": { "type": "string", "nullable": true },
+    "tanggapanOleh": { "type": "string", "nullable": true },
+    "tanggapanAt": { "type": "string", "format": "date-time", "nullable": true },
+    "suratTanggapanUrl": { "type": "string", "nullable": true },
+    "user": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "maskedNik": { "type": "string", "example": "3201************" }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["ticketNumber", "judul", "status", "currentStep"]
 }
 ```
 
@@ -1314,6 +1426,132 @@ flowchart TD
     HandleFFmpegErr --> ReleaseLock
 ```
 
+### 4.8 Modul E-Aspirasi Terpadu, Tanda Bukti Registrasi, dan Pelacakan QR Code Publik
+
+#### 4.8.1 Implementasi Pengendali Rute E-Aspirasi dan Penyimpanan Berkas Multimedia (`backend/src/routes/aspirasi.routes.ts`)
+
+Rute ini menangani unggah usulan baru, berkas materi pendukung PDF dan video (hingga 50 MB), retrieval riwayat, pelacakan publik tanpa autentikasi, serta inferensi AI Tenaga Ahli Gemini:
+
+```typescript
+import { Router } from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { PrismaClient } from "@prisma/client";
+import { authenticateToken, optionalAuth } from "../middleware/auth.middleware";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const router = Router();
+const prisma = new PrismaClient();
+
+// Konfigurasi Multer untuk Unggah Berkas Dokumen & Video Faktual (Maksimal 50 MB)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, "../../uploads/aspirasi");
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `materi-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "application/pdf",
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Format berkas tidak didukung. Unggah PDF atau Video (MP4/WebM/MOV)."));
+  },
+});
+
+// Endpoint Publik Pelacakan 5 Tahapan Definitif via Pemindaian QR Code
+router.get("/track/:ticketNumber", async (req, res) => {
+  const { ticketNumber } = req.params;
+  const aspirasi = await prisma.aspirasi.findUnique({
+    where: { ticketNumber },
+    include: {
+      masyarakat: { select: { name: true, noKtp: true } },
+      timelineEvents: { orderBy: { createdAt: "asc" } },
+    },
+  });
+
+  if (!aspirasi) return res.status(404).json({ message: "Tiket aspirasi tidak ditemukan." });
+
+  // Sensor NIK sesuai regulasi UU Pelindungan Data Pribadi
+  const maskedNik = aspirasi.masyarakat?.noKtp
+    ? aspirasi.masyarakat.noKtp.substring(0, 4) + "********" + aspirasi.masyarakat.noKtp.slice(-4)
+    : "Data Terproteksi";
+
+  return res.json({ ...aspirasi, user: { name: aspirasi.masyarakat.name, maskedNik } });
+});
+```
+
+#### 4.8.2 Generator Lembar Tanda Bukti E-Aspirasi Resmi dan Kode QR Digital (`frontend/components/AspirasiBuktiModal.tsx`)
+
+Komponen modal ini menerbitkan lembar tanda bukti resmi berkepala surat Sekretariat DPRD Provinsi Jawa Barat, lengkap dengan stempel digital resmi dan QR Code berbasis URL absolut pelacakan publik (`/aspirasi/track/:ticketNumber`):
+
+```tsx
+import QRCode from "qrcode.react";
+
+export default function AspirasiBuktiModal({ aspirasi, isOpen, onClose }) {
+  if (!isOpen || !aspirasi) return null;
+  const trackUrl = `${window.location.origin}/aspirasi/track/${aspirasi.ticketNumber}`;
+
+  return (
+    <div className="print-modal-container bg-white text-slate-900 p-8 rounded-2xl border">
+      {/* Kop Resmi Dinas Sekretariat DPRD Jawa Barat */}
+      <div className="flex items-center gap-4 pb-4 border-b-2 border-slate-900">
+        <img src="/logo-jabar.png" alt="Logo Jawa Barat" className="w-16 h-16" />
+        <div className="text-center flex-1">
+          <h2 className="text-base font-black uppercase tracking-wider">Dewan Perwakilan Rakyat Daerah Provinsi Jawa Barat</h2>
+          <h3 className="text-xs font-bold uppercase text-slate-700">Sekretariat DPRD • Sistem Pengelolaan Aspirasi HUDANG</h3>
+          <p className="text-[10px] text-slate-500">Jl. Diponegoro No. 27, Kota Bandung, Jawa Barat 40115</p>
+        </div>
+      </div>
+
+      {/* QR Code Verifikasi Integritas Publik */}
+      <div className="flex justify-between items-center my-6 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+        <div>
+          <span className="text-[11px] font-bold text-slate-500 uppercase">Nomor Registrasi Tiket:</span>
+          <p className="text-lg font-black tracking-widest text-primary font-mono">{aspirasi.ticketNumber}</p>
+        </div>
+        <div className="text-center p-2 bg-white rounded-lg shadow-xs">
+          <QRCode value={trackUrl} size={84} level="H" includeMargin={false} />
+          <span className="text-[8px] font-bold text-slate-400 block mt-1">Scan Lacak Publik</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+#### 4.8.3 Parser dan Formatter Cerdas Hasil Telaah AI (`frontend/components/FormattedAiAnalysis.tsx`)
+
+Komponen ini mentransformasikan luaran teks analisis model AI Tenaga Ahli Gemini dari format kontinu menjadi seksi tematik terstruktur dengan badge warna dan penekanan visual:
+
+```tsx
+export default function FormattedAiAnalysis({ content }: { content: string }) {
+  // Normalisasi string mentah: Tambahkan pemisah baris sebelum angka romawi dan poin tebal
+  const normalized = content
+    .replace(/(?:\s+|^)(\*\*[IVXLCDM]+\.\s+[^*]+?\*\*)/gi, "\n\n$1\n\n")
+    .replace(/(?:\s+|^)(?:[-•*]\s*)?(\*\*[A-Za-z0-9\s/&()-]+?:\*\*)/g, "\n- $1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  // Parsing seksi berurutan: I. Identifikasi, II. Administrasi, III. Substansi, IV. Klarifikasi, V. Rekomendasi
+  // Menampilkan kartu tematik berlatar warna dinamis, badge pill, dan penekanan rekomendasi formal kedewanan
+  return <div className="space-y-4">{/* Render parsed visual sections */}</div>;
+}
+```
+
 ---
 
 ## 5. SKEMA ENTITAS RELASIONAL BASIS DATA (ERD), KAMUS DATA, DAN STATE MACHINE
@@ -1333,6 +1571,8 @@ Diagram entitas relasional memetakan normalisasi basis data tingkat ketiga (3NF)
 | `ScheduleParticipant` | `id` (Int, PK, Autoincrement)<br>`scheduleId` (Int, FK)<br>`dewanId` (Int, FK)<br>`status` (VarChar 50) | PK: `id`<br>FK: `scheduleId` -&gt; `Schedule(id)` OnDelete Cascade<br>FK: `dewanId` -&gt; `User(id)` OnDelete Cascade | Menghubungkan partisipasi multi-dewan terhadap satu sesi pertemuan virtual bersama pemohon warga |
 | `FollowUp` | `id` (Int, PK, Autoincrement)<br>`scheduleId` (Int, FK)<br>`isShared` (Boolean)<br>`suratDisposisiNo` (VarChar 100)<br>`isViewed` (Boolean)<br>`viewedAt` (DateTime)<br>`hasComment` (Boolean)<br>`suratTanggapanNo` (VarChar 100)<br>`actionReport` (Text)<br>`evidenceUrl` (VarChar 500)<br>`progressPercent` (Int, 0-100)<br>`status` (VarChar 50) | PK: `id`<br>FK: `scheduleId` -&gt; `Schedule(id)` OnDelete Cascade<br>Indexes: `[status]`, `[scheduleId]` | Mengelola siklus persistensi empat tahap naskah dinas tindak lanjut DPRD ke perangkat daerah eksekutif hingga tuntas 100 persen |
 | `Rating` | `id` (Int, PK, Autoincrement)<br>`scheduleId` (Int, FK)<br>`dewanId` (Int, FK)<br>`speakingScore` (SmallInt, 1-5)<br>`contextScore` (SmallInt, 1-5)<br>`timeScore` (SmallInt, 1-5)<br>`responsivenessScore` (SmallInt, 1-5)<br>`solutionScore` (SmallInt, 1-5)<br>`comment` (Text) | PK: `id`<br>FK: `scheduleId` -&gt; `Schedule(id)` OnDelete Cascade<br>FK: `dewanId` -&gt; `User(id)`<br>Unique: `[scheduleId, dewanId]` | Menyimpan skor evaluasi konstituen pada 5 dimensi kinerja perwakilan dengan penegakan konstrain unik anti-duplikasi |
+| `Aspirasi` | `id` (Int, PK, Autoincrement)<br>`ticketNumber` (VarChar 50, Unique)<br>`judul` (VarChar 255)<br>`deskripsi` (Text)<br>`kategori` (VarChar 100)<br>`dapil` (VarChar 50)<br>`kabupatenKota` (VarChar 100)<br>`kecamatan` (VarChar 100)<br>`alamat` (Text)<br>`materiUrl` (VarChar 500)<br>`materiType` (VarChar 50)<br>`materiFileName` (VarChar 255)<br>`materiSize` (Int)<br>`masyarakatId` (Int, FK)<br>`dewanId` (Int, FK, Nullable)<br>`status` (VarChar 50)<br>`tanggapanDewan` (Text)<br>`tanggapanOleh` (VarChar 100)<br>`tanggapanAt` (DateTime)<br>`suratTanggapanUrl` (VarChar 500)<br>`aiAnalysis` (Text)<br>`aiRecommendation` (VarChar 100)<br>`aiAnalysedAt` (DateTime)<br>`submittedAt` (DateTime)<br>`verifiedAt` (DateTime)<br>`completedAt` (DateTime) | PK: `id`<br>Unique: `ticketNumber`<br>FK: `masyarakatId` -&gt; `User(id)`<br>FK: `dewanId` -&gt; `User(id)`<br>Indexes: `[ticketNumber]`, `[dapil]`, `[status]`, `[masyarakatId]` | Mengelola seluruh siklus hidup usulan E-Aspirasi mandiri, berkas bukti PDF/Video, telaah otomatis AI Tenaga Ahli, tanggapan resmi komisi dewan, dan status 5 tahapan definitif |
+| `AspirasiTimeline` | `id` (Int, PK, Autoincrement)<br>`aspirasiId` (Int, FK)<br>`tahap` (VarChar 100)<br>`status` (VarChar 50)<br>`keterangan` (Text)<br>`aktor` (VarChar 100)<br>`createdAt` (DateTime) | PK: `id`<br>FK: `aspirasiId` -&gt; `Aspirasi(id)` OnDelete Cascade<br>Indexes: `[aspirasiId]` | Merekam riwayat audit jejak penanganan aspirasi (event-driven timeline) yang disajikan pada stepper pelacakan publik |
 
 ### 5.3 Strategi Indeks Majemuk, Optimasi Kueri, dan Transaksi ACID
 
@@ -1398,6 +1638,40 @@ stateDiagram-v2
     
     RESOLVED_TAHAP_4 --> EVALUASI_RATING: OPEN_CITIZEN_RATING (Konstituen Memberikan Nilai)
     EVALUASI_RATING --> [*]: Siklus Aspirasi Tuntas Sempurna
+```
+
+#### 5.4.2 Mesin Keadaan Terbatas Alur 5 Tahapan Definitif E-Aspirasi Publik
+
+Siklus penanganan usulan E-Aspirasi mandiri warga dikendalikan oleh mesin keadaan 5 tahapan definitif yang disajikan secara transparan melalui portal pelacakan publik terbuka (`/aspirasi/track/:ticketNumber`):
+
+| Tahapan Definitif | Status Sistem (*Internal State*) | Deskripsi Operasional & Aksesibilitas Publik | Aksi Transaksional Sistem |
+| :--- | :--- | :--- | :--- |
+| **Tahap 1: Diajukan** | `diajukan` | Warga berhasil mengirimkan usulan. Sistem menerbitkan tiket unik `ASP-YYYYMM-XXXXX` beserta lembar tanda bukti resmi berstempel dinas dan QR Code verifikasi. | Menyimpan data pada tabel `Aspirasi`, mencatat berkas pada direktori uploads, dan membuat entri awal pada `AspirasiTimeline`. |
+| **Tahap 2: Verifikasi Administrasi** | `verifikasi` / `perbaikan` | Sekretariat DPRD memeriksa keabsahan identitas, kelengkapan surat pengantar lurah/camat, dan RAB. Model AI Tenaga Ahli Gemini 2.5 Flash mengevaluasi kelayakan usulan berdasarkan 5 pilar telaah. | Eksekusi endpoint `/triage`, penyimpanan evaluasi terstruktur pada kolom `aiAnalysis` dan rekomendasi awal pada `aiRecommendation`. |
+| **Tahap 3: Diteruskan ke Komisi/Fraksi** | `diteruskan` | Usulan yang dinyatakan lengkap dan memenuhi kriteria diteruskan kepada Komisi I s.d. V atau Fraksi DPRD sesuai lingkup urusan untuk diagendakan dalam rapat kerja atau rapat dengar pendapat. | Pemutakhiran status aspirasi, penugasan ID komisi/dewan, dan pencatatan event rekam jejak. |
+| **Tahap 4: Tindak Lanjut Lapangan/OPD** | `tindak_lanjut` / `proses_opd` | Dewan dan Dinas Teknis Pemerintah Provinsi Jawa Barat berkoordinasi mengeksekusi program di lapangan, melakukan survei fisik, atau mengintegrasikan usulan ke kamus usulan SIPD. | Anggota dewan mengunggah tanggapan resmi (`tanggapanDewan`) dan naskah dinas balasan (`suratTanggapanUrl`). |
+| **Tahap 5: Selesai** | `selesai` | Usulan telah terealisasi secara konkret di lapangan, dianggarkan pada APBD, atau telah dijawab tuntas dengan surat resmi pimpinan dewan kepada pemohon. | Pemutakhiran kolom `completedAt`, penguncian siklus usulan, dan penyajian status tuntas 100% pada portal publik. |
+| **Terminal: Ditolak** | `ditolak` | Usulan berada di luar ranah kewenangan Pemerintah Daerah Provinsi Jawa Barat, bertentangan dengan peraturan perundang-undangan, atau tidak diperbaiki pemohon. | Perekaman alasan penolakan secara transparan dan penutupan tiket pelacakan. |
+
+```mermaid
+stateDiagram-v2
+    [*] --> TAHAP_1_DIAJUKAN: Pengajuan Warga (Terbit Tiket & QR Code)
+    
+    TAHAP_1_DIAJUKAN --> TAHAP_2_VERIFIKASI: Staf Sekretariat Meninjau Berkas
+    TAHAP_2_VERIFIKASI --> AI_TRIAGE_RUNNING: Pemicu Telaah AI Tenaga Ahli
+    AI_TRIAGE_RUNNING --> TAHAP_2_VERIFIKASI: Simpan Analisis 5 Pilar
+    
+    TAHAP_2_VERIFIKASI --> STATUS_DITOLAK: Berkas Tidak Memenuhi Syarat / Luar Kewenangan
+    STATUS_DITOLAK --> [*]: Publik Melihat Alasan Penolakan
+    
+    TAHAP_2_VERIFIKASI --> TAHAP_3_DITERUSKAN: Berkas Lengkap Disetujui
+    TAHAP_3_DITERUSKAN --> TAHAP_4_TINDAK_LANJUT: Pembahasan Komisi & Koordinasi OPD
+    
+    TAHAP_4_TINDAK_LANJUT --> INPUT_TANGGAPAN_DEWAN: Dewan Memberikan Tanggapan & Surat Resmi
+    INPUT_TANGGAPAN_DEWAN --> TAHAP_4_TINDAK_LANJUT: Publik Melihat Tanggapan Resmi
+    
+    TAHAP_4_TINDAK_LANJUT --> TAHAP_5_SELESAI: Realisasi Lapangan / Jawaban Tuntas 100%
+    TAHAP_5_SELESAI --> [*]: Siklus Aspirasi Selesai
 ```
 
 ---
