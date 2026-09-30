@@ -10,31 +10,47 @@
 
 | Parameter Dokumen | Spesifikasi dan Penetapan Formal |
 | :--- | :--- |
-| Judul Dokumen | Standar Operasional Prosedur Penyelenggaraan Pelayanan E-Aspirasi Terpadu, Musyawarah E-Audiensi Virtual, dan Pengawalan Rekam Jejak Aspirasi Berbasis Platform HUDANG |
+| Judul Dokumen | Standar Operasional Prosedur Penyelenggaraan Pelayanan E-Aspirasi Terpadu, Musyawarah E-Audiensi Virtual, dan Pengawalan Rekam Jejak Aspirasi Berbasis Platform HUDANG (*Strategi Demokrasi Tanpa Jarak melalui DPRD HUDANG*) |
 | Kode Klasifikasi / Nomor Registrasi | SOP/DPRD-JBR/HUDANG/2026/001 |
 | Tanggal Efektif Mulai Berlaku | 15 September 2026 |
-| Status Revisi / Edisi | Edisi 2.1 (Revisi Komprehensif Terpadu – Selaras 100% Fitur Aplikasi E-Aspirasi & E-Audiensi) |
+| Status Revisi / Edisi | Edisi 2.2 (Revisi Komprehensif – Sinkronisasi Penuh Laporan Implementasi Proyek Perubahan PKN Tk. II Angkatan XXII & Kode Aplikasi) |
 | Unit Organisasi Pemilik Proses | Sekretariat Dewan Perwakilan Rakyat Daerah Provinsi Jawa Barat |
 | Unit Pelaksana Teknis Harian | Bagian Persidangan dan Perundang-undangan serta Bagian Fasilitasi Penganggaran dan Pengawasan |
 | Unit Pendukung Operasional TIK | Subbagian Humas, Protokol, dan Publikasi bersama Tim Pengelola SPBE Diskominfo Jabar |
-| Pejabat Pembuat Dokumen | Reformer Proyek Perubahan (Dr. H. Dodi Sukmayana, SE., MM.) bersama Tim Efektif Transformasi Digital |
+| Project Leader / Reformer | Dr. H. Dodi Sukmayana, SE., MM (Sekretaris DPRD Provinsi Jawa Barat, NIP. 19700922 199803 1 004, NDH: 01, Pembina Tk. I IV/b) |
+| Mentor Proyek Perubahan | Dr. Drs. Herman Suryatman, M.Si (Sekretaris Daerah Provinsi Jawa Barat, NIP. 19701111 199102 1 001, Telp: 08112477666) |
+| Coach Proyek Perubahan | Drs. Suryana, M.Kes (Widyaiswara Ahli Utama BPSDM Provinsi Jawa Barat, NIP. 19621229 198503 1 019) |
+| Penguji Seminar | Prof. Dr. H. Karim Suryadi, M.Si (NIP. 19700814 199402 1 001) |
+| Lembaga Penyelenggara | Pelatihan Kepemimpinan Nasional Tingkat II Angkatan XXII Tahun 2026, BPSDM Provinsi Jawa Barat bekerjasama dengan Lembaga Administrasi Negara (LAN) RI |
+| Tim Efektif Proyek Perubahan | 1. Pokja Administrasi: Kepala Bagian Program & Keuangan, Gatot Rahardja, SH (Analis Hukum Ahli Muda), Ridwan, SE (Pengelola Data & Informasi), Dewi Dariah Putri Aji, A.Ak (Pengolah Data & Informasi).<br>2. Pokja Teknis & Analisis: Kepala Sub Bagian Kepegawaian & TU, Khairun Naufal, S.STP., MM (Perencana Ahli Pertama), Sugih Pranata, S.Kom (Dokumentalis Hukum), Irvan Raji, S.Pd., M.IP (Penata Layanan Operasional).<br>3. Pokja Dokumentasi: Kepala Bagian Protokol, Persidangan & PUU, M. Hafidz, SH., MM (Pranata Humas Ahli Muda), Hanif Faisal Hakim, S.I.KOM (Publikasi & Dokumentasi). |
 | Pejabat Penetap Dokumen | Sekretaris Dewan Perwakilan Rakyat Daerah Provinsi Jawa Barat |
 | Tanggal Evaluasi dan Peninjauan Ulang | 15 September 2027 (Berkala Tahunan) |
-| Landasan Yuridis Operasional | 1. Undang-Undang Republik Indonesia Nomor 23 Tahun 2014 tentang Pemerintahan Daerah.<br>2. Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).<br>3. Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2018 tentang Sistem Pemerintahan Berbasis Elektronik (SPBE).<br>4. Peraturan Menteri Pendayagunaan Aparatur Negara dan Reformasi Birokrasi Nomor 35 Tahun 2012 tentang Pedoman Penyusunan Standar Operasional Prosedur Administrasi Pemerintahan.<br>5. Peraturan Daerah Provinsi Jawa Barat tentang Penyelenggaraan Pelayanan Publik dan Keterbukaan Informasi.<br>6. Peraturan Tata Tertib DPRD Provinsi Jawa Barat Nomor 1 Tahun 2022.<br>7. Keputusan Pimpinan DPRD Provinsi Jawa Barat tentang Tata Kelola Digitalisasi Pelayanan Audiensi Publik Platform HUDANG. |
+| Landasan Yuridis Operasional | 1. Undang-Undang Republik Indonesia Nomor 23 Tahun 2014 tentang Pemerintahan Daerah.<br>2. Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).<br>3. Peraturan Presiden Republik Indonesia Nomor 95 Tahun 2018 tentang Sistem Pemerintahan Berbasis Elektronik (SPBE).<br>4. Peraturan Menteri Pendayagunaan Aparatur Negara dan Reformasi Birokrasi Nomor 35 Tahun 2012 tentang Pedoman Penyusunan Standar Operasional Prosedur Administrasi Pemerintahan.<br>5. Peraturan Gubernur Jawa Barat Nomor 22 Tahun 2022 tentang Tugas Pokok, Fungsi, Rincian Tugas Unit, dan Tata Kerja Sekretariat DPRD Provinsi Jawa Barat.<br>6. Peraturan Daerah Provinsi Jawa Barat tentang Penyelenggaraan Pelayanan Publik dan Keterbukaan Informasi.<br>7. Peraturan Tata Tertib DPRD Provinsi Jawa Barat Nomor 1 Tahun 2022.<br>8. Keputusan Pimpinan DPRD Provinsi Jawa Barat tentang Pedoman Penetapan dan Pengelolaan Platform HUDANG. |
 | Sasaran Pemakai Layanan | 1. Warga Masyarakat / Konstituen / Delegasi Komunitas pada 15 Daerah Pemilihan (Dapil) se-Jawa Barat.<br>2. Pimpinan dan Anggota DPRD Provinsi Jawa Barat (120 Anggota, Fraksi, dan Komisi I s.d. V).<br>3. Tim Administrator & Fasilitator Sidang Sekretariat DPRD Jawa Barat.<br>4. Pejabat Penghubung dan Kepala Perangkat Daerah Teknis (Organisasi Perangkat Daerah / OPD) Pemprov Jabar.<br>5. Tim Perekayasa TIK Diskominfo Provinsi Jawa Barat. |
 
 > [!NOTE]
-> Standar Operasional Prosedur (SOP) ini mengikat secara hukum seluruh aparatur sipil negara, pimpinan dan anggota kedewanan, serta pejabat perangkat daerah di lingkungan Pemerintah Daerah Provinsi Jawa Barat dalam penyelenggaraan penyerapan aspirasi publik, pengelolaan usulan digital, serta musyawarah daring.
+> Standar Operasional Prosedur (SOP) ini merupakan dokumen operasional resmi dari Proyek Perubahan *"Strategi Demokrasi Tanpa Jarak melalui DPRD HUDANG"* yang disusun sesuai format standar PermenPAN-RB No. 35/2012. SOP ini mengikat secara hukum seluruh aparatur sipil negara, pimpinan dan anggota kedewanan, serta perangkat daerah terkait dalam penyelenggaraan pelayanan E-Aspirasi Terpadu dan E-Audiensi Virtual.
 
 ---
 
 ## 2. DASAR PEMIKIRAN, ASAS PELAYANAN, TUJUAN, DAN RUANG LINGKUP
 
-### 2.1 Dasar Pemikiran Operasional
+### 2.1 Dasar Pemikiran Operasional dan Rasionalitas Proyek Perubahan
 
-Provinsi Jawa Barat memiliki bentang wilayah seluas 37.087,92 kilometer persegi dengan 18 Kabupaten dan 9 Kota serta total populasi melampaui 51,7 juta jiwa yang terdistribusi ke dalam 15 Daerah Pemilihan. Berdasarkan evaluasi empiris tata laksana penyerapan aspirasi dan audiensi manual di lingkungan Sekretariat DPRD Provinsi Jawa Barat, pelaksanaan tatap muka fisik di Gedung DPRD Kota Bandung sering terkendala jarak geografis pelosok, benturan agenda reses dewan, serta keterbatasan kapasitas ruang rapat fisik.
+Provinsi Jawa Barat merupakan provinsi dengan jumlah penduduk terbanyak di Indonesia, yakni mencapai **51.775.402 jiwa** dengan jumlah pemilih pada Pemilu mencapai **37.759.992 pemilih** (18.955.266 laki-laki dan 18.804.726 perempuan) yang tersebar di wilayah seluas **37.087,92 km²** mencakup **18 Kabupaten dan 9 Kota (27 Kab/Kota)**. Dengan jumlah Anggota DPRD Provinsi Jawa Barat masa bakti 2024–2029 sebanyak **120 orang** pada **15 Daerah Pemilihan (Dapil I s.d. Dapil XV)**, rasio keterwakilan sangat timpang: setiap 1 anggota dewan harus melayani sekitar **314.667 pemilih** atau merepresentasikan **431.462 jiwa penduduk**.
 
-Kehadiran Platform HUDANG (Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak rakyat) mengintegrasikan seluruh proses pelayanan ke dalam **Dua Kanal Pelayanan Terpadu Berbasis Digital**:
+Berdasarkan evaluasi empiris tata laksana pengelolaan aspirasi dan audiensi pada Sekretariat DPRD Provinsi Jawa Barat periode **Januari hingga Juli 2026**, teridentifikasi kesenjangan kapasitas yang sangat kritis:
+1. **Aspirasi Masyarakat Tertulis**: Tercatat **12.600 usulan aspirasi** masuk, namun baru **2.016 aspirasi (16,0%)** yang berhasil ditindaklanjuti. Sisanya sebanyak **10.584 aspirasi (84,0%)** tertahan (*backlog*) tanpa kejelasan proses verifikasi dan tindak lanjut.
+2. **Permohonan Audiensi**: Tercatat **5.040 permohonan audiensi** diajukan oleh masyarakat/konstituen, namun hanya **640 permohonan (12,7%)** yang dapat dilayani melalui pertemuan tatap muka fisik di Gedung DPRD, sedangkan **4.400 permohonan (87,3%)** tidak terlayani akibat keterbatasan alokasi waktu anggota dewan serta keterbatasan ruang sidang fisik. Audiensi tatap muka fisik menjadi titik hambatan (*bottleneck*) utama birokrasi penyerapan aspirasi.
+
+Hasil diagnosis masalah menggunakan **Model ASTRID** (*Aktual, Spesifik, Transformasi, Relevan, Inovatif, Dapat Dilaksanakan*) menetapkan bahwa isu **Digitalisasi Layanan Aspirasi** memperoleh skor tertinggi (**86 poin**) dibandingkan isu Regulasi (75 poin) dan Proses Verifikasi (73 poin). Lebih lanjut, analisis lingkungan strategis SWOT (IFAS = 3,40 / selisih: -0,10; EFAS = 3,44 / selisih: +0,16) menempatkan inisiatif ini pada **Kuadran III (Strategi W-O / Turn-Around)** pada koordinat `(-0,10 ; +0,16)`. Strategi ini memanfaatkan kebijakan efisiensi anggaran nasional serta kematangan teknologi informasi untuk mengatasi keterbatasan internal tata kelola manual.
+
+Proyek Perubahan ini menargetkan pencapaian terukur (*Valuasi Dampak*):
+* Peningkatan cakupan penanganan aspirasi dari 16,0% menjadi **±70%** (+54,0 poin persentase).
+* Peningkatan cakupan pelayanan audiensi dari 12,7% menjadi **±60%** (+47,3 poin persentase).
+* Realisasi efisiensi anggaran operasional pertemuan fisik (reses konvensional, perjalanan dinas, cetak berkas) sebesar **±Rp25,06 miliar pada tahun pertama**.
+
+Secara kultural, inovasi Platform HUDANG (*Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak rakyat*) berakar pada kearifan lokal falsafah Sunda ***Papat Kalima Pancer*** (anggota dewan sebagai poros keseimbangan *pancer* yang menjaga keharmonisan masyarakat melalui *silih asih, silih asah, silih asuh*) serta naskah kuno ***Sanghyang Siksa Kandang Karesian*** dengan konsep kepemimpinan ***Tri Tangtu di Buana*** (*Prabu*, *Rama*, *Resi*). Nilai kepemimpinan *"bayu pinahka prebu, sabda pinahka rama, hedap pinahka resi"* memadukan ketegasan tindak lanjut eksekutif, kehangatan mengayomi keluhan warga tanpa jarak, serta integritas moral yang jernih ke dalam **Dua Kanal Pelayanan Terpadu Berbasis Digital**:
 
 1. **Kanal E-Aspirasi Terpadu (Kanal Usulan Asinkron)**:
    Memfasilitasi warga masyarakat, kelompok swadaya masyarakat (KSM), pengurus desa/kelurahan, dan komunitas untuk menyampaikan proposal aspirasi pembangunan secara mandiri tanpa harus datang ke gedung dewan. Dilengkapi fasilitas unggah berkas multimedia (Proposal/RAB format PDF dan Rekaman Video Faktual Lapangan hingga 50 MB), penerbitan Lembar Tanda Bukti Resmi ber-QR Code untuk transparansi publik, penelaahan otomatis oleh model AI Tenaga Ahli Kedewanan (Gemini 2.5 Flash), pengawalan rekam jejak 5 tahapan definitif, hingga penyampaian tanggapan resmi anggota dewan dan pengunduhan surat balasan resmi.
@@ -44,17 +60,17 @@ Kehadiran Platform HUDANG (Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak r
 
 ### 2.2 Asas-Asas Penyelenggaraan Pelayanan Publik
 
-Penyelenggaraan pelayanan E-Audiensi berpedoman pada asas-asas utama administrasi pemerintahan:
+Penyelenggaraan pelayanan berpedoman pada asas-asas utama administrasi pemerintahan:
 
-1. **Asas Kepastian Hukum**: Menjamin bahwa seluruh rangkaian audiensi, penerbitan risalah, disposisi dewan, hingga tindak lanjut eksekutif memiliki legalitas formal sesuai peraturan perundang-undangan.
+1. **Asas Kepastian Hukum**: Menjamin bahwa seluruh rangkaian penerimaan aspirasi, musyawarah audiensi, penerbitan risalah, disposisi dewan, hingga tindak lanjut eksekutif memiliki legalitas formal sesuai peraturan perundang-undangan.
 
-2. **Asas Keterbukaan**: Menjamin masyarakat pemohon dapat memantau status perkembangan permohonan dan progres disposisi OPD secara langsung melalui Nomor Registrasi Tiket tanpa hambatan birokrasi.
+2. **Asas Keterbukaan**: Menjamin masyarakat pemohon dapat memantau status perkembangan permohonan dan progres disposisi OPD secara langsung melalui Nomor Registrasi Tiket (`ASP-*` dan `AUD-*`) serta pemindaian Kode QR terbuka tanpa hambatan birokrasi.
 
-3. **Asas Kecepatan dan Kemudahan**: Memanfaatkan teknologi digital untuk menyederhanakan alur birokrasi, mengeliminasi jarak tempuh fisik, dan mempercepat respons kedewanan.
+3. **Asas Kecepatan dan Kemudahan**: Memanfaatkan teknologi digital untuk menyederhanakan alur birokrasi, mengeliminasi jarak tempuh fisik ke ibu kota provinsi (Kota Bandung), dan mempercepat respons kedewanan.
 
 4. **Asas Akuntabilitas**: Mewajibkan seluruh pihak—baik Anggota Dewan, aparatur sekretariat, maupun dinas teknis (OPD)—mempertanggungjawabkan setiap tindakan dengan bukti administratif dan dokumentasi lapangan yang sah.
 
-5. **Asas Partisipatif**: Membuka kesempatan setara bagi seluruh lapisan masyarakat dari 27 Kabupaten/Kota se-Jawa Barat untuk menyampaikan aspirasi pembangunan secara bermartabat dan terstruktur.
+5. **Asas Partisipatif**: Membuka kesempatan setara bagi seluruh lapisan masyarakat dari 27 Kabupaten/Kota se-Jawa Barat, termasuk kelompok rentan (disabilitas, perempuan, dan warga pelosok), untuk menyampaikan aspirasi pembangunan secara bermartabat dan terstruktur.
 
 ### 2.3 Tujuan Standar Operasional Prosedur
 
@@ -143,7 +159,47 @@ SOP ini mengatur alur operasional tata kelola pelayanan Platform HUDANG yang men
 
 ---
 
-## 4. MATRIKS PERAN DAN TANGGUNG JAWAB (RACI MATRIX)
+## 4. TATA KELOLA ORGANISASI, PEMETAAN STAKEHOLDER, DAN MATRIKS RACI
+
+### 4.1 Struktur dan Pembagian Tugas Tim Efektif Proyek Perubahan
+
+Berdasarkan Keputusan Pimpinan DPRD dan Surat Perintah Sekretaris DPRD Provinsi Jawa Barat, tata kelola operasional penjamin mutu Platform HUDANG dilaksanakan oleh Tim Efektif Proyek Perubahan dengan struktur sebagai berikut:
+
+| Peran Tata Kelola | Pejabat / Personalia | Tugas Pokok dan Lingkup Tanggung Jawab |
+| :--- | :--- | :--- |
+| **Mentor** | Dr. Drs. Herman Suryatman, M.Si (Sekretaris Daerah Provinsi Jawa Barat) | Memberikan arahan strategis kebijakan makro lintas perangkat daerah, memfasilitasi koordinasi eksekutif (Bappeda, Diskominfo, BPKAD), dan mengawal integrasi SIPD/RKPD. |
+| **Coach** | Drs. Suryana, M.Kes (Widyaiswara Ahli Utama BPSDM Provinsi Jawa Barat) | Memberikan bimbingan teknis metodologis, pengendalian manajemen risiko, serta pengawalan pencapaian tahapan milestone aksi perubahan. |
+| **Project Leader** | Dr. H. Dodi Sukmayana, SE., MM (Sekretaris DPRD Provinsi Jawa Barat) | Memimpin keseluruhan rancang bangun inovasi, mengoordinasikan jajaran internal dan eksternal, menetapkan SOP, dan mengawasi implementasi Platform HUDANG. |
+| **Pokja Administrasi** | 1. Kepala Bagian Program dan Keuangan<br>2. Gatot Rahardja, SH (Analis Hukum Ahli Muda)<br>3. Ridwan, SE (Pengelola Data dan Informasi)<br>4. Dewi Dariah Putri Aji, A.Ak (Pengolah Data dan Informasi) | Menyiapkan draf regulasi internal (Keputusan Pimpinan DPRD), penatausahaan persuratan disposisi, penganggaran APBD berbasis efisiensi, dan pengolahan data administratif aspirasi. |
+| **Pokja Teknis & Analisis** | 1. Kepala Sub Bagian Kepegawaian dan Tata Usaha<br>2. Khairun Naufal, S.STP., MM (Perencana Ahli Pertama)<br>3. Sugih Pranata, S.Kom (Dokumentalis Hukum)<br>4. Irvan Raji, S.Pd., M.IP (Penata Layanan Operasional) | Mengawal rancang bangun fungsional sistem, modul verifikasi semi-otomatis AI, manajemen pangkalan data spasial (GIS 27 Kab/Kota), uji coba piloting, dan pendampingan teknis pengguna. |
+| **Pokja Dokumentasi** | 1. Kepala Bagian Protokol, Persidangan & PUU<br>2. M. Hafidz, SH., MM (Pranata Humas Ahli Muda)<br>3. Hanif Faisal Hakim, S.I.KOM (Publikasi dan Dokumentasi) | Menyelenggarakan diseminasi publik, sosialisasi ke 15 Dapil dan ormawa, penyusunan materi edukasi, dokumentasi persidangan, dan hubungan kemitraan media massa. |
+
+### 4.2 Analisis Pemetaan Kuadran Stakeholder (Stakeholder Mapping)
+
+Berdasarkan penilaian terhadap sumbu Pengaruh (*Influence*) dan sumbu Kepentingan (*Interest*), seluruh pemangku kepentingan dikelompokkan ke dalam empat kuadran strategis:
+
+| Kuadran | Klasifikasi Aktor | Pengaruh & Kepentingan | Implikasi Strategis Pengelolaan (*Management Approach*) |
+| :--- | :--- | :--- | :--- |
+| **Promoters** | Sekretaris Daerah, 120 Anggota DPRD, Diskominfo Jabar | Pengaruh Tinggi, Kepentingan Tinggi | **Dilibatkan Erat (*Manage Closely*)**: Melalui koordinasi rutin berkala, penetapan KPI bersama, pelibatan aktif dalam piloting fitur, dan pengesahan regulasi serta anggaran operasional. |
+| **Latents** | Bappeda Jabar, BPKAD Jabar | Pengaruh Tinggi, Kepentingan Rendah | **Dijaga Tetap Puas (*Keep Satisfied*)**: Melalui FGD sinkronisasi perencanaan RKPD/SIPD dan pengajuan usulan anggaran pemeliharaan bertahap berbasis analisis manfaat (*cost-benefit*). |
+| **Defenders** | Masyarakat/Konstituen, Ormas, LSM, Organisasi Mahasiswa, Parpol | Pengaruh Rendah, Kepentingan Tinggi | **Diberdayakan & Diinformasikan (*Keep Informed & Empower*)**: Sosialisasi berjenjang, kemitraan agen perubahan (*champion*), literasi digital, transparansi via QR Code, dan pelibatan dalam survei IKM. |
+| **Apathetics** | Media Massa, Organisasi Keagamaan | Pengaruh Rendah, Kepentingan Rendah | **Dipantau Secara Berkala (*Monitor*)**: Media monitoring proaktif, penyediaan siaran pers berkala, publikasi data terbuka (*open data*), dan sosialisasi berbasis komunitas keagamaan. |
+
+### 4.3 Bauran Manajemen 7M dan Bauran Pemasaran Pelayanan Publik 7P
+
+Pengelolaan sumber daya operasional Platform HUDANG menyinergikan unsur manajemen **7M** (*Process*) yang bermuara secara konsisten pada bauran pelayanan **7P** (*Outcome*):
+
+| Unsur 7M (Proses Pengelolaan) | Elemen 7P (Hasil Layanan) | Penjabaran Operasional dalam Platform HUDANG |
+| :--- | :--- | :--- |
+| **Material**: Standarisasi struktur data aspirasi dan berkas pendukung | **Product (Produk)** | Platform digital web dan mobile resmi dengan fitur E-Aspirasi terpadu (PDF/Video 50MB), E-Audiensi WebRTC SFU, verifikasi AI Gemini 2.5 Flash, tanda bukti QR Code, analitik GIS, dan integrasi SIPD. |
+| **Money**: Rasionalisasi alokasi pembiayaan operasional | **Price (Biaya Layanan)** | Layanan **Bebas Biaya (Zero Cost)** bagi seluruh warga masyarakat Jawa Barat; efisiensi belanja operasional tatap muka konvensional sebesar **±Rp25,06 miliar pada tahun pertama**. |
+| **Market**: Penggalian kebutuhan konstituen lintas 15 Dapil | **Place (Saluran Akses)** | Saluran akses *omnichannel*: Portal web resmi responsive, aplikasi mobile Android/iOS, pojok digital sekretariat, dan integrasi media sosial resmi DPRD Jawa Barat. |
+| **Minutes**: Manajemen jadwal peluncuran, sosialisasi, dan monev | **Promotion (Sosialisasi)** | Sosialisasi berjenjang (kuliah umum, demo platform mahasiswa, roadshow 15 Dapil, konferensi pers berkala, dan pelibatan duta digital aspirasi). |
+| **Man**: Optimalisasi kompetensi ASN dan fasilitator sidang | **People (SDM Pengelola)** | Petugas desk verifikasi dan admin sistem yang tersertifikasi, pendampingan teknis intensif (*change management*), serta penguatan etika pelayanan responsif. |
+| **Method**: Standardisasi alur kerja SOP PermenPAN-RB | **Process (Proses Layanan)** | Alur layanan baku transparan: Pengajuan $\rightarrow$ Verifikasi Cerdas AI $\rightarrow$ Penyaluran Komisi/Fraksi $\rightarrow$ Tindak Lanjut $\rightarrow$ Jawaban Tuntas Terbuka via QR Code Pelacakan Publik. |
+| **Machine**: Kesiapan infrastruktur server, GIS, dan AI | **Physical Evidence (Bukti Fisik/Digital)** | Lembar Tanda Bukti Resmi ber-QR Code standar A4, notifikasi surel terotomasi, risalah sidang bertranskrip AI, dasbor analitik publik terbuka, dan sertifikat testimoni. |
+
+### 4.4 Matriks Peran dan Tanggung Jawab (RACI Matrix)
 
 Prinsip pembagian peran mengacu pada standar tata kelola RACI (*Responsible, Accountable, Consulted, Informed*):
 
@@ -480,3 +536,14 @@ Untuk menjamin kelancaran pelayanan tatap muka virtual tanpa hambatan yang merug
 2. **Evaluasi dan Peninjauan Berkala**:
    - Standar Operasional Prosedur ini ditinjau ulang secara berkala minimal 1 (satu) kali dalam setahun oleh Tim Efektif Transformasi Digital Sekretariat DPRD Jawa Barat bersama perwakilan komisi dan perangkat daerah mitra kerja.
    - Hasil evaluasi kepuasan konstituen pada Portal Transparansi Publik dijadikan acuan perbaikan berkelanjutan demi mewujudkan pelayanan prima yang responsif, transparan, dan berdampak nyata bagi seluruh masyarakat Jawa Barat.
+
+### 8.3 Pentahapan Utama Implementasi Inovasi (Milestone Aksi Perubahan)
+
+SOP ini mengawal implementasi Platform HUDANG melalui 3 (tiga) pentahapan utama (*milestone*) yang terukur dan berkesinambungan:
+
+| Pentahapan Waktu | Target Keluaran Strategis | Rincian Capaian Kunci | Status Pelaksanaan |
+| :--- | :--- | :--- | :---: |
+| **Milestone Jangka Pendek**<br>(14 September – 08 November 2026) | Fondasi Kelembagaan, Regulasi, Rancang Bangun Platform, Piloting Internal, dan Diseminasi Publik | 1. Terbentuknya Tim Efektif Proyek Perubahan melalui Keputusan Resmi.<br>2. Tersusunnya draf Keputusan Pimpinan DPRD tentang Pedoman Penetapan dan Pengelolaan Platform HUDANG.<br>3. Tersusunnya Modul Panduan Teknis dan Dokumen SOP Baku PermenPAN-RB.<br>4. Terselesaikannya pengembangan portal web, modul E-Aspirasi & E-Audiensi, verifikasi AI Gemini, dan dashboard analitik GIS.<br>5. Pelaksanaan uji coba terbatas (*piloting*) bersama jajaran Sekretariat DPRD.<br>6. Diseminasi dan sosialisasi kepada Pimpinan Fraksi DPRD, perwakilan mahasiswa, dan kelompok masyarakat dengan capaian fisik 100%. | **100% Tuntas** |
+| **Milestone Jangka Menengah**<br>(Desember 2026 – Juni 2027) | Peluncuran Resmi, Pemanfaatan Penuh oleh 120 Anggota DPRD, dan Perluasan ke 15 Dapil | 1. Peluncuran resmi (*grand launching*) dan aktivasi akun bagi seluruh 120 Anggota DPRD Provinsi Jawa Barat.<br>2. Perluasan sosialisasi dan pendampingan teknis secara bertahap ke seluruh 15 Daerah Pemilihan (Dapil I–XV).<br>3. Monitoring dan evaluasi berkala capaian indikator (pengguna aktif, volume aspirasi, kecepatan respons dewan).<br>4. Rilis pembaruan fitur aplikasi berdasarkan masukan pengguna (*continuous enhancement*).<br>5. Penyusunan laporan perbandingan efektivitas dan efisiensi anggaran operasional inovasi HUDANG dibandingkan mekanisme konvensional. | **Terjadwal** |
+| **Milestone Jangka Panjang**<br>(Juli 2027 – Januari 2028) | Penguatan Keamanan Siber, Integrasi Perencanaan Daerah (SIPD/RKPD), dan Keberlanjutan Sistem | 1. Audit keamanan siber berkala dan penerapan enkripsi data triwulanan bersama Diskominfo Provinsi Jawa Barat.<br>2. Pemutakhiran regulasi perlindungan data pribadi dan keabsahan dokumen elektronik konstituen.<br>3. Survei indeks kepuasan pengguna (IKM) berkala terhadap mutu layanan platform.<br>4. Penguatan integrasi interoperabilitas data aspirasi terverifikasi ke dalam SIPD-RI dan RKPD bersama Bappeda Jawa Barat.<br>5. Penyusunan laporan capaian keberlanjutan (*sustainability report*) yang didukung alokasi APBD rutin dan regenerasi SDM aparatur. | **Terjadwal** |
+

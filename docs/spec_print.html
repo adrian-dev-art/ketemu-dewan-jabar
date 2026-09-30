@@ -2270,7 +2270,7 @@ Expecting `+Ze.join(", ")+", got '"+(this.terminals_[Ne]||Ne)+"'":Dt="Parse erro
 </tr>
 <tr>
 <td>Judul Dokumen</td>
-<td>Dokumen Rekayasa Perangkat Lunak, Spesifikasi Teknis, dan Arsitektur Sistem Platform HUDANG</td>
+<td>Dokumen Rekayasa Perangkat Lunak, Spesifikasi Teknis, dan Arsitektur Sistem Platform HUDANG (<em>Strategi Demokrasi Tanpa Jarak melalui DPRD HUDANG</em>)</td>
 </tr>
 <tr>
 <td>Nomor Identifikasi Dokumen</td>
@@ -2282,34 +2282,78 @@ Expecting `+Ze.join(", ")+", got '"+(this.terminals_[Ne]||Ne)+"'":Dt="Parse erro
 </tr>
 <tr>
 <td>Versi Dokumen</td>
-<td>Versi 1.2 (Edisi Lengkap Diagram Arsitektur dan Spesifikasi Rekayasa Teknis)</td>
+<td>Versi 2.1 (Edisi Terpadu – Sinkronisasi Penuh Laporan Implementasi Proyek Perubahan PKN Tk. II Angkatan XXII & Kode Aplikasi)</td>
 </tr>
 <tr>
 <td>Klasifikasi Dokumen</td>
 <td>Terbatas / Dokumen Rekayasa Perangkat Lunak SPBE Pemerintah Provinsi Jawa Barat</td>
 </tr>
 <tr>
+<td>Project Leader / Reformer</td>
+<td>Dr. H. Dodi Sukmayana, SE., MM (Sekretaris DPRD Provinsi Jawa Barat, NIP. 19700922 199803 1 004, NDH: 01, Pembina Tk. I IV/b)</td>
+</tr>
+<tr>
+<td>Mentor Proyek Perubahan</td>
+<td>Dr. Drs. Herman Suryatman, M.Si (Sekretaris Daerah Provinsi Jawa Barat, NIP. 19701111 199102 1 001, Telp: 08112477666)</td>
+</tr>
+<tr>
+<td>Coach Proyek Perubahan</td>
+<td>Drs. Suryana, M.Kes (Widyaiswara Ahli Utama BPSDM Provinsi Jawa Barat, NIP. 19621229 198503 1 019)</td>
+</tr>
+<tr>
+<td>Penguji Seminar</td>
+<td>Prof. Dr. H. Karim Suryadi, M.Si (NIP. 19700814 199402 1 001)</td>
+</tr>
+<tr>
+<td>Lembaga Penyelenggara</td>
+<td>Pelatihan Kepemimpinan Nasional Tingkat II Angkatan XXII Tahun 2026, BPSDM Provinsi Jawa Barat bekerjasama dengan Lembaga Administrasi Negara (LAN) RI</td>
+</tr>
+<tr>
+<td>Tim Efektif Pelaksana</td>
+<td>1. Pokja Administrasi: Kabag Program & Keuangan, Gatot Rahardja, SH, Ridwan, SE, Dewi Dariah Putri Aji, A.Ak.<br/>2. Pokja Teknis & Analisis: Kasubbag Kepegawaian & TU, Khairun Naufal, S.STP., MM, Sugih Pranata, S.Kom, Irvan Raji, S.Pd., M.IP.<br/>3. Pokja Dokumentasi: Kabag Protokol, Persidangan & PUU, M. Hafidz, SH., MM, Hanif Faisal Hakim, S.I.KOM.</td>
+</tr>
+<tr>
 <td>Acuan Standar Rekayasa</td>
-<td>ISO/IEC/IEEE 29148:2018 (Requirements Engineering) dan ISO/IEC/IEEE 42010:2011 (Systems and Software Architecture)</td>
+<td>ISO/IEC/IEEE 29148:2018 (Requirements Engineering), ISO/IEC/IEEE 42010:2011 (Systems and Software Architecture), serta Arsitektur SPBE Pemprov Jabar</td>
 </tr>
 <tr>
 <td>Penanggung Jawab Teknis</td>
-<td>Tim Pengembang Rekayasa Perangkat Lunak Sekretariat DPRD bersama Diskominfo Provinsi Jawa Barat</td>
+<td>Tim Efektif Proyek Perubahan Sekretariat DPRD bersama Tim Pengelola SPBE Diskominfo Provinsi Jawa Barat</td>
 </tr>
 </table></div>
 <div class="alert-box alert-note">
     <div class="alert-title alert-title-note">NOTE</div>
-    <div class="alert-content">Dokumen ini adalah acuan baku teknis rekayasa perangkat lunak (<em>Software Requirements Specification</em> / SRS dan <em>System Architecture Document</em> / SAD) untuk Platform HUDANG. Seluruh cakupan difokuskan secara murni pada spesifikasi teknis mencakup formulasi algoritma rekayasa, diagram arsitektur multi-tier, topologi jaringan Docker, diagram traversal NAT WebRTC ICE, diagram alur persinyalan dan autentikasi, diagram status mesin terbatas, kontrak JSON Schema REST API, skema basis data relasional, pipeline inferensi kecerdasan buatan, model ancaman keamanan STRIDE, serta parameter metrik keandalan sistem.</div>
+    <div class="alert-content">Dokumen ini adalah acuan baku teknis rekayasa perangkat lunak (<em>Software Requirements Specification</em> / SRS dan <em>System Architecture Document</em> / SAD) untuk Platform HUDANG, yang merupakan artefak teknologi inti dari Laporan Implementasi Proyek Perubahan <em>"Strategi Demokrasi Tanpa Jarak melalui DPRD HUDANG"</em>. Dokumen ini memadukan landasan kebijakan, formulasi matematis, arsitektur multi-tier Docker, protokol WebRTC LiveKit SFU, skema basis data PostgreSQL Prisma ORM, kontrak JSON Schema REST API, dan pipeline inferensi AI Tenaga Ahli Kedewanan (Gemini 2.5 Flash).</div>
   </div>
 <hr class="doc-hr" />
 <h2 class="doc-h2">1. ANALISIS KEBUTUHAN DAN BATASAN REKAYASA SISTEM</h2>
-<h3 class="doc-h3">1.1 Rekayasa Permasalahan Komputasi dan Karakteristik Beban Kerja</h3>
-<p class="body-p">Pengembangan Platform HUDANG diarahkan untuk menyelesaikan lima permasalahan teknis komputasi, konkurensi, dan transmisi data pada infrastruktur sistem informasi:</p>
-<p class="numbered-item">1. Permasalahan <em>I/O bottleneck</em> pada penanganan berkas dan ketiadaan arsitektur transmisi asinkron terdistribusi, yang menyebabkan latensi tinggi pada pemrosesan antrean permohonan aspirasi serta penumpukan berkas tertahan (<em>unprocessed backlog</em>) hingga mencapai 84,0 persen dari total kapasitas penyimpanan berkas aktif.</p>
-<p class="numbered-item">2. Permasalahan latensi transmisi media waktu nyata (<em>real-time audio-video transport</em>) dan kegagalan penembusan firewall simetris (<em>Symmetric NAT Traversal</em>) pada jaringan seluler warga di pelosok Jawa Barat, yang memerlukan perancangan arsitektur WebRTC berbasis <em>Selective Forwarding Unit</em> (SFU) dengan latensi komunikasi interaktif di bawah 150 milidetik pada koneksi 4G/5G dan di bawah 300 milidetik pada koneksi 3G.</p>
-<p class="numbered-item">3. Permasalahan beban komputasi konversi format berkas multimedia dan ekstraksi teks kata demi kata (<em>speech-to-text transcription</em>), yang membutuhkan perancangan pipeline asinkron berbasis <em>background worker</em> dengan transkoding audio FFmpeg ke format PCM 16-bit 16 kHz mono serta integrasi streaming model bahasa berskala besar (<em>multimodal LLM</em>) dengan waktu respons inferensi kurang dari 120 detik per berkas audio berdurasi 60 menit.</p>
-<p class="numbered-item">4. Permasalahan integritas data relasional dan konsistensi transaksional (<em>ACID Transactional Consistency</em>) pada pencatatan naskah dinas berjenjang, yang memerlukan implementasi pemodelan data relasional multi-relasi (<em>foreign keys</em>, <em>cascading rules</em>, dan <em>atomic status transitions</em>) dari fase penerbitan lembar disposisi, pembuktian baca pejabat, komitmen dinas, hingga pengunggahan bukti penyelesaian fisik lapangan 100 persen.</p>
-<p class="numbered-item">5. Permasalahan standardisasi interoperabilitas data dan integrasi antarmuka pemrograman aplikasi (REST API) lintas lembaga, yang menuntut ketersediaan serialisasi skema data JSON yang kompatibel penuh dengan format kamus usulan Sistem Informasi Pemerintahan Daerah (SIPD Republik Indonesia) serta lapisan pemetaan spasial GeoJSON 27 Kabupaten dan Kota se-Jawa Barat.</p>
+<h3 class="doc-h3">1.1 Latar Belakang Strategis, Karakteristik Beban Kerja, dan Baseline Empiris</h3>
+<p class="body-p">Pengembangan Platform HUDANG (<em>Hadirkan Usulan, Dengar Aspirasi, Nyata untuk Gerak rakyat</em>) dilandasi oleh kondisi riil demografi, rentang kendali geografis, dan ketimpangan kapasitas penyerapan aspirasi masyarakat di Provinsi Jawa Barat:</p>
+<p class="numbered-item">1. <strong>Kondisi Demografis dan Rasio Keterwakilan Legislatif</strong>:</p>
+<p class="body-p">* Provinsi Jawa Barat memiliki luas wilayah mencapai kurang lebih <strong>37.087,92 km²</strong>, terbagi secara administratif ke dalam <strong>18 Kabupaten dan 9 Kota (27 Kab/Kota)</strong> dengan bentang wilayah pegunungan, perbukitan, hingga pesisir utara dan selatan.</p>
+<p class="body-p">* Jumlah penduduk mencapai <strong>51.775.402 jiwa</strong> (terbanyak di Indonesia), dengan jumlah pemilih pada Pemilu tercatat <strong>37.759.992 pemilih</strong> (18.955.266 laki-laki dan 18.804.726 perempuan).</p>
+<p class="body-p">* Jumlah Anggota DPRD Provinsi Jawa Barat masa jabatan 2024–2029 hanya berjumlah <strong>120 orang</strong> yang terdistribusi ke dalam <strong>15 Daerah Pemilihan (Dapil I s.d. Dapil XV)</strong>.</p>
+<p class="body-p">* Rasio keterwakilan sangat timpang: setiap 1 Anggota DPRD rata-rata merepresentasikan <strong>314.667 pemilih</strong>, atau melayani <strong>431.462 jiwa penduduk</strong>. Mekanisme tatap muka fisik konvensional semata terbukti tidak mampu menjangkau konstituen secara adil dan merata.</p>
+<p class="numbered-item">2. <strong>Data Baseline Pengelolaan Layanan Aspirasi dan Audiensi (Januari – Juli 2026)</strong>:</p>
+<p class="body-p"><em> <strong>Aspirasi Tertulis</strong>: Dari total <strong>12.600 aspirasi</strong> masyarakat yang diterima, hanya <strong>2.016 aspirasi (16,0%)</strong> yang berhasil ditindaklanjuti. Sebanyak <strong>10.584 aspirasi (84,0%)</strong> tertahan (</em>backlog*) tanpa kepastian tindak lanjut.</p>
+<p class="body-p">* <strong>Permohonan Audiensi</strong>: Dari total <strong>5.040 permohonan audiensi</strong> yang diajukan masyarakat/konstituen, hanya <strong>640 permohonan (12,7%)</strong> yang dapat dilayani melalui forum tatap muka fisik di Gedung DPRD, sedangkan <strong>4.400 permohonan (87,3%)</strong> tidak dapat terlayani akibat keterbatasan waktu dewan dan ketersediaan ruang sidang.</p>
+<p class="body-p"><em> Kondisi ini memicu krisis kepercayaan (</em>public distrust*) serta menuntut hadirnya kanal pelayanan digital terpadu.</p>
+<p class="numbered-item">3. <strong>Diagnosis Masalah Model ASTRID dan Posisi Strategis SWOT Kuadran III</strong>:</p>
+<p class="body-p"><em> Penapisan model ASTRID (</em>Aktual, Spesifik, Transformasi, Relevan, Inovatif, Dapat Dilaksanakan*) menetapkan isu <strong>Digitalisasi Layanan Aspirasi</strong> sebagai prioritas tertinggi dengan skor <strong>86</strong> (mengungguli Regulasi dengan skor 75 dan Proses Verifikasi dengan skor 73).</p>
+<p class="body-p">* Analisis Lingkungan Strategis SWOT (IFAS = 3,40 / selisih sumbu-X: -0,10; EFAS = 3,44 / selisih sumbu-Y: +0,16) menempatkan inovasi pada <strong>Kuadran III (Strategi W-O / Turn-Around)</strong> pada titik koordinat <code>(-0,10 ; +0,16)</code>. Strategi ini memanfaatkan momentum kebijakan efisiensi anggaran dan transformasi digital nasional untuk mengeliminasi kelemahan internal berupa ketiadaan platform terpadu dan proses verifikasi manual.</p>
+<p class="numbered-item">4. <strong>Target Kinerja dan Valuasi Dampak Finansial (Before – After)</strong>:</p>
+<p class="body-p">* <strong>Cakupan Penanganan Aspirasi</strong>: Meningkat signifikan dari kondisi awal 16,0% menjadi <strong>±70%</strong> (+54,0 poin persentase).</p>
+<p class="body-p">* <strong>Cakupan Pelayanan Audiensi</strong>: Meningkat dari 12,7% menjadi <strong>±60%</strong> (+47,3 poin persentase) melalui musyawarah virtual WebRTC.</p>
+<p class="body-p">* <strong>Valuasi Efisiensi Anggaran Daerah</strong>: Penyelenggaraan kegiatan tatap muka konvensional (reses fisik, perjalanan dinas, koordinasi manual, dan rapat fisik) membutuhkan biaya operasional sekitar <strong>±Rp25 miliar per tahun</strong>. Melalui platform HUDANG, seluruh siklus beralih ke digital nir-kertas, menghasilkan proyeksi efisiensi anggaran operasional sebesar <strong>±Rp25,06 miliar pada tahun pertama</strong>.</p>
+<p class="numbered-item">5. <strong>Landasan Kultural Kearifan Lokal Jawa Barat</strong>:</p>
+<p class="body-p"><em> Inovasi HUDANG berakar pada kosmologi Sunda <strong></em>Papat Kalima Pancer</strong><em> (Dewan sebagai </em>pancer<em> atau poros penjaga keseimbangan aspirasi rakyat dengan semangat </em>silih asih, silih asah, silih asuh*).</p>
+<p class="body-p"><em> Naskah kuna <strong></em>Sanghyang Siksa Kandang Karesian</strong><em> mengamanatkan kepemimpinan <strong></em>Tri Tangtu di Buana</strong><em>: </em>Prabu<em> (ketegasan eksekusi kebijakan), </em>Rama<em> (kehadiran wakil rakyat mengayomi tanpa jarak), dan </em>Resi<em> (integritas batin moral). Falsafah </em>"bayu pinahka prebu, sabda pinahka rama, hedap pinahka resi"* diwujudkan secara nyata melalui Platform HUDANG yang mengompresi sekat ruang dan waktu birokrasi.</p>
+<p class="numbered-item">6. <strong>Permasalahan Rekayasa Komputasi yang Diselesaikan Sistem</strong>:</p>
+<p class="body-p"><em> </em>I/O Bottleneck & Unprocessed Backlog<em>: Eliminasi penumpukan 84,0% berkas tertahan melalui antrean transmisi asinkron terdistribusi dan </em>Multi-Format Media Vault* hingga 50 MB.</p>
+<p class="body-p"><em> </em>Symmetric NAT Traversal*: Penembusan firewall pada jaringan seluler warga pelosok 15 Dapil via Selective Forwarding Unit (SFU) LiveKit dengan target latensi interaktif < 150 ms (4G/5G) dan < 300 ms (3G).</p>
+<p class="body-p"><em> </em>Automated Triage & Speech Transcription*: Ekstraksi verbatim audio persidangan dan penelaahan proposal aspirasi otomatis menggunakan model AI multimodal Google Gemini 2.5 Flash dalam < 120 detik per jam sesi.</p>
+<p class="body-p"><em> </em>ACID Transactional Consistency*: Penegakan integritas data relasional multi-tahap pada 5 tahapan definitif E-Aspirasi dan 4 tahap disposisi E-Audiensi (Disposisi, Konfirmasi Baca, Tanggapan OPD, hingga Laporan Lapangan 100%).</p>
+<p class="body-p"><em> </em>Standardisasi Interoperabilitas SPBE*: Format serialisasi JSON yang kompatibel dengan SIPD-RI Kemendagri dan visualisasi spasial 27 Kabupaten/Kota se-Jawa Barat.</p>
 <h3 class="doc-h3">1.2 Formulasi Matematis dan Algoritma Rekayasa Inti</h3>
 <p class="body-p">Sistem mengimplementasikan dua algoritma komputasi inti untuk penapisan usulan dan rekapitulasi penilaian kinerja:</p>
 <h4 class="doc-h4">1.2.1 Algoritma Ekstraksi Semantik dan Uji Kemiripan Kosinus (Cosine Similarity)</h4>
